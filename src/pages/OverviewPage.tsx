@@ -1,598 +1,384 @@
-import React, { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useMemo } from 'react'
 import {
-  PlayCircle,
-  TrendingUp,
-  CheckCircle,
-  Users,
-  ThumbsUp,
-  ThumbsDown,
-  Star,
+  CheckCircle2,
   Download,
-  BarChart2,
-  ChevronUp,
-  ChevronDown,
-  ChevronsUpDown,
-  AlertCircle,
+  Grid2X2,
+  LineChart,
+  Users,
+  UserRound,
+  CalendarRange,
+  CircleCheck,
+  CircleX,
+  Sparkles,
+  AlertTriangle,
 } from 'lucide-react'
-
+import { format, parseISO } from 'date-fns'
 import useDashboardData from '../hooks/useDashboardData'
 import { useAppStore } from '../store/index'
-import { t } from '../lib/i18n'
-import { KPICard } from '../components/ui/KPICard'
-import { ChartSkeleton, KPICardSkeleton } from '../components/ui/Skeleton'
+import { exportSimulationsCSV } from '../lib/csvExport'
+import { resolvePreset } from '../lib/dateUtils'
 import { TrendChart } from '../components/charts/TrendChart'
 import { PassFailDonut } from '../components/charts/PassFailDonut'
-import { ScoreHistogram } from '../components/charts/ScoreHistogram'
-import { ActivityBar } from '../components/charts/ActivityBar'
-import { exportSimulationsCSV } from '../lib/csvExport'
-import type { UserStat } from '../api/types'
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.07,
-    },
-  },
+type PresetOption = {
+  id: 'all' | 'last90' | 'last30'
+  label: string
 }
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
-  },
-}
-
-// ─── Date preset config ───────────────────────────────────────────────────────
-
-type DatePresetId = 'today' | 'last7' | 'last30' | 'last90' | 'all'
-
-interface DatePill {
-  id: DatePresetId
-  labelKey: string
-}
-
-const DATE_PILLS: DatePill[] = [
-  { id: 'today',  labelKey: 'today' },
-  { id: 'last7',  labelKey: 'lastWeek' },
-  { id: 'last30', labelKey: 'lastMonth' },
-  { id: 'last90', labelKey: 'last3Months' },
-  { id: 'all',    labelKey: 'allTime' },
+const presetOptions: PresetOption[] = [
+  { id: 'all', label: 'All' },
+  { id: 'last90', label: '3M' },
+  { id: 'last30', label: '12M' },
 ]
 
-// ─── Sort helpers ─────────────────────────────────────────────────────────────
-
-type SortField = 'name' | 'count' | 'avgScore' | 'passRate' | 'bestScore' | 'passCount'
-type SortDir   = 'asc' | 'desc'
-
-function sortUserStats(data: UserStat[], field: SortField, dir: SortDir): UserStat[] {
-  return [...data].sort((a, b) => {
-    const av = a[field] as string | number
-    const bv = b[field] as string | number
-    if (typeof av === 'string' && typeof bv === 'string') {
-      return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-    }
-    const an = av as number
-    const bn = bv as number
-    return dir === 'asc' ? an - bn : bn - an
-  })
+function formatDateInput(value: string) {
+  return value
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+function formatDisplayDate(value: string) {
+  try {
+    return format(parseISO(value), 'MMM d, yyyy')
+  } catch {
+    return value
+  }
+}
 
-function SectionCard({
+function rankGradient(index: number) {
+  if (index === 0) return 'from-[#ffbe55] to-[#ff7f36]'
+  if (index === 1) return 'from-[#d7dce7] to-[#a9b4c8]'
+  return 'from-[#f3a85d] to-[#ef7f3b]'
+}
+
+function InsightCard({
   title,
   children,
-  className = '',
+  action,
 }: {
   title: string
   children: React.ReactNode
-  className?: string
+  action?: string
 }) {
   return (
-    <motion.div
-      variants={itemVariants}
-      className={`rounded-xl bg-card border border-border/50 shadow-sm p-5 ${className}`}
-    >
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-        {title}
-      </h2>
-      {children}
-    </motion.div>
-  )
-}
-
-function SortIcon({
-  field,
-  active,
-  dir,
-}: {
-  field: SortField
-  active: SortField
-  dir: SortDir
-}) {
-  if (field !== active) {
-    return <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground/40" />
-  }
-  return dir === 'asc'
-    ? <ChevronUp className="w-3.5 h-3.5 text-primary" />
-    : <ChevronDown className="w-3.5 h-3.5 text-primary" />
-}
-
-function EmptyState({ lang }: { lang: 'es' | 'en' }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
-      className="flex flex-col items-center justify-center py-24 text-center gap-5"
-    >
-      {/* Simple illustration using SVG */}
-      <svg
-        width="96"
-        height="96"
-        viewBox="0 0 96 96"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <circle cx="48" cy="48" r="48" fill="rgba(0,102,255,0.08)" />
-        <rect x="28" y="36" width="40" height="28" rx="4" fill="rgba(0,102,255,0.15)" stroke="#0066FF" strokeWidth="1.5" />
-        <rect x="34" y="44" width="16" height="3" rx="1.5" fill="#0066FF" opacity="0.6" />
-        <rect x="34" y="51" width="28" height="3" rx="1.5" fill="#0066FF" opacity="0.4" />
-        <rect x="34" y="58" width="20" height="3" rx="1.5" fill="#0066FF" opacity="0.3" />
-        <circle cx="62" cy="34" r="10" fill="#0066FF" opacity="0.12" stroke="#0066FF" strokeWidth="1.5" />
-        <line x1="62" y1="30" x2="62" y2="38" stroke="#0066FF" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="58" y1="34" x2="66" y2="34" stroke="#0066FF" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-
-      <div className="flex flex-col gap-1.5">
-        <p className="text-lg font-semibold text-foreground">
-          {t('noSimulations', lang)}
-        </p>
-        <p className="text-sm text-muted-foreground max-w-xs">
-          {lang === 'es'
-            ? 'Las simulaciones aparecerán aquí una vez que los asesores comiencen a entrenar.'
-            : 'Simulations will appear here once advisors start training.'}
-        </p>
+    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+      <div className="mb-5 flex items-center justify-between">
+        <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">{title}</h3>
+        {action && <button className="text-sm font-semibold text-[#ff2138]">{action}</button>}
       </div>
-    </motion.div>
+      {children}
+    </section>
   )
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+function KpiCard({
+  title,
+  value,
+  icon,
+  footer,
+}: {
+  title: string
+  value: string
+  icon: React.ReactNode
+  footer: string
+}) {
+  return (
+    <div className="rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.04)]">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-3 text-[1.02rem] font-bold text-slate-900">{title}</div>
+          <div className="text-[3.35rem] font-black leading-none tracking-[-0.05em] text-slate-950">{value}</div>
+        </div>
+        <div className="mt-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff1f2] text-[#ff2138]">
+          {icon}
+        </div>
+      </div>
+      <div className="mt-5 text-[1rem]">
+        <span className="font-bold text-[#10b836]">12%</span>
+        <span className="ml-2 font-semibold text-slate-400">{footer}</span>
+      </div>
+    </div>
+  )
+}
 
 export default function OverviewPage() {
-  const language   = useAppStore((s) => s.language)
-  const datePreset = useAppStore((s) => s.datePreset)
-  const setDatePreset = useAppStore((s) => s.setDatePreset)
+  const language = useAppStore((state) => state.language)
+  const datePreset = useAppStore((state) => state.datePreset)
+  const setDatePreset = useAppStore((state) => state.setDatePreset)
+  const dateFrom = useAppStore((state) => state.dateFrom)
+  const dateTo = useAppStore((state) => state.dateTo)
+  const setDateRange = useAppStore((state) => state.setDateRange)
 
   const {
     kpis,
     trend,
-    scoreDistribution,
-    userStats,
     activityStats,
+    userStats,
     filteredSims,
-    isLoading,
-    isError,
-    error,
     effectiveDateFrom,
     effectiveDateTo,
+    isLoading,
   } = useDashboardData()
 
-  // ── Sort state for top performers table ──────────────────────────────────
-  const [sortField, setSortField] = useState<SortField>('avgScore')
-  const [sortDir,   setSortDir]   = useState<SortDir>('desc')
+  const totalSimulations = kpis.totalSimulations ?? 0
+  const averageScore = kpis.averageScore ?? 0
+  const passRate = kpis.passRate ?? 0
+  const activeAdvisors = kpis.activeAdvisors ?? 0
+  const totalActivities = kpis.totalActivities ?? 0
+  const totalMembers = kpis.totalMembers ?? 0
 
-  function handleSort(field: SortField) {
-    if (field === sortField) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDir('desc')
-    }
-  }
-
-  const top10 = useMemo(
-    () => sortUserStats(userStats, sortField, sortDir).slice(0, 10),
-    [userStats, sortField, sortDir],
+  const topActivities = useMemo(
+    () => [...activityStats].sort((a, b) => b.passRate - a.passRate).slice(0, 5),
+    [activityStats],
   )
 
-  // ── CSV export ────────────────────────────────────────────────────────────
-  function handleExportCSV() {
-    const rows = filteredSims.map(s => ({
-      ID:                s.ID_Sim,
-      Usuario_Nombre:    s.Usuario_Nombre,
-      Usuario_Email:     s.Usuario ?? '',
-      Actividad:         s.Actividad,
-      Calificacion:      s.Calificacion,
-      Diagnostico_Final: s.Diagnostico_Final,
-      Fecha:             s.Fecha_y_Hora,
+  const topAdvisors = useMemo(
+    () => [...userStats].sort((a, b) => b.avgScore - a.avgScore).slice(0, 3),
+    [userStats],
+  )
+
+  const weakestActivity = topActivities[topActivities.length - 1]
+  const approved = kpis.passCount ?? 0
+  const disapproved = kpis.failCount ?? 0
+
+  function handleExport() {
+    const rows = filteredSims.map((simulation) => ({
+      ID: simulation.ID_Sim,
+      Usuario: simulation.Usuario_Nombre,
+      Email: simulation.Usuario ?? '',
+      Actividad: simulation.Actividad,
+      Puntaje: simulation.Calificacion ?? simulation.Puntos_Totales ?? 0,
+      Diagnostico: simulation.Diagnostico_Final ?? '',
+      Fecha: simulation.Fecha_y_Hora,
     }))
+
     exportSimulationsCSV(rows, `siigo-dashboard-${effectiveDateFrom}-${effectiveDateTo}.csv`)
   }
 
-  // ── Derived trend for avg score (compare last two points) ────────────────
-  const scoreTrend = useMemo(() => {
-    if (trend.length < 2) return undefined
-    const prev = trend[trend.length - 2].avgScore
-    const curr = trend[trend.length - 1].avgScore
-    const diff = Math.abs(curr - prev)
-    return {
-      value:     Math.round(diff),
-      direction: curr > prev ? 'up' : curr < prev ? 'down' : 'flat',
-    } as { value: number; direction: 'up' | 'down' | 'flat' }
-  }, [trend])
+  function handlePresetClick(option: PresetOption['id']) {
+    setDatePreset(option)
+  }
 
-  const passRateColor = kpis.passRate >= 70 ? 'green' : 'red'
-
-  const isEmpty = !isLoading && filteredSims.length === 0
-
-  // ── Date label for header subtitle ───────────────────────────────────────
-  const dateLabel = useMemo(() => {
-    const pill = DATE_PILLS.find(p => p.id === (datePreset as DatePresetId))
-    return pill ? t(pill.labelKey, language) : `${effectiveDateFrom} — ${effectiveDateTo}`
-  }, [datePreset, language, effectiveDateFrom, effectiveDateTo])
-
-  // ── Error state ───────────────────────────────────────────────────────────
-  if (isError && error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-        <AlertCircle className="w-12 h-12 text-destructive" />
-        <p className="text-base font-medium text-foreground">{t('error', language)}</p>
-        <p className="text-sm text-muted-foreground">{error.message}</p>
-      </div>
+  function handleDateChange(kind: 'from' | 'to', value: string) {
+    setDateRange(
+      kind === 'from' ? value : (dateFrom ?? effectiveDateFrom),
+      kind === 'to' ? value : (dateTo ?? effectiveDateTo),
     )
   }
 
-  return (
-    <div className="flex flex-col gap-6 pb-10">
+  const filterSummary =
+    language === 'es'
+      ? `Tu equipo ha completado ${totalSimulations.toLocaleString()} simulaciones en este periodo.`
+      : `Your team has completed ${totalSimulations.toLocaleString()} simulations in this period.`
 
-      {/* ── Page header ──────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
-      >
-        <div className="flex flex-col gap-0.5">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            Dashboard SIIGO
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {dateLabel}
-          </p>
+  return (
+    <div className="mx-auto max-w-[1500px]">
+      <div className="mb-8 rounded-[34px] bg-[#f7f9fc]">
+        <div className="mb-8 flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div className="pt-3">
+            <h2 className="text-[3rem] font-black tracking-[-0.06em] text-slate-950">Welcome your dashboard</h2>
+            <p className="mt-2 text-[2rem] font-medium tracking-[-0.04em] text-slate-300">{filterSummary}</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+            <div className="flex items-center gap-3 rounded-full">
+              {presetOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handlePresetClick(option.id)}
+                  className={[
+                    'rounded-xl px-5 py-3 text-sm font-bold transition',
+                    datePreset === option.id
+                      ? 'bg-[#ff2138] text-white shadow-[0_14px_32px_rgba(255,33,56,0.28)]'
+                      : 'bg-white text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]',
+                  ].join(' ')}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
+              <CalendarRange className="h-4 w-4 text-slate-400" />
+              <input
+                type="date"
+                value={formatDateInput(dateFrom ?? effectiveDateFrom)}
+                onChange={(event) => handleDateChange('from', event.target.value)}
+                className="border-none bg-transparent text-sm font-semibold text-slate-500 outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
+              <CalendarRange className="h-4 w-4 text-slate-400" />
+              <input
+                type="date"
+                value={formatDateInput(dateTo ?? effectiveDateTo)}
+                onChange={(event) => handleDateChange('to', event.target.value)}
+                className="border-none bg-transparent text-sm font-semibold text-slate-500 outline-none"
+              />
+            </div>
+
+            <div className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
+              Advisors
+            </div>
+
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#ff2138] px-6 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(255,33,56,0.25)] transition hover:brightness-105"
+            >
+              <Download className="h-4 w-4" />
+              Export All
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Date filter pills */}
-          <div className="flex items-center gap-1.5 bg-muted/60 rounded-lg p-1">
-            {DATE_PILLS.map(pill => (
-              <button
-                key={pill.id}
-                onClick={() => setDatePreset(pill.id)}
-                className={[
-                  'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
-                  datePreset === pill.id
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-background/80',
-                ].join(' ')}
-              >
-                {t(pill.labelKey, language)}
-              </button>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
+          <KpiCard title="Total Simulations" value={totalSimulations.toLocaleString()} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title="Average Score" value={`${averageScore.toFixed(0)}%`} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title="Approval Rate" value={`${passRate.toFixed(0)}`} icon={<CheckCircle2 className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title="Active Advisors" value={activeAdvisors.toLocaleString()} icon={<Users className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title="Avaible Activities" value={totalActivities.toLocaleString()} icon={<Grid2X2 className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title="Members" value={totalMembers.toLocaleString()} icon={<UserRound className="h-6 w-6" />} footer="vs previos month" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.65fr_0.95fr]">
+        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">Score Trend</h3>
+            <div className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500">
+              Daily
+            </div>
+          </div>
+          <TrendChart data={trend} height={320} />
+        </section>
+
+        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+          <div className="mb-4 text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">
+            Approval vs. Disapproval
+          </div>
+          <div className="grid gap-4 xl:grid-cols-[0.95fr_0.85fr] xl:items-center">
+            <PassFailDonut passCount={approved} failCount={disapproved} />
+            <div className="space-y-4">
+              <div className="rounded-[22px] border border-slate-200 p-5">
+                <div className="flex items-start gap-3">
+                  <CircleCheck className="mt-0.5 h-5 w-5 text-[#ff2138]" />
+                  <div className="flex-1">
+                    <div className="text-[1.02rem] font-bold text-slate-700">Approved</div>
+                    <div className="mt-2 flex items-end justify-between">
+                      <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{approved}</div>
+                      <div className="text-sm font-bold text-slate-400">{passRate.toFixed(0)}%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[22px] border border-slate-200 p-5">
+                <div className="flex items-start gap-3">
+                  <CircleX className="mt-0.5 h-5 w-5 text-[#ff9aa6]" />
+                  <div className="flex-1">
+                    <div className="text-[1.02rem] font-bold text-slate-700">Disapproved</div>
+                    <div className="mt-2 flex items-end justify-between">
+                      <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{disapproved}</div>
+                      <div className="text-sm font-bold text-slate-400">{(100 - passRate).toFixed(0)}%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 text-center text-[1.02rem] font-semibold text-slate-500">
+                Total: {totalSimulations.toLocaleString()} simulations
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <InsightCard title="Activity Breakdown">
+          <div className="space-y-4">
+            {topActivities.map((activity) => (
+              <div key={`${activity.id}-${activity.name}`}>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="truncate text-[1rem] font-semibold text-slate-700">{activity.name}</div>
+                  <div className="text-sm font-bold text-slate-500">{activity.passRate.toFixed(0)}%</div>
+                </div>
+                <div className="h-3 rounded-full bg-slate-100">
+                  <div
+                    className="h-3 rounded-full bg-[linear-gradient(90deg,#ff1e35,#ff5066)]"
+                    style={{ width: `${Math.min(100, activity.passRate)}%` }}
+                  />
+                </div>
+              </div>
             ))}
           </div>
 
-          {/* CSV export button */}
-          <button
-            onClick={handleExportCSV}
-            disabled={filteredSims.length === 0}
-            className={[
-              'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium',
-              'border border-border/70 bg-card hover:bg-muted/60 transition-colors duration-150',
-              'text-muted-foreground hover:text-foreground',
-              'disabled:opacity-40 disabled:cursor-not-allowed',
-            ].join(' ')}
-          >
-            <Download className="w-3.5 h-3.5" />
-            {t('exportCsv', language)}
+          <button className="mt-6 w-full rounded-2xl border border-[#ffb7c0] px-4 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-[#fff5f6]">
+            View all activities
           </button>
+        </InsightCard>
+
+        <InsightCard title="Top Advisors" action="View all">
+          <div className="space-y-5">
+            {topAdvisors.map((advisor, index) => (
+              <div key={`${advisor.userId ?? advisor.name}-${index}`} className="flex items-center gap-4">
+                <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${rankGradient(index)} text-base font-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.12)]`}>
+                  {index + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[1rem] font-bold text-slate-900">{advisor.name}</div>
+                  <div className="text-sm font-medium text-slate-400">{advisor.count} simulations</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[1.8rem] font-black tracking-[-0.04em] text-slate-950">{advisor.avgScore.toFixed(0)}%</div>
+                  <div className="text-sm font-semibold text-[#10b836]">↑ {advisor.passRate.toFixed(0)}% Approved</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </InsightCard>
+
+        <InsightCard title="AI Insights" action="View all">
+          <div className="space-y-4">
+            <div className="rounded-[20px] bg-[#fff3f4] p-5">
+              <div className="flex items-start gap-4">
+                <div className="mt-0.5 rounded-2xl bg-white p-2 text-[#ff2138] shadow-sm">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-700">
+                    73% of advisors struggle with
+                  </div>
+                  <div className="mt-1 text-[1.45rem] font-black tracking-[-0.03em] text-[#ff2138]">
+                    {weakestActivity?.name ?? 'Handling Objections'}.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[20px] bg-[#fffaf4] p-5">
+              <div className="flex items-start gap-4">
+                <div className="mt-0.5 rounded-2xl bg-white p-2 text-[#ffb01d] shadow-sm">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-slate-500">Recommendation</div>
+                  <div className="mt-2 text-[1.05rem] font-semibold leading-7 text-slate-700">
+                    Assign simulation "{weakestActivity?.name ?? 'Objections Level 2'}" to your team.
+                  </div>
+                </div>
+              </div>
+
+              <button className="mt-5 rounded-2xl border border-[#ffb7c0] px-5 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-white">
+                View recommendation
+              </button>
+            </div>
+          </div>
+        </InsightCard>
+      </div>
+
+      {!isLoading && (
+        <div className="mt-6 rounded-[28px] border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-500 shadow-[0_14px_40px_rgba(15,23,42,0.03)]">
+          Showing data from {formatDisplayDate(effectiveDateFrom)} to {formatDisplayDate(effectiveDateTo)}
         </div>
-      </motion.div>
-
-      {/* ── Empty state ───────────────────────────────────────────────────── */}
-      <AnimatePresence mode="wait">
-        {isEmpty && (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <EmptyState lang={language} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Content (hidden when empty, shown when loading or has data) ───── */}
-      {!isEmpty && (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col gap-6"
-        >
-
-          {/* ── KPI row 1 (4 cards) ──────────────────────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <KPICardSkeleton key={i} />
-              ))
-            ) : (
-              <>
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('totalSimulations', language)}
-                    value={kpis.totalSimulations.toLocaleString()}
-                    icon={PlayCircle}
-                    color="blue"
-                    subtitle={`${kpis.totalActivities} ${t('activities', language).toLowerCase()}`}
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('averageScore', language)}
-                    value={`${kpis.averageScore.toFixed(1)}%`}
-                    icon={TrendingUp}
-                    color="green"
-                    trend={scoreTrend}
-                    subtitle={trend.length > 1 ? `${t('trend', language)}` : undefined}
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('passRate', language)}
-                    value={`${kpis.passRate.toFixed(1)}%`}
-                    icon={CheckCircle}
-                    color={passRateColor}
-                    subtitle={`${kpis.passCount} ${t('pass', language).toLowerCase()} / ${kpis.failCount} ${t('fail', language).toLowerCase()}`}
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('activeAdvisors', language)}
-                    value={kpis.activeAdvisors.toLocaleString()}
-                    icon={Users}
-                    color="violet"
-                    subtitle={`${kpis.totalMembers} ${t('totalMembers', language).toLowerCase()}`}
-                  />
-                </motion.div>
-              </>
-            )}
-          </div>
-
-          {/* ── KPI row 2 (3 cards) ──────────────────────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <KPICardSkeleton key={i} />
-              ))
-            ) : (
-              <>
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('passCount', language)}
-                    value={kpis.passCount.toLocaleString()}
-                    icon={ThumbsUp}
-                    color="green"
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('failCount', language)}
-                    value={kpis.failCount.toLocaleString()}
-                    icon={ThumbsDown}
-                    color="red"
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <KPICard
-                    title={t('bestScore', language)}
-                    value={`${kpis.bestScore.toFixed(0)}%`}
-                    icon={Star}
-                    color="amber"
-                  />
-                </motion.div>
-              </>
-            )}
-          </div>
-
-          {/* ── Trend chart (full width) ──────────────────────────────────── */}
-          <SectionCard title={t('trend', language)}>
-            {isLoading
-              ? <ChartSkeleton height={260} />
-              : <TrendChart data={trend} height={260} />
-            }
-          </SectionCard>
-
-          {/* ── Two-column: donut + histogram ─────────────────────────────── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SectionCard title={t('passFailRatio', language)}>
-              {isLoading
-                ? <ChartSkeleton height={220} />
-                : (
-                  <PassFailDonut
-                    passCount={kpis.passCount}
-                    failCount={kpis.failCount}
-                  />
-                )
-              }
-            </SectionCard>
-
-            <SectionCard title={t('scoreDistribution', language)}>
-              {isLoading
-                ? <ChartSkeleton height={220} />
-                : <ScoreHistogram data={scoreDistribution} />
-              }
-            </SectionCard>
-          </div>
-
-          {/* ── Activity performance bar ──────────────────────────────────── */}
-          <SectionCard title={t('activityBreakdown', language)}>
-            {isLoading
-              ? <ChartSkeleton height={300} />
-              : <ActivityBar data={activityStats} />
-            }
-          </SectionCard>
-
-          {/* ── Top performers table ───────────────────────────────────────── */}
-          <SectionCard title={t('topPerformers', language)}>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-10 rounded-md bg-muted/50 animate-pulse" />
-                ))}
-              </div>
-            ) : top10.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-2 text-muted-foreground">
-                <BarChart2 className="w-8 h-8 opacity-40" />
-                <p className="text-sm">{t('noData', language)}</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto -mx-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/50">
-                      {(
-                        [
-                          { key: 'rank',      label: t('rank', language),     field: null },
-                          { key: 'name',      label: t('name', language),     field: 'name'      as SortField },
-                          { key: 'count',     label: t('attempts', language), field: 'count'     as SortField },
-                          { key: 'avgScore',  label: t('averageScore', language).split(' ')[0],  field: 'avgScore'  as SortField },
-                          { key: 'passRate',  label: t('passRate', language).split(' ')[0],      field: 'passRate'  as SortField },
-                          { key: 'bestScore', label: t('bestScore', language).split(' ')[0],     field: 'bestScore' as SortField },
-                          { key: 'passCount', label: t('passCount', language), field: 'passCount' as SortField },
-                        ] as { key: string; label: string; field: SortField | null }[]
-                      ).map(col => (
-                        <th
-                          key={col.key}
-                          onClick={() => col.field && handleSort(col.field)}
-                          className={[
-                            'px-3 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap',
-                            col.field ? 'cursor-pointer select-none hover:text-foreground transition-colors' : '',
-                          ].join(' ')}
-                        >
-                          <div className="inline-flex items-center gap-1">
-                            {col.label}
-                            {col.field && (
-                              <SortIcon field={col.field} active={sortField} dir={sortDir} />
-                            )}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {top10.map((user, idx) => {
-                      const isTopThree = idx < 3
-                      return (
-                        <motion.tr
-                          key={user.userId ?? user.name}
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.04, duration: 0.25 }}
-                          className="border-b border-border/30 hover:bg-muted/30 transition-colors"
-                        >
-                          {/* Rank */}
-                          <td className="px-3 py-3 text-muted-foreground font-medium w-12">
-                            {isTopThree ? (
-                              <span
-                                className={[
-                                  'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold',
-                                  idx === 0 ? 'bg-amber-500/20 text-amber-400' :
-                                  idx === 1 ? 'bg-slate-400/20 text-slate-300' :
-                                              'bg-amber-700/20 text-amber-600',
-                                ].join(' ')}
-                              >
-                                {idx + 1}
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground/60">{idx + 1}</span>
-                            )}
-                          </td>
-
-                          {/* Name */}
-                          <td className="px-3 py-3 font-medium text-foreground max-w-[180px]">
-                            <span className="block truncate">{user.name}</span>
-                          </td>
-
-                          {/* Attempts */}
-                          <td className="px-3 py-3 text-muted-foreground tabular-nums">
-                            {user.count}
-                          </td>
-
-                          {/* Avg score */}
-                          <td className="px-3 py-3 tabular-nums">
-                            <span
-                              className={
-                                user.avgScore >= 70
-                                  ? 'text-green-500 font-semibold'
-                                  : 'text-red-400 font-semibold'
-                              }
-                            >
-                              {user.avgScore.toFixed(1)}
-                            </span>
-                          </td>
-
-                          {/* Pass rate */}
-                          <td className="px-3 py-3 tabular-nums">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${user.passRate >= 70 ? 'bg-green-500' : 'bg-red-400'}`}
-                                  style={{ width: `${Math.min(100, user.passRate)}%` }}
-                                />
-                              </div>
-                              <span className={user.passRate >= 70 ? 'text-green-500' : 'text-red-400'}>
-                                {user.passRate.toFixed(0)}%
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Best score */}
-                          <td className="px-3 py-3 text-amber-400 font-semibold tabular-nums">
-                            {user.bestScore.toFixed(0)}
-                          </td>
-
-                          {/* Pass count */}
-                          <td className="px-3 py-3 text-muted-foreground tabular-nums">
-                            <span className="text-green-500">{user.passCount}</span>
-                            <span className="text-muted-foreground/50 mx-0.5">/</span>
-                            <span>{user.count}</span>
-                          </td>
-                        </motion.tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </SectionCard>
-
-        </motion.div>
       )}
     </div>
   )

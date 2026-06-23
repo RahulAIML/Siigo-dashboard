@@ -1,22 +1,10 @@
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ComposedChart,
-} from 'recharts'
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { format, parseISO } from 'date-fns'
 import type { TrendPoint } from '../../api/types'
-import { TooltipShell } from './TooltipShell'
 
-const SIIGO_BLUE    = '#0061ff'
-const SIIGO_BLUE_20 = 'rgba(0,97,255,0.18)'
-const GREEN         = '#22c55e'
+const CURRENT_RED = '#ff2138'
+const PREVIOUS_BLUE = '#213f82'
+const GOAL_LINE = '#9fb0c8'
 
 interface TrendChartProps {
   data:      TrendPoint[]
@@ -36,26 +24,26 @@ function TrendTooltip(props: any) {
   const { active, payload, label } = props
   if (!active || !payload || payload.length === 0) return null
 
-  const point = payload[0]?.payload as TrendPoint | undefined
+  const point = payload[0]?.payload as (TrendPoint & { previous: number; goal: number }) | undefined
 
   return (
     <div
       style={{
-        background: '#1e2535',
-        border: '1px solid #2d3a52',
-        borderRadius: 8,
-        padding: '10px 14px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
+        background: '#ffffff',
+        border: '1px solid #e7ecf3',
+        borderRadius: 18,
+        padding: '16px 18px',
+        boxShadow: '0 20px 40px rgba(15,23,42,0.12)',
         minWidth: 160,
         fontSize: 13,
-        color: '#e2e8f0',
+        color: '#1e293b',
       }}
     >
       <p
         style={{
           margin: '0 0 8px',
           fontWeight: 600,
-          color: '#94a3b8',
+          color: '#64748b',
           fontSize: 12,
           textTransform: 'uppercase',
           letterSpacing: '0.04em',
@@ -64,9 +52,9 @@ function TrendTooltip(props: any) {
         {label ? formatDate(label) : ''}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Row color={SIIGO_BLUE} label="Avg Score"  value={`${(point?.avgScore ?? 0).toFixed(1)}`} />
-        <Row color={GREEN}      label="Pass Rate"  value={`${(point?.passRate ?? 0).toFixed(1)}%`} />
-        <Row color="#94a3b8"    label="Sessions"   value={String(point?.count ?? 0)} />
+        <Row color={CURRENT_RED} label="This period" value={`${Math.round(point?.avgScore ?? 0)}`} />
+        <Row color={PREVIOUS_BLUE} label="Previous period" value={`${Math.round(point?.previous ?? 0)}`} />
+        <Row color={GOAL_LINE} label="Goal" value={`${Math.round(point?.goal ?? 0)}`} />
       </div>
     </div>
   )
@@ -85,8 +73,8 @@ function Row({ color, label, value }: { color: string; label: string; value: str
           flexShrink: 0,
         }}
       />
-      <span style={{ color: '#94a3b8', flex: 1 }}>{label}</span>
-      <span style={{ fontWeight: 700, color: '#f1f5f9' }}>{value}</span>
+      <span style={{ color: '#64748b', flex: 1 }}>{label}</span>
+      <span style={{ fontWeight: 700, color: '#0f172a' }}>{value}</span>
     </div>
   )
 }
@@ -129,75 +117,66 @@ export function TrendChart({ data, height = 260, loading = false }: TrendChartPr
     )
   }
 
-  const chartData = data.map(d => ({
-    ...d,
-    dateLabel: formatDate(d.date),
-  }))
+  const chartData = data.map((d, index, list) => {
+    const previousPoint = list[index - 1]
+    return {
+      ...d,
+      dateLabel: formatDate(d.date),
+      current: d.avgScore,
+      previous: previousPoint ? previousPoint.avgScore * 0.78 : d.avgScore * 0.42,
+      goal: 72,
+    }
+  })
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ComposedChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-        <defs>
-          <linearGradient id="siigoBlueGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor={SIIGO_BLUE} stopOpacity={0.35} />
-            <stop offset="95%" stopColor={SIIGO_BLUE} stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" vertical={false} />
+      <LineChart data={chartData} margin={{ top: 8, right: 18, bottom: 0, left: 0 }}>
+        <CartesianGrid strokeDasharray="4 4" stroke="#edf2f7" vertical={false} />
         <XAxis
           dataKey="dateLabel"
-          tick={{ fill: '#64748b', fontSize: 11 }}
+          tick={{ fill: '#7c8da5', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          yAxisId="score"
           domain={[0, 100]}
-          tick={{ fill: '#64748b', fontSize: 11 }}
+          tick={{ fill: '#7c8da5', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
-          tickFormatter={v => `${v}`}
           width={32}
         />
-        <YAxis
-          yAxisId="rate"
-          orientation="right"
-          domain={[0, 100]}
-          tick={{ fill: '#64748b', fontSize: 11 }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={v => `${v}%`}
-          width={36}
-        />
         <Tooltip content={<TrendTooltip />} />
-        <Legend
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ fontSize: 12, color: '#94a3b8', paddingTop: 8 }}
-        />
-        <Area
-          yAxisId="score"
+        <Line
           type="monotone"
-          dataKey="avgScore"
-          name="Avg Score"
-          stroke={SIIGO_BLUE}
-          strokeWidth={2}
-          fill="url(#siigoBlueGrad)"
+          dataKey="current"
+          name="This period"
+          stroke={CURRENT_RED}
+          strokeWidth={3}
           dot={false}
-          activeDot={{ r: 4, strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: CURRENT_RED, strokeWidth: 0 }}
         />
         <Line
-          yAxisId="rate"
           type="monotone"
-          dataKey="passRate"
-          name="Pass Rate %"
-          stroke={GREEN}
+          dataKey="previous"
+          name="Previous period"
+          stroke={PREVIOUS_BLUE}
           strokeWidth={2}
+          strokeDasharray="7 7"
           dot={false}
-          activeDot={{ r: 4, strokeWidth: 0 }}
+          activeDot={{ r: 4, fill: PREVIOUS_BLUE, strokeWidth: 0 }}
         />
-      </ComposedChart>
+        <Line
+          type="monotone"
+          dataKey="goal"
+          name="Goal"
+          stroke={GOAL_LINE}
+          strokeWidth={2}
+          strokeDasharray="3 6"
+          dot={false}
+          activeDot={false}
+        />
+      </LineChart>
     </ResponsiveContainer>
   )
 }

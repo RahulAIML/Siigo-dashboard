@@ -1,396 +1,206 @@
-import { useCallback } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { NavLink } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   LayoutDashboard,
   PlayCircle,
-  Award,
-  MessageSquare,
-  Target,
+  MessageSquareText,
+  BrainCircuit,
   Trophy,
-  BarChart2,
-  Users,
+  Activity,
+  Building2,
+  GitBranch,
   FileText,
   Settings,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
   X,
-} from 'lucide-react';
-import { cn } from '../../lib/cn';
-import useAppStore from '../../store';
+} from 'lucide-react'
+import { useAppStore } from '../../store/index'
 
-// ---------------------------------------------------------------------------
-// i18n — lightweight inline translations
-// ---------------------------------------------------------------------------
-type Lang = 'es' | 'en' | 'fr';
-
-const translations: Record<Lang, Record<string, string>> = {
-  es: {
-    dashboard: 'Dashboard',
-    simulations: 'Simulaciones',
-    certification: 'Certificación',
-    conversational: 'Conversacional',
-    coaching: 'Coaching',
-    leaderboard: 'Ranking',
-    activities: 'Actividades',
-    organization: 'Organización',
-    reports: 'Reportes',
-    settings: 'Configuración',
-    poweredBy: 'Desarrollado por',
-  },
-  en: {
-    dashboard: 'Dashboard',
-    simulations: 'Simulations',
-    certification: 'Certification',
-    conversational: 'Conversational',
-    coaching: 'Coaching',
-    leaderboard: 'Leaderboard',
-    activities: 'Activities',
-    organization: 'Organization',
-    reports: 'Reports',
-    settings: 'Settings',
-    poweredBy: 'Powered by',
-  },
-  fr: {
-    dashboard: 'Tableau de bord',
-    simulations: 'Simulations',
-    certification: 'Certification',
-    conversational: 'Conversationnel',
-    coaching: 'Coaching',
-    leaderboard: 'Classement',
-    activities: 'Activités',
-    organization: 'Organisation',
-    reports: 'Rapports',
-    settings: 'Paramètres',
-    poweredBy: 'Propulsé par',
-  },
-};
-
-function useT(language: string) {
-  const lang: Lang = (language as Lang) in translations ? (language as Lang) : 'es';
-  return (key: string): string => translations[lang][key] ?? key;
+type NavSection = {
+  title: string
+  items: Array<{
+    labelEs: string
+    labelEn: string
+    path: string
+    icon: React.ComponentType<{ className?: string }>
+  }>
 }
 
-// ---------------------------------------------------------------------------
-// Nav item definition
-// ---------------------------------------------------------------------------
-interface NavItem {
-  key: string;
-  path: string;
-  icon: React.ElementType;
+const sections: NavSection[] = [
+  {
+    title: 'GENERAL VIEW',
+    items: [
+      { labelEs: 'Overview', labelEn: 'Overview', path: '/', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'SIMULATOR',
+    items: [
+      { labelEs: 'Simulaciones', labelEn: 'Simulations', path: '/simulations', icon: PlayCircle },
+      { labelEs: 'Conversacional', labelEn: 'Conversational AI', path: '/conversational', icon: MessageSquareText },
+      { labelEs: 'AI Coaching', labelEn: 'AI Coaching', path: '/coaching', icon: BrainCircuit },
+      { labelEs: 'Ranking', labelEn: 'Leaderboard', path: '/leaderboard', icon: Trophy },
+    ],
+  },
+  {
+    title: 'PLATFORM',
+    items: [
+      { labelEs: 'Actividades', labelEn: 'Activities', path: '/activities', icon: Activity },
+      { labelEs: 'Organización', labelEn: 'Organization', path: '/organization', icon: Building2 },
+      { labelEs: 'Business Lines', labelEn: 'Business Lines', path: '/certification', icon: GitBranch },
+    ],
+  },
+  {
+    title: 'MORE',
+    items: [
+      { labelEs: 'Reportes', labelEn: 'Reports', path: '/reports', icon: FileText },
+      { labelEs: 'Configuración', labelEn: 'Settings', path: '/settings', icon: Settings },
+    ],
+  },
+]
+
+function Brand({ collapsed }: { collapsed: boolean }) {
+  return (
+    <div className="flex items-center gap-4 px-6 py-8">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+        <span className="text-lg font-black tracking-[0.18em]">S</span>
+      </div>
+      {!collapsed && (
+        <div className="min-w-0">
+          <div className="text-[2rem] font-black uppercase tracking-[0.06em] text-[#2da4ff]">
+            SIIGO
+          </div>
+          <div className="text-[11px] leading-4 text-white/60">
+            Analytics &amp; Training
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { key: 'dashboard', path: '/', icon: LayoutDashboard },
-  { key: 'simulations', path: '/simulations', icon: PlayCircle },
-  { key: 'certification', path: '/certification', icon: Award },
-  { key: 'conversational', path: '/conversational', icon: MessageSquare },
-  { key: 'coaching', path: '/coaching', icon: Target },
-  { key: 'leaderboard', path: '/leaderboard', icon: Trophy },
-  { key: 'activities', path: '/activities', icon: BarChart2 },
-  { key: 'organization', path: '/organization', icon: Users },
-  { key: 'reports', path: '/reports', icon: FileText },
-  { key: 'settings', path: '/settings', icon: Settings },
-];
-
-// ---------------------------------------------------------------------------
-// Sidebar width constants
-// ---------------------------------------------------------------------------
-const EXPANDED_WIDTH = 240;
-const COLLAPSED_WIDTH = 64;
-
-// ---------------------------------------------------------------------------
-// NavItem component
-// ---------------------------------------------------------------------------
-interface NavItemProps {
-  item: NavItem;
-  collapsed: boolean;
-  t: (key: string) => string;
-  onClick?: () => void;
-}
-
-const SidebarNavItem = ({ item, collapsed, t, onClick }: NavItemProps) => {
-  const location = useLocation();
-  const Icon = item.icon;
-
-  // Exact match for root, prefix match for others
-  const isActive =
-    item.path === '/'
-      ? location.pathname === '/'
-      : location.pathname.startsWith(item.path);
+function SidebarContent({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean
+  onNavigate?: () => void
+}) {
+  const language = useAppStore((state) => state.language)
 
   return (
-    <NavLink
-      to={item.path}
-      onClick={onClick}
-      className={cn(
-        'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
-        'transition-colors duration-150 select-none',
-        isActive
-          ? 'bg-[#E8F5FF] text-[#0078D4] dark:bg-[#0078D4]/20 dark:text-[#4DA6FF]'
-          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800',
-        collapsed ? 'justify-center px-0' : 'px-3',
-      )}
-      title={collapsed ? t(item.key) : undefined}
-    >
-      <Icon
-        size={20}
-        className={cn(
-          'shrink-0',
-          isActive
-            ? 'text-[#0078D4] dark:text-[#4DA6FF]'
-            : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-500 dark:group-hover:text-gray-300',
-        )}
-      />
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.span
-            key="label"
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.18, ease: 'easeInOut' }}
-            className="overflow-hidden whitespace-nowrap"
-          >
-            {t(item.key)}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </NavLink>
-  );
-};
+    <div className="flex h-full flex-col">
+      <Brand collapsed={collapsed} />
 
-// ---------------------------------------------------------------------------
-// Sidebar inner content (shared between desktop and mobile)
-// ---------------------------------------------------------------------------
-interface SidebarContentProps {
-  collapsed: boolean;
-  t: (key: string) => string;
-  onNavClick?: () => void;
-  onToggleCollapse?: () => void;
-  showCollapseButton?: boolean;
+      <div className="flex-1 overflow-y-auto px-4 pb-6">
+        {sections.map((section) => (
+          <div key={section.title} className="mb-8">
+            {!collapsed && (
+              <div className="mb-4 px-2 text-[12px] font-bold uppercase tracking-[0.12em] text-white/60">
+                {section.title}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {section.items.map((item) => {
+                const Icon = item.icon
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === '/'}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      [
+                        'group flex items-center rounded-2xl transition-all duration-200',
+                        collapsed ? 'justify-center px-0 py-4' : 'gap-4 px-5 py-4',
+                        isActive
+                          ? 'bg-[#ff1734] text-white shadow-[0_18px_44px_rgba(255,23,52,0.25)]'
+                          : 'text-white/84 hover:bg-white/8',
+                      ].join(' ')
+                    }
+                    title={collapsed ? (language === 'es' ? item.labelEs : item.labelEn) : undefined}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon className={['h-5 w-5 shrink-0', isActive ? 'text-white' : 'text-white/84'].join(' ')} />
+                        {!collapsed && (
+                          <span className="truncate text-[1.02rem] font-semibold">
+                            {language === 'es' ? item.labelEs : item.labelEn}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
-const SidebarContent = ({
-  collapsed,
-  t,
-  onNavClick,
-  onToggleCollapse,
-  showCollapseButton = true,
-}: SidebarContentProps) => (
-  <div className="flex h-full flex-col overflow-hidden">
-    {/* Logo */}
-    <div
-      className={cn(
-        'flex h-16 shrink-0 items-center border-b border-gray-200 dark:border-gray-700',
-        collapsed ? 'justify-center px-0' : 'justify-between px-4',
-      )}
-    >
-      <AnimatePresence initial={false} mode="wait">
-        {collapsed ? (
-          <motion.span
-            key="short"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="text-xl font-extrabold tracking-tight text-[#0078D4]"
-          >
-            S
-          </motion.span>
-        ) : (
-          <motion.span
-            key="full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="text-xl font-extrabold tracking-tight"
-          >
-            <span className="text-[#0078D4]">SIIG</span>
-            <span className="text-gray-800 dark:text-white">O</span>
-          </motion.span>
-        )}
-      </AnimatePresence>
-
-      {showCollapseButton && !collapsed && (
-        <button
-          onClick={onToggleCollapse}
-          className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
-          aria-label="Collapse sidebar"
-        >
-          <ChevronLeft size={18} />
-        </button>
-      )}
-    </div>
-
-    {/* Nav */}
-    <nav className={cn('flex-1 overflow-y-auto py-4', collapsed ? 'px-2' : 'px-3')}>
-      <ul className="space-y-0.5">
-        {NAV_ITEMS.map((item) => (
-          <li key={item.key}>
-            <SidebarNavItem
-              item={item}
-              collapsed={collapsed}
-              t={t}
-              onClick={onNavClick}
-            />
-          </li>
-        ))}
-      </ul>
-    </nav>
-
-    {/* Footer */}
-    <div
-      className={cn(
-        'shrink-0 border-t border-gray-200 dark:border-gray-700 py-3',
-        collapsed ? 'flex justify-center px-2' : 'px-4',
-      )}
-    >
-      <AnimatePresence initial={false}>
-        {!collapsed ? (
-          <motion.div
-            key="footer-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex flex-col gap-0.5"
-          >
-            <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-600">
-              {t('poweredBy')}
-            </span>
-            <span className="text-xs font-semibold text-[#0078D4]">Rolplay</span>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="footer-collapsed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8F5FF] dark:bg-[#0078D4]/20"
-            title="Powered by Rolplay"
-          >
-            <span className="text-[10px] font-extrabold text-[#0078D4]">R</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Expand button shown only when collapsed */}
-      {showCollapseButton && collapsed && (
-        <button
-          onClick={onToggleCollapse}
-          className="mt-2 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
-          aria-label="Expand sidebar"
-        >
-          <ChevronRight size={18} />
-        </button>
-      )}
-    </div>
-  </div>
-);
-
-// ---------------------------------------------------------------------------
-// Sidebar (default export)
-// ---------------------------------------------------------------------------
-const Sidebar = () => {
-  const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
-  const mobileMenuOpen = useAppStore((s) => s.mobileMenuOpen);
-  const language = useAppStore((s) => s.language);
-  const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
-  const setMobileMenuOpen = useAppStore((s) => s.setMobileMenuOpen);
-
-  const t = useT(language ?? 'es');
-
-  const toggleCollapse = useCallback(() => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  }, [sidebarCollapsed, setSidebarCollapsed]);
-
-  const closeMobile = useCallback(() => {
-    setMobileMenuOpen(false);
-  }, [setMobileMenuOpen]);
+export default function Sidebar() {
+  const collapsed = useAppStore((state) => state.sidebarCollapsed)
+  const mobileOpen = useAppStore((state) => state.mobileMenuOpen)
+  const toggleSidebar = useAppStore((state) => state.toggleSidebar)
+  const setMobileMenuOpen = useAppStore((state) => state.setMobileMenuOpen)
 
   return (
     <>
-      {/* ------------------------------------------------------------------ */}
-      {/* Desktop sidebar                                                      */}
-      {/* ------------------------------------------------------------------ */}
-      <motion.aside
-        className={cn(
-          'hidden md:flex flex-col shrink-0',
-          'bg-white dark:bg-gray-900',
-          'border-r border-gray-200 dark:border-gray-700',
-          'relative z-20 overflow-hidden',
-        )}
-        animate={{ width: sidebarCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
-        transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+      <aside
+        className={[
+          'hidden md:flex md:min-h-screen md:flex-col md:border-r md:border-[#08204d]',
+          'bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white',
+          collapsed ? 'w-[96px]' : 'w-[320px]',
+        ].join(' ')}
       >
-        <SidebarContent
-          collapsed={sidebarCollapsed}
-          t={t}
-          onToggleCollapse={toggleCollapse}
-          showCollapseButton
-        />
-      </motion.aside>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Mobile drawer backdrop                                               */}
-      {/* ------------------------------------------------------------------ */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            key="backdrop"
-            className="fixed inset-0 z-30 bg-black/40 md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={closeMobile}
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Mobile drawer                                                        */}
-      {/* ------------------------------------------------------------------ */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.aside
-            key="mobile-drawer"
-            className={cn(
-              'fixed inset-y-0 left-0 z-40 flex flex-col md:hidden',
-              'bg-white dark:bg-gray-900',
-              'border-r border-gray-200 dark:border-gray-700',
-              'shadow-xl',
-            )}
-            style={{ width: EXPANDED_WIDTH }}
-            initial={{ x: -EXPANDED_WIDTH }}
-            animate={{ x: 0 }}
-            exit={{ x: -EXPANDED_WIDTH }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+        <div className="flex items-center justify-end px-5 pt-4">
+          <button
+            onClick={toggleSidebar}
+            className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {/* Close button */}
-            <button
-              onClick={closeMobile}
-              className="absolute right-3 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
-              aria-label="Close menu"
-            >
-              <X size={18} />
-            </button>
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
+        </div>
+        <SidebarContent collapsed={collapsed} />
+      </aside>
 
-            <SidebarContent
-              collapsed={false}
-              t={t}
-              onNavClick={closeMobile}
-              showCollapseButton={false}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-slate-950/50 md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
             />
-          </motion.aside>
+            <motion.aside
+              className="fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white md:hidden"
+              initial={{ x: -320 }}
+              animate={{ x: 0 }}
+              exit={{ x: -320 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="flex items-center justify-end px-5 pt-4">
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+                  aria-label="Close sidebar"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <SidebarContent collapsed={false} onNavigate={() => setMobileMenuOpen(false)} />
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </>
-  );
-};
-
-export default Sidebar;
+  )
+}

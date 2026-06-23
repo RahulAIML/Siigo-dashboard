@@ -1,40 +1,34 @@
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import Sidebar from './Sidebar';
-import TopBar from './TopBar';
-import AIAssistant from '../ai/AIAssistant';
-import AiBubble from '../ai/AiBubble';
-import useAppStore from '../../store';
+import { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
+import Sidebar from './Sidebar'
+import TopBar from './TopBar'
+import AIAssistant from '../ai/AIAssistant'
+import AiBubble from '../ai/AiBubble'
+import { useAppStore } from '../../store/index'
 
-const Shell = () => {
-  const aiOpen = useAppStore((state) => state.aiOpen);
-  const theme = useAppStore((state) => state.theme);
+export default function Shell() {
+  const aiOpen = useAppStore((state) => state.aiOpen)
+  const theme = useAppStore((state) => state.theme)
 
   useEffect(() => {
-    const html = document.documentElement;
-    if (theme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-  }, [theme]);
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
 
   return (
-    <div className="flex h-screen bg overflow-hidden">
+    <div className="flex min-h-screen bg-[#f4f7fb] text-slate-900">
       <Sidebar />
-      <div className="flex flex-col flex-1 min-w-0">
+
+      <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto px-6 py-6 md:px-8">
           <Outlet />
         </main>
       </div>
+
       <AnimatePresence>
-        {aiOpen && <AIAssistant />}
-        {!aiOpen && <AiBubble />}
+        {aiOpen ? <AIAssistant /> : <AiBubble />}
       </AnimatePresence>
     </div>
-  );
-};
-
-export default Shell;
+  )
+}
