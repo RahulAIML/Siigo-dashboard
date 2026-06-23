@@ -33,9 +33,7 @@ const SIIGO_BLUE  = '#0061ff'
 const GREEN       = '#22c55e'
 const AMBER       = '#F59E0B'
 const RED         = '#EF4444'
-const MUTED       = '#475569'
-const CARD_BG     = 'rgba(15,23,42,0.85)'
-const BORDER      = '1px solid rgba(51,65,85,0.6)'
+const MUTED       = 'var(--color-muted)'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -80,8 +78,8 @@ function Section({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{
-        background: CARD_BG,
-        border: BORDER,
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-line)',
         borderRadius: 16,
         padding: '20px 24px',
       }}
@@ -102,7 +100,7 @@ function Section({
           <Icon style={{ width: 18, height: 18, color: SIIGO_BLUE }} />
         </div>
         <div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#f1f5f9' }}>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-fg)' }}>
             {title}
           </p>
           {subtitle && (
@@ -145,8 +143,8 @@ function SkeletonCard() {
   return (
     <div
       style={{
-        background: CARD_BG,
-        border: BORDER,
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-line)',
         borderRadius: 16,
         padding: '20px 24px',
         display: 'flex',
@@ -155,13 +153,13 @@ function SkeletonCard() {
       }}
     >
       <div
-        style={{ height: 14, width: '40%', borderRadius: 6, background: '#1e2d3d', animation: 'pulse 1.5s infinite' }}
+        style={{ height: 14, width: '40%', borderRadius: 6, background: 'var(--color-line)', animation: 'pulse 1.5s infinite' }}
       />
       <div
-        style={{ height: 32, width: '60%', borderRadius: 6, background: '#1e2d3d', animation: 'pulse 1.5s infinite' }}
+        style={{ height: 32, width: '60%', borderRadius: 6, background: 'var(--color-line)', animation: 'pulse 1.5s infinite' }}
       />
       <div
-        style={{ height: 8, width: '80%', borderRadius: 6, background: '#1e2d3d', animation: 'pulse 1.5s infinite' }}
+        style={{ height: 8, width: '80%', borderRadius: 6, background: 'var(--color-line)', animation: 'pulse 1.5s infinite' }}
       />
     </div>
   )
@@ -180,8 +178,8 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{
-        background: CARD_BG,
-        border: BORDER,
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-line)',
         borderRadius: 16,
         padding: '20px 22px',
         display: 'flex',
@@ -197,7 +195,7 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
               margin: 0,
               fontSize: 14,
               fontWeight: 600,
-              color: '#f1f5f9',
+              color: 'var(--color-fg)',
               lineHeight: 1.35,
               wordBreak: 'break-word',
             }}
@@ -263,7 +261,7 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
           style={{
             height: 6,
             borderRadius: 4,
-            background: 'rgba(51,65,85,0.6)',
+            background: 'var(--color-line)',
             overflow: 'hidden',
           }}
         >
@@ -314,8 +312,8 @@ function StatBox({ label, value, color }: { label: string; value: string; color:
   return (
     <div
       style={{
-        background: 'rgba(15,23,42,0.6)',
-        border: '1px solid rgba(51,65,85,0.4)',
+        background: 'var(--color-bg)',
+        border: '1px solid var(--color-line)',
         borderRadius: 10,
         padding: '8px 10px',
         textAlign: 'center',
@@ -337,16 +335,16 @@ function SessionsBarTooltip({ active, payload, label }: any) {
   return (
     <div
       style={{
-        background: '#1e2535',
-        border: '1px solid #2d3a52',
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-line)',
         borderRadius: 8,
         padding: '10px 14px',
         fontSize: 13,
-        color: '#e2e8f0',
+        color: 'var(--color-fg)',
         maxWidth: 220,
       }}
     >
-      <p style={{ margin: '0 0 6px', fontWeight: 600, color: '#f1f5f9', fontSize: 13 }}>
+      <p style={{ margin: '0 0 6px', fontWeight: 600, color: 'var(--color-fg)', fontSize: 13 }}>
         {stat?.name ?? label}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -368,7 +366,7 @@ function TooltipRow({ color, label, value }: { color: string; label: string; val
   )
 }
 
-function SessionsBarChart({ data }: { data: ActivityStat[] }) {
+function SessionsBarChart({ data, isDark }: { data: ActivityStat[]; isDark: boolean }) {
   if (!data.length) return <EmptyState message="No session data available" />
 
   const sorted = [...data].sort((a, b) => b.count - a.count).slice(0, 10)
@@ -384,7 +382,7 @@ function SessionsBarChart({ data }: { data: ActivityStat[] }) {
         margin={{ top: 4, right: 52, bottom: 4, left: 4 }}
         barCategoryGap="20%"
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" horizontal={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1e2d3d' : '#e4e8f0'} horizontal={false} />
         <XAxis
           type="number"
           tick={{ fill: '#64748b', fontSize: 11 }}
@@ -417,18 +415,18 @@ const TH_STYLE: React.CSSProperties = {
   textAlign: 'left',
   fontSize: 11,
   fontWeight: 600,
-  color: '#64748b',
+  color: 'var(--color-muted)',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.06em',
-  borderBottom: '1px solid rgba(51,65,85,0.5)',
+  borderBottom: '1px solid var(--color-line)',
   whiteSpace: 'nowrap',
 }
 
 const TD_STYLE: React.CSSProperties = {
   padding: '12px 14px',
   fontSize: 13,
-  color: '#cbd5e1',
-  borderBottom: '1px solid rgba(51,65,85,0.25)',
+  color: 'var(--color-fg)',
+  borderBottom: '1px solid var(--color-line)',
   verticalAlign: 'middle',
 }
 
@@ -471,7 +469,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
               >
                 <td style={TD_STYLE}>
                   <div>
-                    <span style={{ color: '#f1f5f9', fontWeight: 500 }}>{stat.name}</span>
+                    <span style={{ color: 'var(--color-fg)', fontWeight: 500 }}>{stat.name}</span>
                     {stat.activityType && (
                       <p style={{ margin: '2px 0 0', fontSize: 11, color: '#475569' }}>
                         {stat.activityType}
@@ -493,7 +491,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
                         width: 60,
                         height: 4,
                         borderRadius: 2,
-                        background: 'rgba(51,65,85,0.5)',
+                        background: 'var(--color-line)',
                         overflow: 'hidden',
                       }}
                     >
@@ -561,7 +559,7 @@ function buildActivityTrend(trend: TrendPoint[]): ActivityTrendPoint[] {
   })
 }
 
-function ActivityTrendChart({ trend }: { trend: TrendPoint[] }) {
+function ActivityTrendChart({ trend, isDark }: { trend: TrendPoint[]; isDark: boolean }) {
   const chartData = useMemo(() => buildActivityTrend(trend), [trend])
 
   if (!chartData.length) return <EmptyState message="No trend data available yet" />
@@ -569,7 +567,7 @@ function ActivityTrendChart({ trend }: { trend: TrendPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={chartData} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1e2d3d' : '#e4e8f0'} vertical={false} />
         <XAxis
           dataKey="dateLabel"
           tick={{ fill: '#64748b', fontSize: 11 }}
@@ -586,11 +584,11 @@ function ActivityTrendChart({ trend }: { trend: TrendPoint[] }) {
         />
         <Tooltip
           contentStyle={{
-            background: '#1e2535',
-            border: '1px solid #2d3a52',
+            background: isDark ? '#1e2535' : '#ffffff',
+            border: '1px solid var(--color-line)',
             borderRadius: 8,
             fontSize: 13,
-            color: '#e2e8f0',
+            color: isDark ? '#e2e8f0' : '#1e293b',
           }}
           labelStyle={{ color: '#94a3b8', fontSize: 12, marginBottom: 6 }}
           formatter={(value: number) => [value, 'Sessions']}
@@ -618,13 +616,15 @@ function ActivityTrendChart({ trend }: { trend: TrendPoint[] }) {
 
 export default function ActivitiesPage() {
   const language = useAppStore((s) => s.language)
+  const theme    = useAppStore((s) => s.theme)
+  const isDark   = theme === 'dark'
   const { activityStats, trend, isLoading, isError, error } = useDashboardData()
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div style={{ height: 36, width: 260, borderRadius: 8, background: '#1e2d3d' }} />
+        <div style={{ height: 36, width: 260, borderRadius: 8, background: 'var(--color-line)' }} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {[0, 1].map((i) => <SkeletonCard key={i} />)}
         </div>
@@ -658,12 +658,12 @@ export default function ActivitiesPage() {
     )
   }
 
-  const totalSessions   = activityStats.reduce((sum, a) => sum + a.count, 0)
-  const totalPass       = activityStats.reduce((sum, a) => sum + a.passCount, 0)
-  const totalFail       = activityStats.reduce((sum, a) => sum + a.failCount, 0)
+  const totalSessions   = activityStats?.reduce((sum, a) => sum + a.count, 0) ?? 0
+  const totalPass       = activityStats?.reduce((sum, a) => sum + a.passCount, 0) ?? 0
+  const totalFail       = activityStats?.reduce((sum, a) => sum + a.failCount, 0) ?? 0
   const overallPassRate = totalSessions > 0 ? (totalPass / totalSessions) * 100 : 0
   const overallAvgScore =
-    activityStats.length > 0
+    activityStats && activityStats.length > 0
       ? activityStats.reduce((sum, a) => sum + a.avgScore * a.count, 0) / Math.max(totalSessions, 1)
       : 0
 
@@ -698,7 +698,7 @@ export default function ActivitiesPage() {
             <Activity style={{ width: 22, height: 22, color: SIIGO_BLUE }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-fg)' }}>
               {language === 'es' ? 'Actividades' : 'Activities'}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: '#64748b', marginTop: 1 }}>
@@ -710,7 +710,7 @@ export default function ActivitiesPage() {
         </div>
 
         {/* Global summary chips */}
-        {activityStats.length > 0 && (
+        {activityStats && activityStats.length > 0 && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
             <Chip label={language === 'es' ? 'Actividades' : 'Activities'} value={String(activityStats.length)} color={SIIGO_BLUE} />
             <Chip label={language === 'es' ? 'Total Sesiones' : 'Total Sessions'} value={String(totalSessions)} color="#94a3b8" />
@@ -723,13 +723,13 @@ export default function ActivitiesPage() {
       </motion.div>
 
       {/* ── 2. Activity summary cards ────────────────────────────────────── */}
-      {activityStats.length === 0 ? (
+      {!activityStats || activityStats.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{
-            background: CARD_BG,
-            border: BORDER,
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-line)',
             borderRadius: 16,
             padding: '48px 24px',
             display: 'flex',
@@ -757,7 +757,7 @@ export default function ActivitiesPage() {
             gap: 16,
           }}
         >
-          {activityStats.map((stat) => (
+          {activityStats?.map((stat) => (
             <ActivitySummaryCard key={stat.id} stat={stat} />
           ))}
         </div>
@@ -769,7 +769,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Número de sesiones de simulación completadas por actividad (top 10)' : 'Number of simulation sessions completed per activity (top 10)'}
         icon={BarChart2}
       >
-        <SessionsBarChart data={activityStats} />
+        <SessionsBarChart data={activityStats} isDark={isDark} />
       </Section>
 
       {/* ── 4. Activity detail table ─────────────────────────────────────── */}
@@ -787,7 +787,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Volumen diario de sesiones — indica qué períodos están creciendo' : 'Daily session volume — indicates which periods are growing in usage'}
         icon={TrendingUp}
       >
-        <ActivityTrendChart trend={trend} />
+        <ActivityTrendChart trend={trend} isDark={isDark} />
       </Section>
     </div>
   )

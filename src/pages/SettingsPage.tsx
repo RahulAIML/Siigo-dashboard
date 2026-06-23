@@ -11,6 +11,7 @@ import {
   Info,
   Trash2,
   RefreshCw,
+  CheckCircle,
 } from 'lucide-react'
 import { useAppStore } from '../store'
 import { PASS_THRESHOLD } from '../config/constants'
@@ -134,7 +135,10 @@ export default function SettingsPage() {
       // storage unavailable
     }
     setClearDone(true)
-    setTimeout(() => setClearDone(false), 2500)
+    setTimeout(() => {
+      setClearDone(false)
+      window.location.reload()
+    }, 1500)
   }, [queryClient, language, setLastCleared])
 
   const datePresetOptions: { value: DatePreset; label: string }[] = [

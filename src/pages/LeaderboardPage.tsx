@@ -388,7 +388,7 @@ export default function LeaderboardPage() {
         <SummaryCard
           icon={TrendingUp}
           label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score (All)'}
-          value={fmtScore(kpis.averageScore)}
+          value={fmtScore(kpis.averageScore ?? 0)}
           color="#10B981"
           delay={0.1}
         />
