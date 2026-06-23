@@ -367,7 +367,7 @@ function TooltipRow({ color, label, value }: { color: string; label: string; val
 }
 
 function SessionsBarChart({ data, isDark }: { data: ActivityStat[]; isDark: boolean }) {
-  if (!data.length) return <EmptyState message="No session data available" />
+  if (!data || !data.length) return <EmptyState message="No session data available" />
 
   const sorted = [...data].sort((a, b) => b.count - a.count).slice(0, 10)
   const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.name, 24) }))
@@ -431,7 +431,7 @@ const TD_STYLE: React.CSSProperties = {
 }
 
 function DetailTable({ data }: { data: ActivityStat[] }) {
-  if (!data.length) return <EmptyState message="No activity data to display" />
+  if (!data || !data.length) return <EmptyState message="No activity data to display" />
 
   const sorted = [...data].sort((a, b) => b.count - a.count)
 
@@ -548,6 +548,7 @@ interface ActivityTrendPoint {
 }
 
 function buildActivityTrend(trend: TrendPoint[]): ActivityTrendPoint[] {
+  if (!trend || !trend.length) return []
   return trend.map((t) => {
     let label = t.date
     try {
@@ -787,7 +788,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Volumen diario de sesiones — indica qué períodos están creciendo' : 'Daily session volume — indicates which periods are growing in usage'}
         icon={TrendingUp}
       >
-        <ActivityTrendChart trend={trend} isDark={isDark} />
+        <ActivityTrendChart trend={trend ?? []} isDark={isDark} />
       </Section>
     </div>
   )
