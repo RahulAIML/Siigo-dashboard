@@ -7,6 +7,8 @@ import { useDebounce } from '../lib/useDebounce'
 import { exportSimulationsCSV } from '../lib/csvExport'
 import { downloadSimReport } from '../lib/reportPdf'
 import { cn } from '../lib/cn'
+import { useAppStore } from '../store'
+import { t } from '../lib/i18n'
 import type { Simulation } from '../api/types'
 
 // ---------------------------------------------------------------------------
@@ -63,18 +65,18 @@ function buildSimDetails(sim: Simulation) {
 // PassFailBadge
 // ---------------------------------------------------------------------------
 
-function PassFailBadge({ value }: { value: 'si' | 'no' | null }) {
+function PassFailBadge({ value, language }: { value: 'si' | 'no' | null; language: 'es' | 'en' }) {
   if (value === 'si') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-        Aprobado
+        {language === 'es' ? 'Aprobado' : 'Passed'}
       </span>
     )
   }
   if (value === 'no') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
-        No aprobado
+        {language === 'es' ? 'No aprobado' : 'Failed'}
       </span>
     )
   }
@@ -322,6 +324,7 @@ type SortDir = 'asc' | 'desc'
 // ---------------------------------------------------------------------------
 
 export default function SimulationsPage() {
+  const language = useAppStore((s) => s.language)
   const { filteredSims, activities, isLoading, isError } = useDashboardData()
 
   // ── Local filter state ────────────────────────────────────────────────────
@@ -462,7 +465,7 @@ export default function SimulationsPage() {
   if (isError) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
-        <p>Error al cargar simulaciones. Intente de nuevo.</p>
+        <p>{language === 'es' ? 'Error al cargar simulaciones. Intente de nuevo.' : 'Error loading simulations. Please try again.'}</p>
       </div>
     )
   }
@@ -482,7 +485,7 @@ export default function SimulationsPage() {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-white">Simulaciones</h1>
+            <h1 className="text-xl font-semibold text-white">{t('simulations', language)}</h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
               {filteredSims.length} total
             </span>
@@ -502,7 +505,7 @@ export default function SimulationsPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
-            Exportar CSV
+            {t('exportCsv', language)}
           </button>
         </div>
 
@@ -520,7 +523,7 @@ export default function SimulationsPage() {
             </svg>
             <input
               type="text"
-              placeholder="Buscar por usuario..."
+              placeholder={language === 'es' ? 'Buscar por usuario...' : 'Search by user...'}
               value={searchRaw}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
@@ -544,7 +547,7 @@ export default function SimulationsPage() {
             onChange={(e) => handleActivityChange(e.target.value)}
             className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
           >
-            <option value="all">Todas las actividades</option>
+            <option value="all">{language === 'es' ? 'Todas las actividades' : 'All activities'}</option>
             {activityOptions.map((name) => (
               <option key={name} value={name}>{name}</option>
             ))}
@@ -567,7 +570,11 @@ export default function SimulationsPage() {
                     : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700',
                 )}
               >
-                {v === 'all' ? 'Todos' : v === 'passed' ? 'Aprobados' : 'No aprobados'}
+                {v === 'all'
+                  ? (language === 'es' ? 'Todos' : 'All')
+                  : v === 'passed'
+                  ? (language === 'es' ? 'Aprobados' : 'Passed')
+                  : (language === 'es' ? 'No aprobados' : 'Failed')}
               </button>
             ))}
           </div>
@@ -580,28 +587,28 @@ export default function SimulationsPage() {
               <thead>
                 <tr className="border-b border-slate-700/60 bg-slate-800/60">
                   <th className="w-10 px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">Usuario</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">Actividad</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">{t('name', language)}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">{t('activity', language)}</th>
                   <th
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none group"
                     onClick={() => toggleSort('score')}
                   >
                     <span className="inline-flex items-center gap-1.5">
-                      Calificación
+                      {t('score', language)}
                       <SortIcon col="score" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Diagnóstico</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('result', language)}</th>
                   <th
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none"
                     onClick={() => toggleSort('date')}
                   >
                     <span className="inline-flex items-center gap-1.5">
-                      Fecha
+                      {t('date', language)}
                       <SortIcon col="date" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">{language === 'es' ? 'Acciones' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/40">
@@ -612,8 +619,8 @@ export default function SimulationsPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p className="text-base font-medium text-slate-400">Sin resultados</p>
-                        <p className="text-sm">No hay simulaciones que coincidan con los filtros aplicados.</p>
+                        <p className="text-base font-medium text-slate-400">{language === 'es' ? 'Sin resultados' : 'No results'}</p>
+                        <p className="text-sm">{language === 'es' ? 'No hay simulaciones que coincidan con los filtros aplicados.' : 'No simulations match the applied filters.'}</p>
                       </div>
                     </td>
                   </tr>
@@ -663,7 +670,7 @@ export default function SimulationsPage() {
 
                           {/* Diagnostico */}
                           <td className="px-4 py-3">
-                            <PassFailBadge value={sim.Diagnostico_Final} />
+                            <PassFailBadge value={sim.Diagnostico_Final} language={language} />
                           </td>
 
                           {/* Fecha */}
@@ -727,7 +734,7 @@ export default function SimulationsPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between gap-4 text-sm">
             <p className="text-slate-500">
-              Mostrando {pageStart + 1}–{Math.min(pageEnd, displaySims.length)} de {displaySims.length}
+              {language === 'es' ? 'Mostrando' : 'Showing'} {pageStart + 1}–{Math.min(pageEnd, displaySims.length)} {language === 'es' ? 'de' : 'of'} {displaySims.length}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -738,7 +745,7 @@ export default function SimulationsPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                Anterior
+                {language === 'es' ? 'Anterior' : 'Previous'}
               </button>
 
               {/* Page numbers — show up to 5 around current */}
@@ -779,7 +786,7 @@ export default function SimulationsPage() {
                 disabled={safePage === totalPages}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Siguiente
+                {language === 'es' ? 'Siguiente' : 'Next'}
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                 </svg>

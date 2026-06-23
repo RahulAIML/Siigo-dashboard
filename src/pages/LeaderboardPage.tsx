@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import useAppStore from '../store'
 import {
   Trophy,
   Medal,
@@ -264,6 +265,7 @@ function SummaryCard({ icon: Icon, label, value, color, delay }: SummaryCardProp
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function LeaderboardPage() {
+  const language = useAppStore((s) => s.language)
   const { userStats, kpis, isLoading } = useDashboardData()
 
   const [search, setSearch] = useState('')
@@ -347,8 +349,8 @@ export default function LeaderboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
         <Trophy className="w-12 h-12 opacity-30" />
-        <p className="text-lg font-medium">No simulation data available</p>
-        <p className="text-sm">Run some simulations to see the leaderboard.</p>
+        <p className="text-lg font-medium">{language === 'es' ? 'Sin datos de simulaciones' : 'No simulation data available'}</p>
+        <p className="text-sm">{language === 'es' ? 'Completa simulaciones para ver el ranking.' : 'Run some simulations to see the leaderboard.'}</p>
       </div>
     )
   }
@@ -368,8 +370,8 @@ export default function LeaderboardPage() {
             <Trophy className="w-5 h-5 text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Leaderboard</h1>
-            <p className="text-sm text-muted-foreground">Top Performers</p>
+            <h1 className="text-2xl font-bold text-foreground">{language === 'es' ? 'Ranking' : 'Leaderboard'}</h1>
+            <p className="text-sm text-muted-foreground">{language === 'es' ? 'Mejores Desempeños' : 'Top Performers'}</p>
           </div>
         </div>
       </motion.div>
@@ -378,21 +380,21 @@ export default function LeaderboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <SummaryCard
           icon={Users}
-          label="Total Advisors"
+          label={language === 'es' ? 'Total Asesores' : 'Total Advisors'}
           value={String(userStats.length)}
           color="#0066FF"
           delay={0.05}
         />
         <SummaryCard
           icon={TrendingUp}
-          label="Avg Score (All)"
+          label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score (All)'}
           value={fmtScore(kpis.averageScore)}
           color="#10B981"
           delay={0.1}
         />
         <SummaryCard
           icon={Award}
-          label="Certification Rate"
+          label={language === 'es' ? 'Tasa de Certificación' : 'Certification Rate'}
           value={fmtPct(certRate)}
           color="#8B5CF6"
           delay={0.15}
@@ -404,7 +406,7 @@ export default function LeaderboardPage() {
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
             <Medal className="w-4 h-4" />
-            Top 3 Podium
+            {language === 'es' ? 'Top 3 Podio' : 'Top 3 Podium'}
           </h2>
           {/* Order: 2nd | 1st | 3rd */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -435,7 +437,7 @@ export default function LeaderboardPage() {
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search by name..."
+              placeholder={language === 'es' ? 'Buscar por nombre...' : 'Search by name...'}
               className="w-full pl-9 pr-3 py-2 rounded-lg bg-muted border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
@@ -489,22 +491,22 @@ export default function LeaderboardPage() {
             <thead>
               <tr className="border-b border-border/50 bg-muted/30">
                 <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide w-12">
-                  Rank
+                  {language === 'es' ? 'Puesto' : 'Rank'}
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Name
+                  {language === 'es' ? 'Nombre' : 'Name'}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Simulations
+                  {language === 'es' ? 'Simulaciones' : 'Simulations'}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Avg Score
+                  {language === 'es' ? 'Prom. Puntaje' : 'Avg Score'}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Pass Rate
+                  {language === 'es' ? 'Tasa Aprobación' : 'Pass Rate'}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Best Score
+                  {language === 'es' ? 'Mejor Puntaje' : 'Best Score'}
                 </th>
               </tr>
             </thead>
@@ -513,7 +515,7 @@ export default function LeaderboardPage() {
                 {pageRows.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">
-                      No advisors match your search.
+                      {language === 'es' ? 'Ningún asesor coincide con tu búsqueda.' : 'No advisors match your search.'}
                     </td>
                   </tr>
                 ) : (

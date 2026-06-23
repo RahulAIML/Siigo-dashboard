@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
+import useAppStore from '../store'
 import {
   ResponsiveContainer,
   BarChart,
@@ -616,6 +617,7 @@ function ActivityTrendChart({ trend }: { trend: TrendPoint[] }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ActivitiesPage() {
+  const language = useAppStore((s) => s.language)
   const { activityStats, trend, isLoading, isError, error } = useDashboardData()
 
   // ── Loading ────────────────────────────────────────────────────────────────
@@ -697,10 +699,12 @@ export default function ActivitiesPage() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>
-              Activities
+              {language === 'es' ? 'Actividades' : 'Activities'}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: '#64748b', marginTop: 1 }}>
-              Simulator usage breakdown, scores, and pass rates per activity
+              {language === 'es'
+                ? 'Desglose de uso del simulador, puntajes y tasas de aprobación por actividad'
+                : 'Simulator usage breakdown, scores, and pass rates per activity'}
             </p>
           </div>
         </div>
@@ -708,12 +712,12 @@ export default function ActivitiesPage() {
         {/* Global summary chips */}
         {activityStats.length > 0 && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-            <Chip label="Activities" value={String(activityStats.length)} color={SIIGO_BLUE} />
-            <Chip label="Total Sessions" value={String(totalSessions)} color="#94a3b8" />
-            <Chip label="Avg Score" value={fmt1(overallAvgScore)} color={overallAvgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
-            <Chip label="Overall Pass Rate" value={`${fmt1(overallPassRate)}%`} color={performanceColor(overallPassRate)} />
-            <Chip label="Passed" value={String(totalPass)} color={GREEN} />
-            <Chip label="Failed" value={String(totalFail)} color={totalFail > 0 ? RED : MUTED} />
+            <Chip label={language === 'es' ? 'Actividades' : 'Activities'} value={String(activityStats.length)} color={SIIGO_BLUE} />
+            <Chip label={language === 'es' ? 'Total Sesiones' : 'Total Sessions'} value={String(totalSessions)} color="#94a3b8" />
+            <Chip label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score'} value={fmt1(overallAvgScore)} color={overallAvgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
+            <Chip label={language === 'es' ? 'Tasa Aprobación' : 'Overall Pass Rate'} value={`${fmt1(overallPassRate)}%`} color={performanceColor(overallPassRate)} />
+            <Chip label={language === 'es' ? 'Aprobados' : 'Passed'} value={String(totalPass)} color={GREEN} />
+            <Chip label={language === 'es' ? 'Reprobados' : 'Failed'} value={String(totalFail)} color={totalFail > 0 ? RED : MUTED} />
           </div>
         )}
       </motion.div>
@@ -737,11 +741,12 @@ export default function ActivitiesPage() {
         >
           <LayoutGrid style={{ width: 44, height: 44, opacity: 0.35 }} />
           <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#64748b' }}>
-            No activity data yet
+            {language === 'es' ? 'Sin datos de actividades aún' : 'No activity data yet'}
           </p>
           <p style={{ margin: 0, fontSize: 13, color: MUTED, textAlign: 'center', maxWidth: 380 }}>
-            Activity statistics will appear here once simulation sessions are completed.
-            Simulators currently configured: Simulador Siigo Gastrobar.
+            {language === 'es'
+              ? 'Las estadísticas de actividad aparecerán aquí cuando se completen sesiones de simulación.'
+              : 'Activity statistics will appear here once simulation sessions are completed.'}
           </p>
         </motion.div>
       ) : (
@@ -760,8 +765,8 @@ export default function ActivitiesPage() {
 
       {/* ── 3. Sessions per activity (horizontal bar) ────────────────────── */}
       <Section
-        title="Sessions per Activity"
-        subtitle="Number of simulation sessions completed per activity (top 10)"
+        title={language === 'es' ? 'Sesiones por Actividad' : 'Sessions per Activity'}
+        subtitle={language === 'es' ? 'Número de sesiones de simulación completadas por actividad (top 10)' : 'Number of simulation sessions completed per activity (top 10)'}
         icon={BarChart2}
       >
         <SessionsBarChart data={activityStats} />
@@ -769,8 +774,8 @@ export default function ActivitiesPage() {
 
       {/* ── 4. Activity detail table ─────────────────────────────────────── */}
       <Section
-        title="Activity Detail"
-        subtitle="Full breakdown: sessions, scores, pass/fail counts per activity"
+        title={language === 'es' ? 'Detalle de Actividad' : 'Activity Detail'}
+        subtitle={language === 'es' ? 'Desglose completo: sesiones, puntajes, aprobados/reprobados por actividad' : 'Full breakdown: sessions, scores, pass/fail counts per activity'}
         icon={LayoutGrid}
       >
         <DetailTable data={activityStats} />
@@ -778,8 +783,8 @@ export default function ActivitiesPage() {
 
       {/* ── 5. Activity trend over time ──────────────────────────────────── */}
       <Section
-        title="Activity Trend Over Time"
-        subtitle="Daily session volume — indicates which periods are growing in usage"
+        title={language === 'es' ? 'Tendencia de Actividad en el Tiempo' : 'Activity Trend Over Time'}
+        subtitle={language === 'es' ? 'Volumen diario de sesiones — indica qué períodos están creciendo' : 'Daily session volume — indicates which periods are growing in usage'}
         icon={TrendingUp}
       >
         <ActivityTrendChart trend={trend} />

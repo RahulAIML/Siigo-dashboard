@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
+import useAppStore from '../store'
 import {
   ResponsiveContainer,
   BarChart,
@@ -56,10 +57,10 @@ function tierBg(tier: Tier): string {
   return 'rgba(239,68,68,0.10)'
 }
 
-function tierLabel(tier: Tier): string {
-  if (tier === 'strong')     return 'Strong'
-  if (tier === 'developing') return 'Developing'
-  return 'Needs Coaching'
+function tierLabel(tier: Tier, lang: 'es' | 'en' = 'es'): string {
+  if (tier === 'strong')     return lang === 'es' ? 'Sólido' : 'Strong'
+  if (tier === 'developing') return lang === 'es' ? 'En desarrollo' : 'Developing'
+  return lang === 'es' ? 'Necesita coaching' : 'Needs Coaching'
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -93,7 +94,7 @@ function SectionCard({
 
 // ─── Round stat card ──────────────────────────────────────────────────────────
 
-function RoundCard({ stat, index }: { stat: RoundStat; index: number }) {
+function RoundCard({ stat, index, language }: { stat: RoundStat; index: number; language: 'es' | 'en' }) {
   const tier  = getTier(stat.avg)
   const color = tierColor(tier)
   const bg    = tierBg(tier)
@@ -120,7 +121,7 @@ function RoundCard({ stat, index }: { stat: RoundStat; index: number }) {
           className="text-xs font-semibold px-2 py-0.5 rounded-full"
           style={{ color, backgroundColor: bg }}
         >
-          {tierLabel(tier)}
+          {tierLabel(tier, language)}
         </span>
       </div>
 
@@ -133,13 +134,13 @@ function RoundCard({ stat, index }: { stat: RoundStat; index: number }) {
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground mb-0.5">Pass Rate</span>
+          <span className="text-xs text-muted-foreground mb-0.5">{language === 'es' ? 'Tasa Aprob.' : 'Pass Rate'}</span>
           <span className="text-lg font-bold text-foreground">
             {stat.passRate.toFixed(1)}%
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground mb-0.5">Responses</span>
+          <span className="text-xs text-muted-foreground mb-0.5">{language === 'es' ? 'Respuestas' : 'Responses'}</span>
           <span className="text-lg font-bold text-foreground">
             {stat.count.toLocaleString()}
           </span>
@@ -251,7 +252,7 @@ function FeedbackCard({
 
 // ─── Tier table ───────────────────────────────────────────────────────────────
 
-function TierTableRow({ stat }: { stat: RoundStat }) {
+function TierTableRow({ stat, language }: { stat: RoundStat; language: 'es' | 'en' }) {
   const tier  = getTier(stat.avg)
   const color = tierColor(tier)
   const bg    = tierBg(tier)
@@ -273,7 +274,7 @@ function TierTableRow({ stat }: { stat: RoundStat }) {
           className="text-xs font-semibold px-2 py-0.5 rounded-full"
           style={{ color, backgroundColor: bg }}
         >
-          {tierLabel(tier)}
+          {tierLabel(tier, language)}
         </span>
       </td>
     </tr>
@@ -305,6 +306,7 @@ function EmptyState() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ConversationalPage() {
+  const language = useAppStore((s) => s.language)
   const { roundStats, filteredSims, isLoading } = useDashboardData()
 
   // ── Derived metrics ──────────────────────────────────────────────────────────
@@ -371,9 +373,9 @@ export default function ConversationalPage() {
             <MessageSquare className="w-5 h-5" style={{ color: SIIGO_BLUE }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Interaction Analysis</h1>
+            <h1 className="text-xl font-bold text-foreground">{language === 'es' ? 'Análisis de Interacciones' : 'Interaction Analysis'}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Round-by-round performance breakdown
+              {language === 'es' ? 'Rendimiento por ronda de interacción' : 'Round-by-round performance breakdown'}
             </p>
           </div>
         </div>
@@ -421,9 +423,9 @@ export default function ConversationalPage() {
             <MessageSquare className="w-5 h-5" style={{ color: SIIGO_BLUE }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Interaction Analysis</h1>
+            <h1 className="text-xl font-bold text-foreground">{language === 'es' ? 'Análisis de Interacciones' : 'Interaction Analysis'}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Round-by-round performance across {filteredSims.length.toLocaleString()} simulation
+              {language === 'es' ? 'Rendimiento por ronda en' : 'Round-by-round performance across'} {filteredSims.length.toLocaleString()} {language === 'es' ? 'simulación' : 'simulation'}
               {filteredSims.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -461,7 +463,7 @@ export default function ConversationalPage() {
       {/* ── 2. Round performance stats ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         {roundStats.map((stat, i) => (
-          <RoundCard key={stat.round} stat={stat} index={i} />
+          <RoundCard key={stat.round} stat={stat} index={i} language={language} />
         ))}
       </div>
 
@@ -608,7 +610,7 @@ export default function ConversationalPage() {
             </thead>
             <tbody>
               {roundStats.map(stat => (
-                <TierTableRow key={stat.round} stat={stat} />
+                <TierTableRow key={stat.round} stat={stat} language={language} />
               ))}
             </tbody>
           </table>

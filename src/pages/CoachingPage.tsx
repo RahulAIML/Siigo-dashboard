@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
+import useAppStore from '../store'
 import {
   AlertTriangle,
   Award,
@@ -727,6 +728,7 @@ function useCoachingData(
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CoachingPage() {
+  const language = useAppStore((s) => s.language)
   const { userStats, roundStats, simulations, kpis, isLoading } = useDashboardData()
 
   const { atRisk, strongPerformers, weaknesses, actions, progressEntries } =
@@ -748,25 +750,25 @@ export default function CoachingPage() {
   // ── KPI summary bar ─────────────────────────────────────────────────────────
   const summaryItems = [
     {
-      label: 'At-Risk Advisors',
+      label: language === 'es' ? 'Asesores en Riesgo' : 'At-Risk Advisors',
       value: atRisk.length,
       icon: AlertTriangle,
       color: atRisk.length > 0 ? 'text-red-400' : 'text-emerald-400',
     },
     {
-      label: 'Strong Performers',
+      label: language === 'es' ? 'Alto Rendimiento' : 'Strong Performers',
       value: strongPerformers.length,
       icon: Award,
       color: 'text-emerald-400',
     },
     {
-      label: 'Weak Rounds',
+      label: language === 'es' ? 'Rondas Débiles' : 'Weak Rounds',
       value: weaknesses.filter((w) => w.severity !== 'ok').length,
       icon: BarChart2,
       color: weaknesses.filter((w) => w.severity === 'critical').length > 0 ? 'text-red-400' : 'text-amber-400',
     },
     {
-      label: 'Pending Actions',
+      label: language === 'es' ? 'Acciones Pendientes' : 'Pending Actions',
       value: actions.filter((a) => a.priority === 'high').length,
       icon: Zap,
       color: actions.filter((a) => a.priority === 'high').length > 0 ? 'text-amber-400' : 'text-muted-foreground',
@@ -782,10 +784,11 @@ export default function CoachingPage() {
             <BookOpen className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Coaching Insights</h1>
+            <h1 className="text-2xl font-bold text-foreground">{language === 'es' ? 'Insights de Coaching' : 'Coaching Insights'}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Identify coaching opportunities, recognize top performers, and prioritize
-              interventions based on simulation data.
+              {language === 'es'
+                ? 'Identifica oportunidades de coaching, reconoce los mejores asesores y prioriza intervenciones.'
+                : 'Identify coaching opportunities, recognize top performers, and prioritize interventions based on simulation data.'}
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 // Reports & Exports page: quick export cards, custom export config, coming-soon features.
 
 import React, { useState, useCallback } from 'react'
+import useAppStore from '../store'
 import { motion } from 'framer-motion'
 import {
   FileText,
@@ -226,6 +227,7 @@ interface QuickExportCardProps {
   onExport: () => void
   loading?: boolean
   disabled?: boolean
+  language?: 'es' | 'en'
 }
 
 const colorMap = {
@@ -259,6 +261,7 @@ function QuickExportCard({
   onExport,
   loading = false,
   disabled = false,
+  language = 'es',
 }: QuickExportCardProps) {
   const c = colorMap[color]
 
@@ -305,7 +308,7 @@ function QuickExportCard({
         ) : (
           <Download className="w-3.5 h-3.5" />
         )}
-        {loading ? 'Generando...' : 'Descargar CSV'}
+        {loading ? (language === 'es' ? 'Generando...' : 'Generating...') : (language === 'es' ? 'Descargar CSV' : 'Download CSV')}
       </button>
     </motion.div>
   )
@@ -367,6 +370,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 const today = new Date().toISOString().slice(0, 10)
 
 export default function ReportsPage() {
+  const language = useAppStore((s) => s.language)
   const { filteredSims, kpis, userStats, isLoading, effectiveDateFrom, effectiveDateTo } =
     useDashboardData()
 
@@ -473,47 +477,53 @@ export default function ReportsPage() {
             <FileText className="w-5 h-5 text-blue-500" />
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            Reportes &amp; Exportaciones
+            {language === 'es' ? 'Reportes & Exportaciones' : 'Reports & Exports'}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground ml-12">
-          Descarga datos de rendimiento, simulaciones y certificaciones en formato CSV.
+          {language === 'es'
+            ? 'Descarga datos de rendimiento, simulaciones y certificaciones en formato CSV.'
+            : 'Download performance data, simulations, and certifications in CSV format.'}
         </p>
       </motion.div>
 
       {/* ── Quick export cards ────────────────────────────────────────────── */}
       <section>
-        <SectionTitle>Exportacion rapida</SectionTitle>
+        <SectionTitle>{language === 'es' ? 'Exportación rápida' : 'Quick export'}</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <QuickExportCard
-            title="Resumen Ejecutivo"
-            description="KPIs principales del periodo activo: simulaciones, aprobacion, promedio."
+            title={language === 'es' ? 'Resumen Ejecutivo' : 'Executive Summary'}
+            description={language === 'es' ? 'KPIs principales del periodo activo: simulaciones, aprobación, promedio.' : 'Key KPIs for the active period: simulations, pass rate, avg score.'}
             icon={BarChart2}
             color="blue"
+            language={language}
             onExport={handleExportSummary}
             disabled={isLoading}
           />
           <QuickExportCard
-            title="Detalle de Simulaciones"
-            description="Todas las sesiones con usuario, puntaje, diagnostico y fecha."
+            title={language === 'es' ? 'Detalle de Simulaciones' : 'Simulation Detail'}
+            description={language === 'es' ? 'Todas las sesiones con usuario, puntaje, diagnóstico y fecha.' : 'All sessions with user, score, diagnosis, and date.'}
             icon={FileText}
             color="green"
+            language={language}
             onExport={handleExportSimulations}
             disabled={isLoading}
           />
           <QuickExportCard
-            title="Ranking de Asesores"
-            description="Clasificacion de asesores por puntaje promedio y tasa de aprobacion."
+            title={language === 'es' ? 'Ranking de Asesores' : 'Advisor Ranking'}
+            description={language === 'es' ? 'Clasificación de asesores por puntaje promedio y tasa de aprobación.' : 'Advisor ranking by average score and pass rate.'}
             icon={Trophy}
             color="amber"
+            language={language}
             onExport={handleExportLeaderboard}
             disabled={isLoading || userStats.length === 0}
           />
           <QuickExportCard
-            title="Reporte de Certificacion"
-            description="Estado de certificacion por asesor: quien paso y quien esta pendiente."
+            title={language === 'es' ? 'Reporte de Certificación' : 'Certification Report'}
+            description={language === 'es' ? 'Estado de certificación por asesor: quién pasó y quién está pendiente.' : 'Certification status per advisor: who passed and who is pending.'}
             icon={Award}
             color="violet"
+            language={language}
             onExport={handleExportCertification}
             disabled={isLoading}
           />
@@ -522,7 +532,7 @@ export default function ReportsPage() {
 
       {/* ── Export configuration ──────────────────────────────────────────── */}
       <section>
-        <SectionTitle>Configuracion de exportacion</SectionTitle>
+        <SectionTitle>{language === 'es' ? 'Configuración de exportación' : 'Export configuration'}</SectionTitle>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -611,7 +621,7 @@ export default function ReportsPage() {
 
       {/* ── Coming soon ───────────────────────────────────────────────────── */}
       <section>
-        <SectionTitle>Funcionalidades en desarrollo</SectionTitle>
+        <SectionTitle>{language === 'es' ? 'Funcionalidades en desarrollo' : 'Features in development'}</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <ComingSoonCard
             title="Reportes por Email"

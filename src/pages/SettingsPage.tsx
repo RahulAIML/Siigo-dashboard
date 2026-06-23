@@ -7,17 +7,13 @@ import {
   Sun,
   Calendar,
   ShieldCheck,
-  Sparkles,
   Database,
   Info,
-  Eye,
-  EyeOff,
-  CheckCircle,
   Trash2,
   RefreshCw,
 } from 'lucide-react'
 import { useAppStore } from '../store'
-import { PASS_THRESHOLD, DEFAULT_GEMINI_MODEL } from '../config/constants'
+import { PASS_THRESHOLD } from '../config/constants'
 import { t } from '../lib/i18n'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -89,78 +85,6 @@ function ToggleGroup<T extends string>({ value, options, onChange }: ToggleGroup
           {opt.label}
         </button>
       ))}
-    </div>
-  )
-}
-
-// ─── AI Key input ──────────────────────────────────────────────────────────────
-
-const GEMINI_KEY_STORAGE = 'siigo-gemini-key'
-
-function GeminiKeyInput() {
-  const [draft, setDraft] = useState<string>(() => {
-    try {
-      return localStorage.getItem(GEMINI_KEY_STORAGE) ?? ''
-    } catch {
-      return ''
-    }
-  })
-  const [visible, setVisible] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  const isSet = draft.trim().length > 0
-
-  const handleSave = useCallback(() => {
-    try {
-      if (draft.trim()) {
-        localStorage.setItem(GEMINI_KEY_STORAGE, draft.trim())
-      } else {
-        localStorage.removeItem(GEMINI_KEY_STORAGE)
-      }
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    } catch {
-      // storage unavailable
-    }
-  }, [draft])
-
-  const maskedValue = isSet && !visible ? '•'.repeat(Math.min(draft.length, 32)) : draft
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="relative">
-        <input
-          type={visible ? 'text' : 'password'}
-          value={maskedValue}
-          onChange={(e) => {
-            setDraft(e.target.value)
-            setSaved(false)
-          }}
-          placeholder="AIza..."
-          className="w-56 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs px-3 py-2 pr-8 outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-        />
-        <button
-          type="button"
-          onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          aria-label={visible ? 'Hide key' : 'Show key'}
-        >
-          {visible ? <EyeOff size={14} /> : <Eye size={14} />}
-        </button>
-      </div>
-      <button
-        onClick={handleSave}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-      >
-        {saved ? (
-          <>
-            <CheckCircle size={13} />
-            Guardado
-          </>
-        ) : (
-          'Guardar'
-        )}
-      </button>
     </div>
   )
 }
@@ -321,48 +245,6 @@ export default function SettingsPage() {
             </span>
           </div>
         </SettingRow>
-      </SectionCard>
-
-      {/* ── AI Assistant settings ── */}
-      <SectionCard
-        title={language === 'es' ? 'Asistente IA' : 'AI Assistant'}
-        icon={<Sparkles size={16} />}
-      >
-        <SettingRow
-          label={language === 'es' ? 'Clave API de Gemini' : 'Gemini API key'}
-          description={
-            language === 'es'
-              ? 'Requerida para habilitar el asistente IA'
-              : 'Required to enable the AI assistant'
-          }
-        >
-          <GeminiKeyInput />
-        </SettingRow>
-
-        <SettingRow
-          label={language === 'es' ? 'Modelo activo' : 'Active model'}
-          description={
-            language === 'es'
-              ? 'Modelo de IA utilizado para las respuestas'
-              : 'AI model used for responses'
-          }
-        >
-          <span className="inline-block rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-mono px-3 py-1.5 border border-purple-200 dark:border-purple-700">
-            {DEFAULT_GEMINI_MODEL}
-          </span>
-        </SettingRow>
-
-        {/* Info box */}
-        <div className="px-5 py-4">
-          <div className="rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-4 flex gap-3">
-            <Info size={16} className="text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
-              {language === 'es'
-                ? 'El Asistente IA analiza los datos de simulaciones de SIIGO en tiempo real. Puedes consultarle sobre puntajes, tendencias, asesores destacados y cualquier métrica del dashboard. Tu clave API se almacena únicamente en este navegador y nunca se comparte con terceros.'
-                : 'The AI Assistant analyses SIIGO simulation data in real time. You can ask about scores, trends, top advisors, and any dashboard metric. Your API key is stored only in this browser and is never shared with third parties.'}
-            </p>
-          </div>
-        </div>
       </SectionCard>
 
       {/* ── Data settings ── */}

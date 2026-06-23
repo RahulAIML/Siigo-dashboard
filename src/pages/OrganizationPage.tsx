@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useMembers } from '../api/queries'
 import useDashboardData from '../hooks/useDashboardData'
+import useAppStore from '../store'
 import { KPICard } from '../components/ui/KPICard'
 import { Skeleton, TableRowSkeleton, PageHeader } from '../components/ui/Skeleton'
 import type { Member, OrgNode, UserStat } from '../api/types'
@@ -185,6 +186,7 @@ function StatusBadge({ disabled }: { disabled: number }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function OrganizationPage() {
+  const language = useAppStore((s) => s.language)
   const membersQuery             = useMembers()
   const { userStats, isLoading: dashLoading } = useDashboardData()
 
@@ -248,40 +250,40 @@ export default function OrganizationPage() {
     <div className="flex flex-col gap-6">
       {/* Page header */}
       <PageHeader
-        title="Organization"
-        subtitle="Team structure, enrollment status, and simulation performance per user."
+        title={language === 'es' ? 'Organización' : 'Organization'}
+        subtitle={language === 'es' ? 'Estructura del equipo, estado de inscripción y rendimiento por usuario.' : 'Team structure, enrollment status, and simulation performance per user.'}
       />
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title="Total Enrolled"
+          title={language === 'es' ? 'Total Inscritos' : 'Total Enrolled'}
           value={isLoading ? '—' : totalUsers}
-          subtitle="All registered users"
+          subtitle={language === 'es' ? 'Todos los usuarios registrados' : 'All registered users'}
           icon={Users}
           color="blue"
           loading={isLoading}
         />
         <KPICard
-          title="Active Advisors"
+          title={language === 'es' ? 'Asesores Activos' : 'Active Advisors'}
           value={isLoading ? '—' : activeUsers}
-          subtitle="Enabled accounts"
+          subtitle={language === 'es' ? 'Cuentas habilitadas' : 'Enabled accounts'}
           icon={UserCheck}
           color="green"
           loading={isLoading}
         />
         <KPICard
-          title="Inactive Users"
+          title={language === 'es' ? 'Usuarios Inactivos' : 'Inactive Users'}
           value={isLoading ? '—' : disabledUsers}
-          subtitle="Disabled accounts"
+          subtitle={language === 'es' ? 'Cuentas deshabilitadas' : 'Disabled accounts'}
           icon={UserX}
           color="red"
           loading={isLoading}
         />
         <KPICard
-          title="Org Levels"
-          value={isLoading ? '—' : (showTree ? 'Hierarchy' : 'Flat')}
-          subtitle={showTree ? 'Multi-level structure detected' : 'All users at level 0'}
+          title={language === 'es' ? 'Niveles Org.' : 'Org Levels'}
+          value={isLoading ? '—' : (showTree ? (language === 'es' ? 'Jerárquico' : 'Hierarchy') : (language === 'es' ? 'Plano' : 'Flat'))}
+          subtitle={showTree ? (language === 'es' ? 'Estructura multinivel detectada' : 'Multi-level structure detected') : (language === 'es' ? 'Todos en nivel 0' : 'All users at level 0')}
           icon={Building2}
           color="violet"
           loading={isLoading}
@@ -299,13 +301,13 @@ export default function OrganizationPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <Building2 className="w-4 h-4 text-violet-400" />
-              Organizational Tree
+              {language === 'es' ? 'Árbol Organizacional' : 'Organizational Tree'}
             </h2>
             <button
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setViewMode(viewMode === 'tree' ? 'table' : 'tree')}
             >
-              {viewMode === 'tree' ? 'Switch to table' : 'Switch to tree'}
+              {viewMode === 'tree' ? (language === 'es' ? 'Ver tabla' : 'Switch to table') : (language === 'es' ? 'Ver árbol' : 'Switch to tree')}
             </button>
           </div>
 
@@ -334,7 +336,7 @@ export default function OrganizationPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 border-b border-border/50">
           <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-400" />
-            User Directory
+            {language === 'es' ? 'Directorio de Usuarios' : 'User Directory'}
             {!isLoading && (
               <span className="text-xs font-normal text-muted-foreground ml-1">
                 ({filteredMembers.length} of {totalUsers})
@@ -348,7 +350,7 @@ export default function OrganizationPage() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search name or email…"
+                placeholder={language === 'es' ? 'Buscar nombre o email…' : 'Search name or email…'}
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-background border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
@@ -363,9 +365,9 @@ export default function OrganizationPage() {
                 onChange={(e) => handleStatus(e.target.value as 'all' | 'active' | 'disabled')}
                 className="pl-8 pr-3 py-1.5 text-sm rounded-lg bg-background border border-border/60 text-foreground appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 transition cursor-pointer"
               >
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="disabled">Disabled</option>
+                <option value="all">{language === 'es' ? 'Todos' : 'All'}</option>
+                <option value="active">{language === 'es' ? 'Activos' : 'Active'}</option>
+                <option value="disabled">{language === 'es' ? 'Inactivos' : 'Disabled'}</option>
               </select>
             </div>
           </div>
@@ -374,7 +376,7 @@ export default function OrganizationPage() {
         {/* Error state */}
         {isError && (
           <div className="px-5 py-10 text-center text-sm text-red-400">
-            Failed to load organization data. Please refresh the page.
+            {language === 'es' ? 'Error al cargar datos de organización. Recarga la página.' : 'Failed to load organization data. Please refresh the page.'}
           </div>
         )}
 
@@ -384,7 +386,10 @@ export default function OrganizationPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50">
-                  {['Name', 'Email', 'Level', 'Status', 'Sessions', 'Avg Score'].map((col) => (
+                  {(language === 'es'
+                    ? ['Nombre', 'Email', 'Nivel', 'Estado', 'Sesiones', 'Prom. Puntaje']
+                    : ['Name', 'Email', 'Level', 'Status', 'Sessions', 'Avg Score']
+                  ).map((col) => (
                     <th
                       key={col}
                       className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap"
@@ -403,7 +408,7 @@ export default function OrganizationPage() {
                   ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground text-sm">
-                        No users match your search.
+                        {language === 'es' ? 'Ningún usuario coincide con tu búsqueda.' : 'No users match your search.'}
                       </td>
                     </tr>
                   )
@@ -489,7 +494,7 @@ export default function OrganizationPage() {
         {!isLoading && !isError && totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
-              Page {page} of {totalPages} &mdash; {filteredMembers.length} users
+              {language === 'es' ? 'Página' : 'Page'} {page} {language === 'es' ? 'de' : 'of'} {totalPages} &mdash; {filteredMembers.length} {language === 'es' ? 'usuarios' : 'users'}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -497,7 +502,7 @@ export default function OrganizationPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="px-3 py-1.5 text-xs rounded-lg border border-border/50 text-foreground hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Previous
+                {language === 'es' ? 'Anterior' : 'Previous'}
               </button>
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
                 // Show pages around current
@@ -532,7 +537,7 @@ export default function OrganizationPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 className="px-3 py-1.5 text-xs rounded-lg border border-border/50 text-foreground hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Next
+                {language === 'es' ? 'Siguiente' : 'Next'}
               </button>
             </div>
           </div>
