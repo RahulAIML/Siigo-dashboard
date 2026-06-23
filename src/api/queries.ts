@@ -14,7 +14,7 @@ import { keepPreviousData } from '@tanstack/react-query'
 export function useActivities(): UseQueryResult<Activity[]> {
   return useQuery({
     queryKey: ['activities'],
-    queryFn:  fetchActivities,
+    queryFn:  ({ signal }) => fetchActivities(signal),
     staleTime: CACHE_ACTIVITIES_MS,
     gcTime:    CACHE_ACTIVITIES_MS * 2,
   })
@@ -23,7 +23,7 @@ export function useActivities(): UseQueryResult<Activity[]> {
 export function useSimulations(from: string, to: string): UseQueryResult<Simulation[]> {
   return useQuery({
     queryKey:      ['simulations', from, to],
-    queryFn:       () => fetchSimulations(from, to),
+    queryFn:       ({ signal }) => fetchSimulations(from, to, signal),
     staleTime:     CACHE_SIMULATIONS_MS,
     gcTime:        CACHE_SIMULATIONS_MS * 2,
     placeholderData: keepPreviousData,
@@ -33,7 +33,7 @@ export function useSimulations(from: string, to: string): UseQueryResult<Simulat
 export function useMembers(): UseQueryResult<Member[]> {
   return useQuery({
     queryKey:  ['members'],
-    queryFn:   fetchMembers,
+    queryFn:   ({ signal }) => fetchMembers(signal),
     staleTime: CACHE_MEMBERS_MS,
     gcTime:    CACHE_MEMBERS_MS * 2,
   })
@@ -57,8 +57,8 @@ export async function prefetchAll(
   to:          string,
 ): Promise<void> {
   await Promise.allSettled([
-    queryClient.prefetchQuery({ queryKey: ['activities'],          queryFn: fetchActivities,                staleTime: CACHE_ACTIVITIES_MS }),
-    queryClient.prefetchQuery({ queryKey: ['simulations', from, to], queryFn: () => fetchSimulations(from, to), staleTime: CACHE_SIMULATIONS_MS }),
-    queryClient.prefetchQuery({ queryKey: ['members'],             queryFn: fetchMembers,                   staleTime: CACHE_MEMBERS_MS }),
+    queryClient.prefetchQuery({ queryKey: ['activities'],             queryFn: ({ signal }) => fetchActivities(signal),        staleTime: CACHE_ACTIVITIES_MS }),
+    queryClient.prefetchQuery({ queryKey: ['simulations', from, to], queryFn: ({ signal }) => fetchSimulations(from, to, signal), staleTime: CACHE_SIMULATIONS_MS }),
+    queryClient.prefetchQuery({ queryKey: ['members'],             queryFn: ({ signal }) => fetchMembers(signal),           staleTime: CACHE_MEMBERS_MS }),
   ])
 }

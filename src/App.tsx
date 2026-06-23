@@ -54,26 +54,19 @@ function buildQueryClient(): QueryClient {
     },
   })
 
-  // Restore persisted cache on mount
+  // Restore persisted cache on mount — skip entries older than staleTime
   const stored = loadCacheFromStorage()
   if (stored && typeof stored === 'object') {
     const entries = stored as Record<string, unknown>
     const safe = filterEntries(entries)
+    const now = Date.now()
     try {
-      // Hydrate each entry back into the cache
-      const cache = qc.getQueryCache()
-      for (const [queryHash, data] of Object.entries(safe)) {
-        // queryHash is stored as the serialised key; attempt to find or seed
-        const queries = cache.getAll()
-        const existing = queries.find((q) => q.queryHash === queryHash)
-        if (!existing) {
-          // Use setQueryData via a synthetic key derived from the hash
-          // We stored entries as { queryKey, data } objects
-          const entry = data as { queryKey?: unknown[]; state?: { data?: unknown } }
-          if (entry?.queryKey && entry?.state?.data !== undefined) {
-            qc.setQueryData(entry.queryKey, entry.state.data)
-          }
-        }
+      for (const [, data] of Object.entries(safe)) {
+        const entry = data as { queryKey?: unknown[]; state?: { data?: unknown }; dataUpdatedAt?: number }
+        if (!entry?.queryKey || entry?.state?.data === undefined) continue
+        // If stored data is older than staleTime, skip it — React Query will fetch fresh
+        if (entry.dataUpdatedAt && now - entry.dataUpdatedAt > STALE_TIME) continue
+        qc.setQueryData(entry.queryKey, entry.state.data)
       }
     } catch {
       // If hydration fails, proceed without cache
@@ -95,8 +88,9 @@ function buildQueryClient(): QueryClient {
           const bytes = JSON.stringify(query.state.data ?? null).length
           if (bytes > MAX_PERSISTED_ENTRY_BYTES) continue
           snapshot[query.queryHash] = {
-            queryKey: query.queryKey,
-            state:    { data: query.state.data },
+            queryKey:     query.queryKey,
+            state:        { data: query.state.data },
+            dataUpdatedAt: query.state.dataUpdatedAt,
           }
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
