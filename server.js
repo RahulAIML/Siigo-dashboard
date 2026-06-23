@@ -82,6 +82,10 @@ function log(method, path, status) {
   console.log(`[${ts}] ${method} ${path} → ${status}`)
 }
 
+function isAssetRequest(pathname) {
+  return pathname.startsWith('/assets/') || /\.[a-zA-Z0-9]+$/.test(pathname)
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', `http://localhost`)
   setSecurityHeaders(res)
@@ -179,6 +183,15 @@ createServer(async (req, res) => {
     send(req, res, entry.data, entry.gz)
     log('GET', url.pathname, 200)
   } catch {
+    if (isAssetRequest(url.pathname)) {
+      if (!res.writableEnded) {
+        safeWriteHead(res, 404)
+        safeEnd(res, 'Not found')
+        log('GET', url.pathname, 404)
+      }
+      return
+    }
+
     // Fallback to SPA index.html for client-side routing
     try {
       const html = await readFile(join(DIST, 'index.html'))
