@@ -43,14 +43,22 @@ function setSecurityHeaders(res) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
 }
 
-function send(req, res, payload, gz) {
-  if (gz && acceptsGzip(req)) {
+function send(req, res, payload, gz, statusCode = 200) {
+  const shouldGzip = Boolean(gz) && acceptsGzip(req)
+
+  if (shouldGzip) {
     res.setHeader('Content-Encoding', 'gzip')
     res.setHeader('Vary', 'Accept-Encoding')
-    res.end(gz)
-  } else {
-    res.end(payload)
   }
+
+  safeWriteHead(res, statusCode)
+
+  if (req.method === 'HEAD') {
+    safeEnd(res)
+    return
+  }
+
+  safeEnd(res, shouldGzip ? gz : payload)
 }
 
 function safeWriteHead(res, statusCode) {
@@ -174,8 +182,7 @@ createServer(async (req, res) => {
     if (cached && Date.now() - cached.ts < CACHE_TTL) {
       res.setHeader('Content-Type', 'application/json')
       res.setHeader('X-Cache', 'HIT')
-      safeWriteHead(res, 200)
-      send(req, res, cached.body, cached.gz)
+      send(req, res, cached.body, cached.gz, 200)
       logRequest(req, 200, { route: 'proxy', cache: 'HIT' })
       return
     }
@@ -207,8 +214,7 @@ createServer(async (req, res) => {
       }
       res.setHeader('Content-Type', 'application/json')
       res.setHeader('X-Cache', 'MISS')
-      safeWriteHead(res, 200)
-      send(req, res, body, gz)
+      send(req, res, body, gz, 200)
       logRequest(req, 200, {
         route: 'proxy',
         cache: 'MISS',
@@ -251,8 +257,7 @@ createServer(async (req, res) => {
     } else if (ext === '.html') {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     }
-    safeWriteHead(res, 200)
-    send(req, res, entry.data, entry.gz)
+    send(req, res, entry.data, entry.gz, 200)
     logRequest(req, 200, { route: 'static', filePath })
   } catch (error) {
     log('error', 'static:read_failed', {
