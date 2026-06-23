@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Send, Sparkles, Bot, Trash2, ImagePlus, XCircle,
-  AlertCircle, User, StopCircle, Database, CheckCircle2,
+  AlertCircle, User, StopCircle, CheckCircle2,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useLocation } from 'react-router-dom'
@@ -182,45 +182,19 @@ const mdComponents = {
   ),
 }
 
-// ─── Phase Indicator ──────────────────────────────────────────────────────────
+// ─── Thinking dots (replaces all technical phase labels) ─────────────────────
 
-function PhaseIndicator({ phase, lang }: { phase: MessagePhase; lang: 'es' | 'en' }) {
-  if (phase === 'done') return null
-  const labels: Record<MessagePhase, { es: string; en: string }> = {
-    sql_planning:  { es: 'Planificando consulta...', en: 'Planning query...' },
-    sql_executing: { es: 'Ejecutando consulta SQL...', en: 'Executing SQL query...' },
-    generating:    { es: 'Generando respuesta...', en: 'Generating answer...' },
-    done:          { es: '', en: '' },
-  }
+function ThinkingDots() {
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-1.5">
-      <Database size={10} className="animate-pulse text-accent" />
-      <span>{labels[phase][lang]}</span>
-    </div>
-  )
-}
-
-// ─── SQL Badge ────────────────────────────────────────────────────────────────
-
-function SQLBadge({ sql, lang }: { sql: string; lang: 'es' | 'en' }) {
-  const [expanded, setExpanded] = useState(false)
-  const label = lang === 'es' ? 'Consulta SQL ejecutada' : 'SQL query executed'
-  return (
-    <div className="mb-2 rounded-lg border border-white/10 bg-white/5 overflow-hidden">
-      <button
-        onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 text-left"
-      >
-        <CheckCircle2 size={11} className="text-green-400 flex-shrink-0" />
-        <span className="text-[11px] text-slate-400 flex-1">{label}</span>
-        <span className="text-[10px] text-slate-600">{expanded ? '▲' : '▼'}</span>
-      </button>
-      {expanded && (
-        <pre className="px-3 pb-2 text-[11px] font-mono text-slate-400 whitespace-pre-wrap break-all">
-          {sql}
-        </pre>
-      )}
-    </div>
+    <span className="flex gap-1 items-center py-0.5">
+      {[0, 1, 2].map((d) => (
+        <span
+          key={d}
+          className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce"
+          style={{ animationDelay: `${d * 150}ms` }}
+        />
+      ))}
+    </span>
   )
 }
 
@@ -294,24 +268,30 @@ export default function AIAssistant() {
   // ── System prompt ─────────────────────────────────────────────────────────
 
   function buildSystemPrompt(withImage: boolean): string {
-    const lang = language === 'es' ? 'Spanish (es)' : 'English (en)'
+    const lang     = language === 'es' ? 'Spanish' : 'English'
+    const noData   = language === 'es'
+      ? 'No tengo datos suficientes para responder eso en este momento.'
+      : 'I don\'t have enough data to answer that right now.'
     return `You are the SIIGO Sales Training Analytics AI Assistant.
-You help sales managers at SIIGO understand team training performance data.
+
+⚠️ LANGUAGE RULE — HIGHEST PRIORITY:
+You MUST respond EXCLUSIVELY in ${lang}. This is non-negotiable.
+Do NOT use any other language regardless of what language the user writes in.
+Every word of your response must be in ${lang}.
 
 CRITICAL RULES — HALLUCINATION PREVENTION:
 1. NEVER invent numbers, scores, percentages, or statistics.
-2. Every numeric claim MUST come from the DASHBOARD DATA section below or from an SQL query you execute.
-3. If data is unavailable for a question, say exactly: "No tengo datos suficientes para responder eso en este momento."
-4. When answering metric questions, always cite the source (dashboard data or SQL result).
-5. SQL queries MUST be read-only SELECT statements. NEVER suggest DELETE, DROP, UPDATE, INSERT, ALTER, TRUNCATE, CREATE, or EXEC.
-6. Only use these tables: r_user_session, r_user, r_simulator.
+2. Every numeric claim MUST come from the DASHBOARD DATA section below or from a database query you execute.
+3. If data is unavailable, say exactly: "${noData}"
+4. Always base answers on real data — dashboard data OR fresh query results.
+5. Database queries MUST be read-only SELECT statements only.
+6. Only use these tables: r_user_session, r_user, r_simulator, r_user_session_details.
 
 CONTEXT:
 - Client: SIIGO (client_id = ${SIIGO_CLIENT_ID})
-- Simulator: Simulador Siigo Gastrobar (simulator_id IN (${SIIGO_IDS_SQL}))
-- Platform: Rolplay sales training
+- Simulator ID: ${SIIGO_IDS_SQL}
+- Platform: Rolplay sales training simulation
 - Current page: ${pageName}
-- Respond in: ${lang}
 
 AVAILABLE DATABASE TABLES:
 - r_user_session: ID, user_id, simulator_id, score, passed_flag (1=pass 0=fail), date_created, closing_analysis
@@ -759,11 +739,6 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
                         : 'bg-white/5 text-slate-300 rounded-tl-none'
                     }`}
                 >
-                  {/* Phase indicator */}
-                  {msg.role === 'model' && msg.phase && msg.phase !== 'done' && (
-                    <PhaseIndicator phase={msg.phase} lang={language} />
-                  )}
-
                   {/* Attached image */}
                   {msg.imageDataUrl && (
                     <img
@@ -773,18 +748,11 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
                     />
                   )}
 
-                  {/* SQL badge */}
-                  {msg.role === 'model' && msg.sqlQuery && msg.phase === 'done' && (
-                    <SQLBadge sql={msg.sqlQuery} lang={language} />
-                  )}
-
                   {/* Message content */}
                   {msg.role === 'model' && !msg.isError ? (
                     msg.text
                       ? <ReactMarkdown components={mdComponents}>{msg.text}</ReactMarkdown>
-                      : <span className="text-slate-600 italic text-xs">
-                          {language === 'es' ? 'Procesando...' : 'Processing...'}
-                        </span>
+                      : <ThinkingDots />
                   ) : (
                     <span>{msg.text}</span>
                   )}
