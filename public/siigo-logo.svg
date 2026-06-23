@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="SIIGO logo">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a285f" />
+      <stop offset="100%" stop-color="#071a45" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1da1ff" />
+      <stop offset="100%" stop-color="#59c4ff" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)" />
+  <path d="M87 34c-12-8-32-8-44 1-7 5-11 12-11 21 0 8 4 15 12 19l9 4c7 3 11 7 11 12 0 6-6 10-15 10-8 0-16-3-22-8l-8 14c8 7 20 11 33 11 22 0 37-11 37-28 0-12-7-20-20-26l-10-4c-6-2-9-5-9-9 0-5 5-9 13-9 7 0 14 2 20 6l4-14z" fill="url(#accent)" />
+  <circle cx="98" cy="94" r="12" fill="#ff2138" />
+</svg>
