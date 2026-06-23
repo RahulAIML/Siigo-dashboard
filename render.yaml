@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: siigo-dashboard
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+      - key: VITE_GEMINI_MODEL
+        value: gemini-2.5-flash

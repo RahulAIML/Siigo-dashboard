@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIIGO Sales Dashboard</title>
+    <meta name="description" content="SIIGO sales team training analytics platform" />
+    <link rel="icon" href="/siigo-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-bg: #F8FAFC;
+        --color-bg-alt: #F1F5F9;
+        --color-surface: #FFFFFF;
+        --color-card: #FFFFFF;
+        --color-line: #E2E8F0;
+        --color-muted: #94A3B8;
+      }
+
+      .dark {
+        --color-bg: #0F172A;
+        --color-bg-alt: #1E293B;
+        --color-surface: #1E293B;
+        --color-card: #243047;
+        --color-line: #334155;
+        --color-muted: #64748B;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: var(--color-bg);
+        color: #1E293B;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

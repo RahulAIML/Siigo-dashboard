@@ -1,0 +1,18 @@
+version: '3.9'
+services:
+  siigo-dashboard:
+    build: .
+    ports:
+      - "4175:4175"
+    environment:
+      - NODE_ENV=production
+      - PORT=4175
+      - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY}
+      - VITE_GEMINI_MODEL=${VITE_GEMINI_MODEL:-gemini-2.5-flash}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4175/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
