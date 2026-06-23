@@ -52,6 +52,18 @@ function send(req, res, payload, gz) {
   }
 }
 
+function safeWriteHead(res, statusCode) {
+  if (!res.headersSent) {
+    res.writeHead(statusCode)
+  }
+}
+
+function safeEnd(res, payload) {
+  if (!res.writableEnded) {
+    res.end(payload)
+  }
+}
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = []
@@ -77,8 +89,8 @@ createServer(async (req, res) => {
   // ── Health check ─────────────────────────────────────────────────────────────
   if (url.pathname === '/health' && req.method === 'GET') {
     res.setHeader('Content-Type', 'application/json')
-    res.writeHead(200)
-    res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }))
+    safeWriteHead(res, 200)
+    safeEnd(res, JSON.stringify({ status: 'ok', uptime: process.uptime() }))
     log('GET', '/health', 200)
     return
   }
@@ -90,8 +102,8 @@ createServer(async (req, res) => {
     const upstreamUrl  = `${UPSTREAM}${upstreamPath}`
 
     if (req.method !== 'POST') {
-      res.writeHead(405)
-      res.end('Method Not Allowed')
+      safeWriteHead(res, 405)
+      safeEnd(res, 'Method Not Allowed')
       log(req.method, url.pathname, 405)
       return
     }
@@ -104,7 +116,7 @@ createServer(async (req, res) => {
     if (cached && Date.now() - cached.ts < CACHE_TTL) {
       res.setHeader('Content-Type', 'application/json')
       res.setHeader('X-Cache', 'HIT')
-      res.writeHead(200)
+      safeWriteHead(res, 200)
       send(req, res, cached.body, cached.gz)
       log('POST', url.pathname, '200 [cache HIT]')
       return
@@ -118,8 +130,8 @@ createServer(async (req, res) => {
       })
       if (!upstream.ok) {
         const text = await upstream.text()
-        res.writeHead(upstream.status)
-        res.end(text)
+        safeWriteHead(res, upstream.status)
+        safeEnd(res, text)
         log('POST', url.pathname, upstream.status)
         return
       }
@@ -130,12 +142,12 @@ createServer(async (req, res) => {
       }
       res.setHeader('Content-Type', 'application/json')
       res.setHeader('X-Cache', 'MISS')
-      res.writeHead(200)
+      safeWriteHead(res, 200)
       send(req, res, body, gz)
       log('POST', url.pathname, 200)
     } catch (err) {
-      res.writeHead(502)
-      res.end(String(err))
+      safeWriteHead(res, 502)
+      safeEnd(res, String(err))
       log('POST', url.pathname, 502)
     }
     return
@@ -163,7 +175,7 @@ createServer(async (req, res) => {
     } else if (ext === '.html') {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     }
-    res.writeHead(200)
+    safeWriteHead(res, 200)
     send(req, res, entry.data, entry.gz)
     log('GET', url.pathname, 200)
   } catch {
@@ -172,12 +184,14 @@ createServer(async (req, res) => {
       const html = await readFile(join(DIST, 'index.html'))
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-      res.writeHead(200)
-      res.end(html)
+      safeWriteHead(res, 200)
+      safeEnd(res, html)
     } catch {
-      res.writeHead(404)
-      res.end('Not found')
-      log('GET', url.pathname, 404)
+      if (!res.writableEnded) {
+        safeWriteHead(res, 404)
+        safeEnd(res, 'Not found')
+        log('GET', url.pathname, 404)
+      }
     }
   }
 }).listen(PORT, '0.0.0.0', () => {
