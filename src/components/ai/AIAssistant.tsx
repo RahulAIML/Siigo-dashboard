@@ -314,9 +314,13 @@ CONTEXT:
 - Respond in: ${lang}
 
 AVAILABLE DATABASE TABLES:
-- r_user_session: session_id, user_id, simulator_id, client_id, score, diagnostico_final (si/no), date_created, user_name, user_email
-- r_user: id, name, email, level, disabled, designation, parent_id, client_id
-- r_simulator: id, name, category, interactions, lang, available, client_id
+- r_user_session: ID, user_id, simulator_id, score, passed_flag (1=pass 0=fail), date_created, closing_analysis
+- r_user_session_details: ID, session_id (FK→r_user_session.ID), sequence, ai_text, user_text, retro_analysis
+- r_user: ID, name, email, level, disabled, designation, parent_id, client_id
+- r_simulator: ID, name, category, interactions, lang, available
+
+JOIN PATTERN (always use this to filter by client):
+  JOIN r_user u ON u.ID = us.user_id WHERE u.client_id = ${SIIGO_CLIENT_ID}
 
 LIVE DASHBOARD DATA (already computed — use this for quick questions):
 ${aiContext || '(No hay datos disponibles en este momento)'}

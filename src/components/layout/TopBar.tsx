@@ -20,13 +20,13 @@ export default function TopBar() {
           <Menu className="h-5 w-5" />
         </button>
 
-        <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-            Rolplay
-          </div>
-          <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {t('analyticsTitle', language)}
-          </h1>
+        <div className="min-w-0 flex items-center">
+          <img
+            src="/siigo_logo.jpg"
+            alt="Siigo"
+            className="h-10 w-auto object-contain"
+            style={{ maxWidth: '120px' }}
+          />
         </div>
       </div>
 
