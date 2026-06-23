@@ -30,6 +30,7 @@ const MIME = {
   '.woff':  'font/woff',
 }
 const SKIP_GZIP = new Set(['.png', '.ico', '.woff', '.woff2', '.jpg', '.gif'])
+let requestCounter = 0
 
 function acceptsGzip(req) {
   return (req.headers['accept-encoding'] ?? '').includes('gzip')
@@ -77,9 +78,44 @@ function cacheKey(body) {
   return createHash('sha256').update(body).digest('hex').slice(0, 48)
 }
 
-function log(method, path, status) {
-  const ts = new Date().toISOString()
-  console.log(`[${ts}] ${method} ${path} → ${status}`)
+function serializeError(error) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+
+  return {
+    message: String(error),
+  }
+}
+
+function log(level, event, details = {}) {
+  const entry = {
+    ts: new Date().toISOString(),
+    level,
+    event,
+    ...details,
+  }
+
+  const line = JSON.stringify(entry)
+  if (level === 'error') {
+    console.error(line)
+  } else {
+    console.log(line)
+  }
+}
+
+function logRequest(req, status, extra = {}) {
+  log('info', 'request', {
+    requestId: req.requestId,
+    method: req.method,
+    path: req.url,
+    status,
+    ...extra,
+  })
 }
 
 function isAssetRequest(pathname) {
@@ -87,15 +123,24 @@ function isAssetRequest(pathname) {
 }
 
 createServer(async (req, res) => {
+  req.requestId = `req-${Date.now()}-${++requestCounter}`
   const url = new URL(req.url ?? '/', `http://localhost`)
   setSecurityHeaders(res)
+
+  log('info', 'request:start', {
+    requestId: req.requestId,
+    method: req.method,
+    path: url.pathname,
+    search: url.search,
+    userAgent: req.headers['user-agent'] ?? '',
+  })
 
   // ── Health check ─────────────────────────────────────────────────────────────
   if (url.pathname === '/health' && req.method === 'GET') {
     res.setHeader('Content-Type', 'application/json')
     safeWriteHead(res, 200)
     safeEnd(res, JSON.stringify({ status: 'ok', uptime: process.uptime() }))
-    log('GET', '/health', 200)
+    logRequest(req, 200, { route: 'health' })
     return
   }
 
@@ -108,12 +153,21 @@ createServer(async (req, res) => {
     if (req.method !== 'POST') {
       safeWriteHead(res, 405)
       safeEnd(res, 'Method Not Allowed')
-      log(req.method, url.pathname, 405)
+      logRequest(req, 405, { route: 'proxy', reason: 'method_not_allowed' })
       return
     }
 
     let bodyText
-    try { bodyText = await readBody(req) } catch { bodyText = '{}' }
+    try {
+      bodyText = await readBody(req)
+    } catch (error) {
+      bodyText = '{}'
+      log('error', 'proxy:read_body_failed', {
+        requestId: req.requestId,
+        path: url.pathname,
+        error: serializeError(error),
+      })
+    }
 
     const key    = cacheKey(bodyText)
     const cached = apiCache.get(key)
@@ -122,7 +176,7 @@ createServer(async (req, res) => {
       res.setHeader('X-Cache', 'HIT')
       safeWriteHead(res, 200)
       send(req, res, cached.body, cached.gz)
-      log('POST', url.pathname, '200 [cache HIT]')
+      logRequest(req, 200, { route: 'proxy', cache: 'HIT' })
       return
     }
 
@@ -136,7 +190,14 @@ createServer(async (req, res) => {
         const text = await upstream.text()
         safeWriteHead(res, upstream.status)
         safeEnd(res, text)
-        log('POST', url.pathname, upstream.status)
+        log('error', 'proxy:upstream_error', {
+          requestId: req.requestId,
+          path: url.pathname,
+          upstreamUrl,
+          status: upstream.status,
+          responsePreview: text.slice(0, 500),
+        })
+        logRequest(req, upstream.status, { route: 'proxy', cache: 'MISS' })
         return
       }
       const body = await upstream.text()
@@ -148,11 +209,22 @@ createServer(async (req, res) => {
       res.setHeader('X-Cache', 'MISS')
       safeWriteHead(res, 200)
       send(req, res, body, gz)
-      log('POST', url.pathname, 200)
+      logRequest(req, 200, {
+        route: 'proxy',
+        cache: 'MISS',
+        upstreamUrl,
+        responseBytes: body.length,
+      })
     } catch (err) {
       safeWriteHead(res, 502)
       safeEnd(res, String(err))
-      log('POST', url.pathname, 502)
+      log('error', 'proxy:request_failed', {
+        requestId: req.requestId,
+        path: url.pathname,
+        upstreamUrl,
+        error: serializeError(err),
+      })
+      logRequest(req, 502, { route: 'proxy' })
     }
     return
   }
@@ -181,13 +253,20 @@ createServer(async (req, res) => {
     }
     safeWriteHead(res, 200)
     send(req, res, entry.data, entry.gz)
-    log('GET', url.pathname, 200)
-  } catch {
+    logRequest(req, 200, { route: 'static', filePath })
+  } catch (error) {
+    log('error', 'static:read_failed', {
+      requestId: req.requestId,
+      path: url.pathname,
+      filePath,
+      error: serializeError(error),
+    })
+
     if (isAssetRequest(url.pathname)) {
       if (!res.writableEnded) {
         safeWriteHead(res, 404)
         safeEnd(res, 'Not found')
-        log('GET', url.pathname, 404)
+        logRequest(req, 404, { route: 'static', filePath, reason: 'asset_not_found' })
       }
       return
     }
@@ -199,14 +278,38 @@ createServer(async (req, res) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
       safeWriteHead(res, 200)
       safeEnd(res, html)
-    } catch {
+      logRequest(req, 200, { route: 'spa_fallback' })
+    } catch (fallbackError) {
+      log('error', 'spa:fallback_failed', {
+        requestId: req.requestId,
+        path: url.pathname,
+        dist: DIST,
+        error: serializeError(fallbackError),
+      })
       if (!res.writableEnded) {
         safeWriteHead(res, 404)
         safeEnd(res, 'Not found')
-        log('GET', url.pathname, 404)
+        logRequest(req, 404, { route: 'spa_fallback', reason: 'index_missing' })
       }
     }
   }
 }).listen(PORT, '0.0.0.0', () => {
-  console.log(`SIIGO dashboard running on port ${PORT}`)
+  log('info', 'server:start', {
+    port: PORT,
+    dist: DIST,
+    upstream: UPSTREAM,
+    node: process.version,
+  })
+})
+
+process.on('uncaughtException', (error) => {
+  log('error', 'process:uncaught_exception', {
+    error: serializeError(error),
+  })
+})
+
+process.on('unhandledRejection', (reason) => {
+  log('error', 'process:unhandled_rejection', {
+    error: serializeError(reason),
+  })
 })
