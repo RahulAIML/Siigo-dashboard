@@ -769,7 +769,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Número de sesiones de simulación completadas por actividad (top 10)' : 'Number of simulation sessions completed per activity (top 10)'}
         icon={BarChart2}
       >
-        <SessionsBarChart data={activityStats} isDark={isDark} />
+        <SessionsBarChart data={activityStats ?? []} isDark={isDark} />
       </Section>
 
       {/* ── 4. Activity detail table ─────────────────────────────────────── */}
@@ -778,7 +778,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Desglose completo: sesiones, puntajes, aprobados/reprobados por actividad' : 'Full breakdown: sessions, scores, pass/fail counts per activity'}
         icon={LayoutGrid}
       >
-        <DetailTable data={activityStats} />
+        <DetailTable data={activityStats ?? []} />
       </Section>
 
       {/* ── 5. Activity trend over time ──────────────────────────────────── */}
