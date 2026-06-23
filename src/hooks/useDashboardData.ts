@@ -168,10 +168,10 @@ export default function useDashboardData(): DashboardData {
 
   const activityStats: ActivityStat[] = useMemo(() => {
     if (filteredSims.length === 0) return []
-    return metricsEngine.getActivityStats(
+    return (metricsEngine.getActivityStats(
       filteredSims as Parameters<typeof metricsEngine.getActivityStats>[0],
       activities   as Parameters<typeof metricsEngine.getActivityStats>[1],
-    ) as ActivityStat[]
+    ) as ActivityStat[]) ?? []
   }, [filteredSims, activities])
 
   const aiContext: string = useMemo(() => {
