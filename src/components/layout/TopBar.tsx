@@ -1,5 +1,6 @@
-import { Globe, Menu, Moon, Sun, ChevronDown } from 'lucide-react'
+import { Globe, Menu, Moon, Sun } from 'lucide-react'
 import { useAppStore } from '../../store/index'
+import { t } from '../../lib/i18n'
 
 export default function TopBar() {
   const language = useAppStore((state) => state.language)
@@ -9,34 +10,37 @@ export default function TopBar() {
   const setMobileMenuOpen = useAppStore((state) => state.setMobileMenuOpen)
 
   return (
-    <header className="sticky top-0 z-20 flex h-[92px] items-center justify-between border-b border-slate-200/80 bg-white/96 px-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-8">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] backdrop-blur-sm transition-colors md:px-8">
       <div className="flex items-center gap-4">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 md:hidden"
+          className="rounded-xl border border-[var(--color-line)] p-2 text-slate-600 dark:text-slate-300 transition hover:bg-[var(--color-bg-alt)] md:hidden"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
         </button>
 
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-            SIIGO
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+            Rolplay
           </div>
-          <h1 className="truncate text-[2rem] font-extrabold tracking-[-0.03em] text-slate-950">
-            SIIGO Analytics Platform
+          <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
+            {t('analyticsTitle', language)}
           </h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 md:gap-5">
-        <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 md:flex">
-          <Globe className="h-4 w-4 text-slate-500" />
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Language switcher */}
+        <div className="hidden items-center gap-1 rounded-full border border-[var(--color-line)] bg-[var(--color-bg-alt)] px-2 py-1.5 md:flex">
+          <Globe className="h-3.5 w-3.5 text-slate-400" />
           <button
             onClick={() => setLanguage('es')}
             className={[
-              'rounded-full px-3 py-1 text-sm font-semibold transition',
-              language === 'es' ? 'bg-white text-[#1f5fe2] shadow-sm' : 'text-slate-500',
+              'rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+              language === 'es'
+                ? 'bg-[var(--color-surface)] text-[#0066FF] shadow-sm dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400',
             ].join(' ')}
           >
             🇲🇽 ES
@@ -44,31 +48,34 @@ export default function TopBar() {
           <button
             onClick={() => setLanguage('en')}
             className={[
-              'rounded-full px-3 py-1 text-sm font-semibold transition',
-              language === 'en' ? 'bg-white text-[#1f5fe2] shadow-sm' : 'text-slate-500',
+              'rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+              language === 'en'
+                ? 'bg-[var(--color-surface)] text-[#0066FF] shadow-sm dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400',
             ].join(' ')}
           >
             🇺🇸 EN
           </button>
         </div>
 
+        {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          className="rounded-full border border-slate-200 bg-white p-2.5 text-slate-600 transition hover:bg-slate-50"
-          aria-label="Toggle theme"
+          className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] p-2 text-slate-600 dark:text-slate-300 transition hover:bg-[var(--color-bg-alt)]"
+          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         >
           {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </button>
 
-        <div className="flex items-center gap-3 rounded-full bg-white px-2 py-1">
+        {/* User badge — generic since no user auth in this dashboard */}
+        <div className="flex items-center gap-2 rounded-full bg-[var(--color-bg-alt)] border border-[var(--color-line)] px-3 py-1.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0066FF] text-[10px] font-bold text-white">
+            SG
+          </div>
           <div className="hidden text-right md:block">
-            <div className="text-[1.02rem] font-bold text-slate-900">Carlos Ramirez</div>
-            <div className="text-sm font-medium text-slate-400">Admin</div>
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-none">SIIGO</div>
+            <div className="text-[11px] font-medium text-slate-400 leading-tight">{t('admin', language)}</div>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff3b4f,#ff7c8a)] text-sm font-bold text-white shadow-[0_10px_30px_rgba(255,59,79,0.28)]">
-            CR
-          </div>
-          <ChevronDown className="hidden h-5 w-5 text-slate-600 md:block" />
         </div>
       </div>
     </header>

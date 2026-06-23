@@ -16,9 +16,10 @@ import {
   X,
 } from 'lucide-react'
 import { useAppStore } from '../../store/index'
+import { t } from '../../lib/i18n'
 
 type NavSection = {
-  title: string
+  titleKey: string
   items: Array<{
     labelEs: string
     labelEn: string
@@ -29,13 +30,13 @@ type NavSection = {
 
 const sections: NavSection[] = [
   {
-    title: 'GENERAL VIEW',
+    titleKey: 'sectionGeneral',
     items: [
       { labelEs: 'Overview', labelEn: 'Overview', path: '/', icon: LayoutDashboard },
     ],
   },
   {
-    title: 'SIMULATOR',
+    titleKey: 'sectionSimulator',
     items: [
       { labelEs: 'Simulaciones', labelEn: 'Simulations', path: '/simulations', icon: PlayCircle },
       { labelEs: 'Conversacional', labelEn: 'Conversational AI', path: '/conversational', icon: MessageSquareText },
@@ -44,7 +45,7 @@ const sections: NavSection[] = [
     ],
   },
   {
-    title: 'PLATFORM',
+    titleKey: 'sectionPlatform',
     items: [
       { labelEs: 'Actividades', labelEn: 'Activities', path: '/activities', icon: Activity },
       { labelEs: 'Organización', labelEn: 'Organization', path: '/organization', icon: Building2 },
@@ -52,7 +53,7 @@ const sections: NavSection[] = [
     ],
   },
   {
-    title: 'MORE',
+    titleKey: 'sectionMore',
     items: [
       { labelEs: 'Reportes', labelEn: 'Reports', path: '/reports', icon: FileText },
       { labelEs: 'Configuración', labelEn: 'Settings', path: '/settings', icon: Settings },
@@ -95,10 +96,10 @@ function SidebarContent({
 
       <div className="flex-1 overflow-y-auto px-4 pb-6">
         {sections.map((section) => (
-          <div key={section.title} className="mb-8">
+          <div key={section.titleKey} className="mb-8">
             {!collapsed && (
               <div className="mb-4 px-2 text-[12px] font-bold uppercase tracking-[0.12em] text-white/60">
-                {section.title}
+                {t(section.titleKey, language)}
               </div>
             )}
 

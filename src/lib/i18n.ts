@@ -99,6 +99,41 @@ const translations = {
     lunes: 'Lunes', martes: 'Martes', miercoles: 'Miércoles',
     jueves: 'Jueves', viernes: 'Viernes', sabado: 'Sábado', domingo: 'Domingo',
 
+    // Overview page
+    welcomeTitle:        'Bienvenido al Dashboard',
+    scoreTrend:          'Tendencia de Puntajes',
+    daily:               'Diario',
+    approvalVsDisapproval:'Aprobados vs. Reprobados',
+    approved:            'Aprobados',
+    disapproved:         'Reprobados',
+    aiInsights:          'Insights IA',
+    viewAllActivities:   'Ver todas las actividades',
+    viewAll:             'Ver todo',
+    viewRecommendation:  'Ver recomendación',
+    exportAll:           'Exportar Todo',
+    advisors:            'Asesores',
+    vsLastMonth:         'vs mes anterior',
+    totalLabel:          'Total',
+    recommendation:      'Recomendación',
+    businessLines:       'Líneas de Negocio',
+    showingDataFrom:     'Mostrando datos del',
+    showingDataTo:       'al',
+    simulationsWord:     'simulaciones',
+    teamCompletedPre:    'Tu equipo ha completado',
+    teamCompletedPost:   'simulaciones en este periodo.',
+
+    // Empty states
+    noDataPeriod:        'No se encontró actividad para el período seleccionado.',
+    noDataAnalysis:      'No hay suficientes datos disponibles para este análisis.',
+    waitingInsights:     'Esperando más interacciones antes de generar información.',
+    noDataAvailable:     'Sin datos disponibles para este período.',
+
+    // Sidebar sections
+    sectionGeneral:   'VISTA GENERAL',
+    sectionSimulator: 'SIMULADOR',
+    sectionPlatform:  'PLATAFORMA',
+    sectionMore:      'MÁS',
+
     // Misc
     siigo:           'SIIGO',
     salesDashboard:  'Dashboard de Ventas',
@@ -108,6 +143,8 @@ const translations = {
     pageOf:          'de',
     showing:         'Mostrando',
     results:         'resultados',
+    admin:           'Administrador',
+    analyticsTitle:  'Plataforma Analítica SIIGO',
   },
   en: {
     dashboard:      'Dashboard',
@@ -196,6 +233,42 @@ const translations = {
     lunes: 'Monday', martes: 'Tuesday', miercoles: 'Wednesday',
     jueves: 'Thursday', viernes: 'Friday', sabado: 'Saturday', domingo: 'Sunday',
 
+    // Overview page
+    welcomeTitle:        'Welcome to the Dashboard',
+    scoreTrend:          'Score Trend',
+    daily:               'Daily',
+    approvalVsDisapproval:'Approval vs. Disapproval',
+    approved:            'Approved',
+    disapproved:         'Disapproved',
+    aiInsights:          'AI Insights',
+    viewAllActivities:   'View all activities',
+    viewAll:             'View all',
+    viewRecommendation:  'View recommendation',
+    exportAll:           'Export All',
+    advisors:            'Advisors',
+    vsLastMonth:         'vs last month',
+    totalLabel:          'Total',
+    recommendation:      'Recommendation',
+    businessLines:       'Business Lines',
+    showingDataFrom:     'Showing data from',
+    showingDataTo:       'to',
+    simulationsWord:     'simulations',
+    teamCompletedPre:    'Your team has completed',
+    teamCompletedPost:   'simulations in this period.',
+
+    // Empty states
+    noDataPeriod:        'No activity found for the selected period.',
+    noDataAnalysis:      'Not enough data available for this analysis.',
+    waitingInsights:     'Waiting for more interactions before generating insights.',
+    noDataAvailable:     'No data available for this period.',
+
+    // Sidebar sections
+    sectionGeneral:   'GENERAL VIEW',
+    sectionSimulator: 'SIMULATOR',
+    sectionPlatform:  'PLATFORM',
+    sectionMore:      'MORE',
+
+    // Misc
     siigo:           'SIIGO',
     salesDashboard:  'Sales Dashboard',
     trainingPlatform:'Training Platform',
@@ -204,6 +277,8 @@ const translations = {
     pageOf:          'of',
     showing:         'Showing',
     results:         'results',
+    admin:           'Administrator',
+    analyticsTitle:  'SIIGO Analytics Platform',
   },
 } as const
 

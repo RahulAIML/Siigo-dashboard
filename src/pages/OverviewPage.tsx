@@ -16,31 +16,21 @@ import { format, parseISO } from 'date-fns'
 import useDashboardData from '../hooks/useDashboardData'
 import { useAppStore } from '../store/index'
 import { exportSimulationsCSV } from '../lib/csvExport'
-import { resolvePreset } from '../lib/dateUtils'
 import { TrendChart } from '../components/charts/TrendChart'
 import { PassFailDonut } from '../components/charts/PassFailDonut'
+import { t } from '../lib/i18n'
 
-type PresetOption = {
-  id: 'all' | 'last90' | 'last30'
-  label: string
-}
+type PresetId = 'all' | 'last90' | 'last30'
 
-const presetOptions: PresetOption[] = [
-  { id: 'all', label: 'All' },
-  { id: 'last90', label: '3M' },
-  { id: 'last30', label: '12M' },
-]
-
-function formatDateInput(value: string) {
-  return value
+const PRESET_LABELS: Record<PresetId, { es: string; en: string }> = {
+  all:    { es: 'Todo',  en: 'All' },
+  last90: { es: '3M',   en: '3M'  },
+  last30: { es: '30D',  en: '30D' },
 }
 
 function formatDisplayDate(value: string) {
-  try {
-    return format(parseISO(value), 'MMM d, yyyy')
-  } catch {
-    return value
-  }
+  try { return format(parseISO(value), 'MMM d, yyyy') }
+  catch { return value }
 }
 
 function rankGradient(index: number) {
@@ -49,21 +39,15 @@ function rankGradient(index: number) {
   return 'from-[#f3a85d] to-[#ef7f3b]'
 }
 
-function InsightCard({
-  title,
-  children,
-  action,
-}: {
-  title: string
-  children: React.ReactNode
-  action?: string
-}) {
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
-      <div className="mb-5 flex items-center justify-between">
-        <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">{title}</h3>
-        {action && <button className="text-sm font-semibold text-[#ff2138]">{action}</button>}
-      </div>
+    <section
+      className={[
+        'rounded-[28px] border border-[var(--color-line)] bg-[var(--color-card)]',
+        'p-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.25)]',
+        className,
+      ].join(' ')}
+    >
       {children}
     </section>
   )
@@ -73,28 +57,52 @@ function KpiCard({
   title,
   value,
   icon,
-  footer,
+  sub,
 }: {
   title: string
   value: string
   icon: React.ReactNode
-  footer: string
+  sub?: string
 }) {
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.04)]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="mb-3 text-[1.02rem] font-bold text-slate-900">{title}</div>
-          <div className="text-[3.35rem] font-black leading-none tracking-[-0.05em] text-slate-950">{value}</div>
+    <div className="rounded-[24px] border border-[var(--color-line)] bg-[var(--color-card)] px-5 py-4 shadow-[0_8px_32px_rgba(15,23,42,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="mb-2 truncate text-sm font-semibold text-slate-500 dark:text-slate-400">{title}</div>
+          <div className="text-[2.4rem] font-black leading-none tracking-[-0.05em] text-slate-950 dark:text-white">{value}</div>
         </div>
-        <div className="mt-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff1f2] text-[#ff2138]">
+        <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fff1f2] dark:bg-[#3b0d13] text-[#ff2138]">
           {icon}
         </div>
       </div>
-      <div className="mt-5 text-[1rem]">
-        <span className="font-bold text-[#10b836]">12%</span>
-        <span className="ml-2 font-semibold text-slate-400">{footer}</span>
-      </div>
+      {sub && (
+        <div className="mt-3 text-xs font-medium text-slate-400 dark:text-slate-500">{sub}</div>
+      )}
+    </div>
+  )
+}
+
+function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
+  return (
+    <div className="mb-4 flex items-center justify-between">
+      <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">{title}</h3>
+      {action && (
+        <button
+          onClick={onAction}
+          className="text-xs font-semibold text-[#0066FF] dark:text-blue-400 hover:underline"
+        >
+          {action}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function EmptyInsight({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+      <Sparkles className="mb-3 h-8 w-8 opacity-30" />
+      {message}
     </div>
   )
 }
@@ -119,11 +127,13 @@ export default function OverviewPage() {
   } = useDashboardData()
 
   const totalSimulations = kpis.totalSimulations ?? 0
-  const averageScore = kpis.averageScore ?? 0
-  const passRate = kpis.passRate ?? 0
-  const activeAdvisors = kpis.activeAdvisors ?? 0
+  const averageScore    = kpis.averageScore ?? 0
+  const passRate        = kpis.passRate ?? 0
+  const activeAdvisors  = kpis.activeAdvisors ?? 0
   const totalActivities = kpis.totalActivities ?? 0
-  const totalMembers = kpis.totalMembers ?? 0
+  const totalMembers    = kpis.totalMembers ?? 0
+  const approved        = kpis.passCount ?? 0
+  const disapproved     = kpis.failCount ?? 0
 
   const topActivities = useMemo(
     () => [...activityStats].sort((a, b) => b.passRate - a.passRate).slice(0, 5),
@@ -135,249 +145,299 @@ export default function OverviewPage() {
     [userStats],
   )
 
-  const weakestActivity = topActivities[topActivities.length - 1]
-  const approved = kpis.passCount ?? 0
-  const disapproved = kpis.failCount ?? 0
+  const weakestActivity = topActivities.length > 0
+    ? topActivities[topActivities.length - 1]
+    : null
 
   function handleExport() {
     const rows = filteredSims.map((simulation) => ({
-      ID: simulation.ID_Sim,
-      Usuario: simulation.Usuario_Nombre,
-      Email: simulation.Usuario ?? '',
-      Actividad: simulation.Actividad,
-      Puntaje: simulation.Calificacion ?? simulation.Puntos_Totales ?? 0,
-      Diagnostico: simulation.Diagnostico_Final ?? '',
-      Fecha: simulation.Fecha_y_Hora,
+      ID:         simulation.ID_Sim,
+      Usuario:    simulation.Usuario_Nombre,
+      Email:      simulation.Usuario ?? '',
+      Actividad:  simulation.Actividad,
+      Puntaje:    simulation.Calificacion ?? simulation.Puntos_Totales ?? 0,
+      Diagnostico:simulation.Diagnostico_Final ?? '',
+      Fecha:      simulation.Fecha_y_Hora,
     }))
-
     exportSimulationsCSV(rows, `siigo-dashboard-${effectiveDateFrom}-${effectiveDateTo}.csv`)
-  }
-
-  function handlePresetClick(option: PresetOption['id']) {
-    setDatePreset(option)
   }
 
   function handleDateChange(kind: 'from' | 'to', value: string) {
     setDateRange(
       kind === 'from' ? value : (dateFrom ?? effectiveDateFrom),
-      kind === 'to' ? value : (dateTo ?? effectiveDateTo),
+      kind === 'to'   ? value : (dateTo   ?? effectiveDateTo),
     )
   }
 
-  const filterSummary =
-    language === 'es'
-      ? `Tu equipo ha completado ${totalSimulations.toLocaleString()} simulaciones en este periodo.`
-      : `Your team has completed ${totalSimulations.toLocaleString()} simulations in this period.`
+  const filterSummary = totalSimulations > 0
+    ? `${t('teamCompletedPre', language)} ${totalSimulations.toLocaleString()} ${t('teamCompletedPost', language)}`
+    : t('noDataPeriod', language)
+
+  const hasData = totalSimulations > 0
 
   return (
-    <div className="mx-auto max-w-[1500px]">
-      <div className="mb-8 rounded-[34px] bg-[#f7f9fc]">
-        <div className="mb-8 flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-          <div className="pt-3">
-            <h2 className="text-[3rem] font-black tracking-[-0.06em] text-slate-950">Welcome your dashboard</h2>
-            <p className="mt-2 text-[2rem] font-medium tracking-[-0.04em] text-slate-300">{filterSummary}</p>
+    <div className="mx-auto max-w-[1500px] space-y-5">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="rounded-[28px] border border-[var(--color-line)] bg-[var(--color-card)] p-6 shadow-[0_8px_32px_rgba(15,23,42,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+              {t('welcomeTitle', language)}
+            </h2>
+            <p className="mt-1.5 text-sm font-medium text-slate-400 dark:text-slate-500">{filterSummary}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 xl:justify-end">
-            <div className="flex items-center gap-3 rounded-full">
-              {presetOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => handlePresetClick(option.id)}
-                  className={[
-                    'rounded-xl px-5 py-3 text-sm font-bold transition',
-                    datePreset === option.id
-                      ? 'bg-[#ff2138] text-white shadow-[0_14px_32px_rgba(255,33,56,0.28)]'
-                      : 'bg-white text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]',
-                  ].join(' ')}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Preset buttons */}
+            {(['all', 'last90', 'last30'] as PresetId[]).map((id) => (
+              <button
+                key={id}
+                onClick={() => setDatePreset(id)}
+                className={[
+                  'rounded-xl px-4 py-2 text-xs font-bold transition',
+                  datePreset === id
+                    ? 'bg-[#0066FF] text-white shadow-[0_8px_20px_rgba(0,102,255,0.3)]'
+                    : 'border border-[var(--color-line)] bg-[var(--color-bg-alt)] text-slate-500 dark:text-slate-400',
+                ].join(' ')}
+              >
+                {PRESET_LABELS[id][language]}
+              </button>
+            ))}
 
-            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
-              <CalendarRange className="h-4 w-4 text-slate-400" />
+            {/* Date range pickers */}
+            <div className="flex items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-alt)] px-3 py-2">
+              <CalendarRange className="h-3.5 w-3.5 text-slate-400" />
               <input
                 type="date"
-                value={formatDateInput(dateFrom ?? effectiveDateFrom)}
-                onChange={(event) => handleDateChange('from', event.target.value)}
-                className="border-none bg-transparent text-sm font-semibold text-slate-500 outline-none"
+                value={dateFrom ?? effectiveDateFrom}
+                onChange={(e) => handleDateChange('from', e.target.value)}
+                className="border-none bg-transparent text-xs font-semibold text-slate-600 dark:text-slate-300 outline-none"
               />
             </div>
 
-            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
-              <CalendarRange className="h-4 w-4 text-slate-400" />
+            <div className="flex items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-alt)] px-3 py-2">
+              <CalendarRange className="h-3.5 w-3.5 text-slate-400" />
               <input
                 type="date"
-                value={formatDateInput(dateTo ?? effectiveDateTo)}
-                onChange={(event) => handleDateChange('to', event.target.value)}
-                className="border-none bg-transparent text-sm font-semibold text-slate-500 outline-none"
+                value={dateTo ?? effectiveDateTo}
+                onChange={(e) => handleDateChange('to', e.target.value)}
+                className="border-none bg-transparent text-xs font-semibold text-slate-600 dark:text-slate-300 outline-none"
               />
             </div>
 
-            <div className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
-              Advisors
-            </div>
-
+            {/* Export */}
             <button
               onClick={handleExport}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#ff2138] px-6 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(255,33,56,0.25)] transition hover:brightness-105"
+              disabled={!hasData}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0066FF] px-4 py-2 text-xs font-bold text-white shadow-[0_8px_20px_rgba(0,102,255,0.25)] transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Download className="h-4 w-4" />
-              Export All
+              <Download className="h-3.5 w-3.5" />
+              {t('exportAll', language)}
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
-          <KpiCard title="Total Simulations" value={totalSimulations.toLocaleString()} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Average Score" value={`${averageScore.toFixed(0)}%`} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Approval Rate" value={`${passRate.toFixed(0)}`} icon={<CheckCircle2 className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Active Advisors" value={activeAdvisors.toLocaleString()} icon={<Users className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Avaible Activities" value={totalActivities.toLocaleString()} icon={<Grid2X2 className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Members" value={totalMembers.toLocaleString()} icon={<UserRound className="h-6 w-6" />} footer="vs previos month" />
+        {/* ── KPI Grid ───────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          <KpiCard
+            title={t('totalSimulations', language)}
+            value={totalSimulations.toLocaleString()}
+            icon={<LineChart className="h-5 w-5" />}
+            sub={hasData ? undefined : t('noDataPeriod', language)}
+          />
+          <KpiCard
+            title={t('averageScore', language)}
+            value={hasData ? `${averageScore.toFixed(1)}%` : '—'}
+            icon={<LineChart className="h-5 w-5" />}
+          />
+          <KpiCard
+            title={t('passRate', language)}
+            value={hasData ? `${passRate.toFixed(1)}%` : '—'}
+            icon={<CheckCircle2 className="h-5 w-5" />}
+          />
+          <KpiCard
+            title={t('activeAdvisors', language)}
+            value={activeAdvisors.toLocaleString()}
+            icon={<Users className="h-5 w-5" />}
+          />
+          <KpiCard
+            title={t('totalActivities', language)}
+            value={totalActivities.toLocaleString()}
+            icon={<Grid2X2 className="h-5 w-5" />}
+          />
+          <KpiCard
+            title={t('totalMembers', language)}
+            value={totalMembers.toLocaleString()}
+            icon={<UserRound className="h-5 w-5" />}
+          />
         </div>
       </div>
 
+      {/* ── Charts row ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.65fr_0.95fr]">
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">Score Trend</h3>
-            <div className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500">
-              Daily
-            </div>
-          </div>
-          <TrendChart data={trend} height={320} />
-        </section>
+        <Card>
+          <SectionHeader
+            title={t('scoreTrend', language)}
+            action={t('daily', language)}
+          />
+          {hasData ? (
+            <TrendChart data={trend} height={300} />
+          ) : (
+            <EmptyInsight message={t('noDataPeriod', language)} />
+          )}
+        </Card>
 
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
-          <div className="mb-4 text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">
-            Approval vs. Disapproval
-          </div>
-          <div className="grid gap-4 xl:grid-cols-[0.95fr_0.85fr] xl:items-center">
-            <PassFailDonut passCount={approved} failCount={disapproved} />
-            <div className="space-y-4">
-              <div className="rounded-[22px] border border-slate-200 p-5">
-                <div className="flex items-start gap-3">
-                  <CircleCheck className="mt-0.5 h-5 w-5 text-[#ff2138]" />
-                  <div className="flex-1">
-                    <div className="text-[1.02rem] font-bold text-slate-700">Approved</div>
-                    <div className="mt-2 flex items-end justify-between">
-                      <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{approved}</div>
-                      <div className="text-sm font-bold text-slate-400">{passRate.toFixed(0)}%</div>
+        <Card>
+          <SectionHeader title={t('approvalVsDisapproval', language)} />
+          {hasData ? (
+            <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr] xl:items-center">
+              <PassFailDonut passCount={approved} failCount={disapproved} />
+              <div className="space-y-3">
+                <div className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-bg-alt)] p-4">
+                  <div className="flex items-start gap-3">
+                    <CircleCheck className="mt-0.5 h-4 w-4 text-[#10B981]" />
+                    <div className="flex-1">
+                      <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('approved', language)}</div>
+                      <div className="mt-1.5 flex items-end justify-between">
+                        <div className="text-2xl font-black tracking-tight text-slate-950 dark:text-white">{approved}</div>
+                        <div className="text-xs font-bold text-slate-400">{passRate.toFixed(1)}%</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="rounded-[22px] border border-slate-200 p-5">
-                <div className="flex items-start gap-3">
-                  <CircleX className="mt-0.5 h-5 w-5 text-[#ff9aa6]" />
-                  <div className="flex-1">
-                    <div className="text-[1.02rem] font-bold text-slate-700">Disapproved</div>
-                    <div className="mt-2 flex items-end justify-between">
-                      <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{disapproved}</div>
-                      <div className="text-sm font-bold text-slate-400">{(100 - passRate).toFixed(0)}%</div>
+                <div className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-bg-alt)] p-4">
+                  <div className="flex items-start gap-3">
+                    <CircleX className="mt-0.5 h-4 w-4 text-[#EF4444]" />
+                    <div className="flex-1">
+                      <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('disapproved', language)}</div>
+                      <div className="mt-1.5 flex items-end justify-between">
+                        <div className="text-2xl font-black tracking-tight text-slate-950 dark:text-white">{disapproved}</div>
+                        <div className="text-xs font-bold text-slate-400">{(100 - passRate).toFixed(1)}%</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-2 text-center text-[1.02rem] font-semibold text-slate-500">
-                Total: {totalSimulations.toLocaleString()} simulations
+                <div className="pt-1 text-center text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  {t('totalLabel', language)}: {totalSimulations.toLocaleString()} {t('simulationsWord', language)}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          ) : (
+            <EmptyInsight message={t('noDataPeriod', language)} />
+          )}
+        </Card>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <InsightCard title="Activity Breakdown">
-          <div className="space-y-4">
-            {topActivities.map((activity) => (
-              <div key={`${activity.id}-${activity.name}`}>
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <div className="truncate text-[1rem] font-semibold text-slate-700">{activity.name}</div>
-                  <div className="text-sm font-bold text-slate-500">{activity.passRate.toFixed(0)}%</div>
-                </div>
-                <div className="h-3 rounded-full bg-slate-100">
-                  <div
-                    className="h-3 rounded-full bg-[linear-gradient(90deg,#ff1e35,#ff5066)]"
-                    style={{ width: `${Math.min(100, activity.passRate)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button className="mt-6 w-full rounded-2xl border border-[#ffb7c0] px-4 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-[#fff5f6]">
-            View all activities
-          </button>
-        </InsightCard>
-
-        <InsightCard title="Top Advisors" action="View all">
-          <div className="space-y-5">
-            {topAdvisors.map((advisor, index) => (
-              <div key={`${advisor.userId ?? advisor.name}-${index}`} className="flex items-center gap-4">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${rankGradient(index)} text-base font-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.12)]`}>
-                  {index + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[1rem] font-bold text-slate-900">{advisor.name}</div>
-                  <div className="text-sm font-medium text-slate-400">{advisor.count} simulations</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[1.8rem] font-black tracking-[-0.04em] text-slate-950">{advisor.avgScore.toFixed(0)}%</div>
-                  <div className="text-sm font-semibold text-[#10b836]">↑ {advisor.passRate.toFixed(0)}% Approved</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </InsightCard>
-
-        <InsightCard title="AI Insights" action="View all">
-          <div className="space-y-4">
-            <div className="rounded-[20px] bg-[#fff3f4] p-5">
-              <div className="flex items-start gap-4">
-                <div className="mt-0.5 rounded-2xl bg-white p-2 text-[#ff2138] shadow-sm">
-                  <AlertTriangle className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-slate-700">
-                    73% of advisors struggle with
+      {/* ── Bottom row ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        {/* Activity Breakdown */}
+        <Card>
+          <SectionHeader title={t('activityBreakdown', language)} />
+          {topActivities.length > 0 ? (
+            <div className="space-y-3">
+              {topActivities.map((activity) => (
+                <div key={`${activity.id}-${activity.name}`}>
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <div className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{activity.name}</div>
+                    <div className="shrink-0 text-xs font-bold text-slate-500 dark:text-slate-400">{activity.passRate.toFixed(0)}%</div>
                   </div>
-                  <div className="mt-1 text-[1.45rem] font-black tracking-[-0.03em] text-[#ff2138]">
-                    {weakestActivity?.name ?? 'Handling Objections'}.
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[var(--color-line)]">
+                    <div
+                      className="h-2 rounded-full bg-[linear-gradient(90deg,#0066FF,#3b82f6)]"
+                      style={{ width: `${Math.min(100, Math.max(0, activity.passRate))}%` }}
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="rounded-[20px] bg-[#fffaf4] p-5">
-              <div className="flex items-start gap-4">
-                <div className="mt-0.5 rounded-2xl bg-white p-2 text-[#ffb01d] shadow-sm">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-slate-500">Recommendation</div>
-                  <div className="mt-2 text-[1.05rem] font-semibold leading-7 text-slate-700">
-                    Assign simulation "{weakestActivity?.name ?? 'Objections Level 2'}" to your team.
-                  </div>
-                </div>
-              </div>
-
-              <button className="mt-5 rounded-2xl border border-[#ffb7c0] px-5 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-white">
-                View recommendation
+              ))}
+              <button className="mt-4 w-full rounded-2xl border border-[var(--color-line)] px-4 py-2.5 text-xs font-bold text-[#0066FF] dark:text-blue-400 transition hover:bg-[var(--color-bg-alt)]">
+                {t('viewAllActivities', language)}
               </button>
             </div>
-          </div>
-        </InsightCard>
+          ) : (
+            <EmptyInsight message={t('noDataAnalysis', language)} />
+          )}
+        </Card>
+
+        {/* Top Advisors */}
+        <Card>
+          <SectionHeader title={t('topPerformers', language)} action={t('viewAll', language)} />
+          {topAdvisors.length > 0 ? (
+            <div className="space-y-4">
+              {topAdvisors.map((advisor, index) => (
+                <div key={`${advisor.userId ?? advisor.name}-${index}`} className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${rankGradient(index)} text-sm font-black text-white shadow`}>
+                    {index + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-slate-900 dark:text-white">{advisor.name}</div>
+                    <div className="text-xs font-medium text-slate-400">{advisor.count} {t('simulationsWord', language)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{advisor.avgScore.toFixed(0)}%</div>
+                    <div className="text-xs font-semibold text-[#10B981]">↑ {advisor.passRate.toFixed(0)}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyInsight message={t('noDataPeriod', language)} />
+          )}
+        </Card>
+
+        {/* AI Insights */}
+        <Card>
+          <SectionHeader title={t('aiInsights', language)} />
+          {weakestActivity ? (
+            <div className="space-y-3">
+              <div className="rounded-[16px] bg-[#fff3f4] dark:bg-[#3b0d13]/50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 rounded-xl bg-white dark:bg-[#3b0d13] p-1.5 text-[#ff2138] shadow-sm">
+                    <AlertTriangle className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                      {language === 'es'
+                        ? `La actividad con menor aprobación es:`
+                        : `Lowest approval rate activity:`}
+                    </div>
+                    <div className="mt-1 text-base font-black tracking-tight text-[#ff2138]">
+                      {weakestActivity.name}
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-400">
+                      {weakestActivity.passRate.toFixed(0)}% {t('passRate', language).toLowerCase()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[16px] bg-[#fffaf4] dark:bg-[#2a1f00]/50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 rounded-xl bg-white dark:bg-[#2a1f00] p-1.5 text-[#ffb01d] shadow-sm">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-slate-400">{t('recommendation', language)}</div>
+                    <div className="mt-1 text-sm font-semibold leading-relaxed text-slate-700 dark:text-slate-200">
+                      {language === 'es'
+                        ? `Asigna más práctica de "${weakestActivity.name}" al equipo para mejorar la tasa de aprobación.`
+                        : `Assign more practice of "${weakestActivity.name}" to the team to improve the pass rate.`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <EmptyInsight message={t('waitingInsights', language)} />
+          )}
+        </Card>
       </div>
 
+      {/* ── Footer date range ──────────────────────────────────────────────── */}
       {!isLoading && (
-        <div className="mt-6 rounded-[28px] border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-500 shadow-[0_14px_40px_rgba(15,23,42,0.03)]">
-          Showing data from {formatDisplayDate(effectiveDateFrom)} to {formatDisplayDate(effectiveDateTo)}
+        <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-card)] px-5 py-3 text-xs font-medium text-slate-400 dark:text-slate-500">
+          {t('showingDataFrom', language)} {formatDisplayDate(effectiveDateFrom)} {t('showingDataTo', language)} {formatDisplayDate(effectiveDateTo)}
         </div>
       )}
     </div>
