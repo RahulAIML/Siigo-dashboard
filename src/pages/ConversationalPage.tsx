@@ -215,7 +215,7 @@ function GroupedBarTooltip({ active, payload, label }: any) {
           <span style={{ color: '#94a3b8', flex: 1 }}>{entry.name}</span>
           <span style={{ fontWeight: 700, color: '#f1f5f9' }}>
             {typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value}
-            {entry.name === 'Pass Rate' ? '%' : ''}
+            {entry.dataKey === 'Pass Rate' ? '%' : ''}
           </span>
         </div>
       ))}
@@ -484,7 +484,7 @@ export default function ConversationalPage() {
           title={t('roundComparisonRadar', language)}
           subtitle={`${t('radarSubtitle', language)} (${roundStats.length})`}
         >
-          <RoundRadar data={roundStats} loading={isLoading} />
+          <RoundRadar data={roundStats} loading={isLoading} language={language} />
         </SectionCard>
 
         {/* Grouped bar chart */}
@@ -520,12 +520,12 @@ export default function ConversationalPage() {
                 iconSize={8}
                 wrapperStyle={{ fontSize: 12, color: '#94a3b8', paddingTop: 8 }}
               />
-              <Bar dataKey="Avg Score" radius={[3, 3, 0, 0]}>
+              <Bar dataKey="Avg Score" name={t('avgScoreLabel', language)} radius={[3, 3, 0, 0]}>
                 {groupedBarData.map((_, i) => (
                   <Cell key={i} fill={ROUND_COLORS[i % ROUND_COLORS.length]} />
                 ))}
               </Bar>
-              <Bar dataKey="Pass Rate" radius={[3, 3, 0, 0]} fill={GREEN} fillOpacity={0.65} />
+              <Bar dataKey="Pass Rate" name={t('passRateLabel', language)} radius={[3, 3, 0, 0]} fill={GREEN} fillOpacity={0.65} />
             </BarChart>
           </ResponsiveContainer>
         </SectionCard>

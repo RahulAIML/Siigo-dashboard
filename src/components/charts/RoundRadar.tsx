@@ -9,13 +9,19 @@ import {
   Legend,
 } from 'recharts'
 import type { RoundStat } from '../../api/types'
+import { t } from '../../lib/i18n'
 
 const SIIGO_BLUE = '#0061ff'
 const GREEN      = '#22c55e'
 
 interface RoundRadarProps {
-  data:     RoundStat[]
-  loading?: boolean
+  data:      RoundStat[]
+  loading?:  boolean
+  language?: 'es' | 'en'
+}
+
+function rLabel(round: number, lang: 'es' | 'en'): string {
+  return `${t('roundWord', lang)} ${round}`
 }
 
 function RadarTooltip({ active, payload, label }: any) {
@@ -58,7 +64,7 @@ function RadarTooltip({ active, payload, label }: any) {
           />
           <span style={{ color: '#94a3b8', flex: 1 }}>{entry.name}</span>
           <span style={{ fontWeight: 700, color: '#f1f5f9' }}>
-            {entry.name === 'Pass Rate' ? `${Number(entry.value).toFixed(1)}%` : Number(entry.value).toFixed(1)}
+            {entry.dataKey === 'passRate' ? `${Number(entry.value).toFixed(1)}%` : Number(entry.value).toFixed(1)}
           </span>
         </div>
       ))}
@@ -66,7 +72,7 @@ function RadarTooltip({ active, payload, label }: any) {
   )
 }
 
-export function RoundRadar({ data, loading = false }: RoundRadarProps) {
+export function RoundRadar({ data, loading = false, language = 'es' }: RoundRadarProps) {
   if (loading) {
     return (
       <div
@@ -79,7 +85,7 @@ export function RoundRadar({ data, loading = false }: RoundRadarProps) {
           fontSize: 14,
         }}
       >
-        Loading...
+        {t('loadingLabel', language)}
       </div>
     )
   }
@@ -99,13 +105,13 @@ export function RoundRadar({ data, loading = false }: RoundRadarProps) {
         }}
       >
         <span style={{ fontSize: 32 }}>🕸️</span>
-        <span>No round data available</span>
+        <span>{t('noRoundData', language)}</span>
       </div>
     )
   }
 
   const chartData = data.map(d => ({
-    subject:  d.label,
+    subject:  rLabel(d.round, language),
     avg:      Math.round(d.avg * 10) / 10,
     passRate: Math.round(d.passRate * 10) / 10,
   }))
@@ -126,7 +132,7 @@ export function RoundRadar({ data, loading = false }: RoundRadarProps) {
           tickCount={4}
         />
         <Radar
-          name="Avg Score"
+          name={t('avgScoreLabel', language)}
           dataKey="avg"
           stroke={SIIGO_BLUE}
           fill={SIIGO_BLUE}
@@ -135,7 +141,7 @@ export function RoundRadar({ data, loading = false }: RoundRadarProps) {
           dot={{ r: 3, fill: SIIGO_BLUE, strokeWidth: 0 }}
         />
         <Radar
-          name="Pass Rate"
+          name={t('passRateLabel', language)}
           dataKey="passRate"
           stroke={GREEN}
           fill={GREEN}

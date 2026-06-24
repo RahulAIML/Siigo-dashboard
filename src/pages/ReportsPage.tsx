@@ -617,31 +617,6 @@ export default function ReportsPage() {
         </motion.div>
       </section>
 
-      {/* ── Coming soon ───────────────────────────────────────────────────── */}
-      <section>
-        <SectionTitle>{t('featuresInDev', language)}</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <ComingSoonCard
-            title={t('emailReports', language)}
-            description={t('emailReportsDesc', language)}
-            icon={Mail}
-            language={language}
-          />
-          <ComingSoonCard
-            title={t('powerBIInt', language)}
-            description={t('powerBIDesc', language)}
-            icon={BarChart2}
-            language={language}
-          />
-          <ComingSoonCard
-            title={t('weeklyDigest', language)}
-            description={t('weeklyDigestDesc', language)}
-            icon={Users}
-            language={language}
-          />
-        </div>
-      </section>
-
       {/* ── Toast container ───────────────────────────────────────────────── */}
       <ToastContainer toasts={toasts} />
     </div>
