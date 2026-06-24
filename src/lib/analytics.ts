@@ -213,28 +213,32 @@ export function computeTrend(
 
 export function computeRoundStats(sims: Simulation[]): RoundStat[] {
   const rounds = [1, 2, 3, 4, 5] as const
+  const roundLabels = ['Round 1', 'Round 2', 'Round 3', 'Round 4', 'Round 5']
 
-  return rounds.map((n) => {
-    const key = `Puntos_${n}` as keyof Simulation
-    const values: number[] = []
+  return rounds.map((n, idx) => {
+    // Use presence of a response in round N + overall session score as proxy
+    const responseKey = `Respuesta_${n}` as keyof Simulation
+    const scores: number[] = []
 
     for (const s of sims) {
-      const raw = s[key]
-      const parsed = parseScore(raw as string | number | null)
-      if (parsed !== null) values.push(parsed)
+      const response = s[responseKey] as string | null | undefined
+      if (!response || String(response).trim().length === 0) continue
+      // Use overall session score as the performance metric for this round
+      const sessionScore = parseScore(s.Calificacion ?? s.Puntos_Totales ?? null)
+      if (sessionScore !== null) scores.push(sessionScore)
     }
 
-    const avg = safeMean(values)
-    const passRate =
-      values.length > 0
-        ? (values.filter((v) => v > 0).length / values.length) * 100
-        : 0
+    const avg      = safeMean(scores)
+    const passRate = scores.length > 0
+      ? (scores.filter(v => v >= PASS_THRESHOLD).length / scores.length) * 100
+      : 0
 
     return {
-      round: n,
+      round:    n,
+      label:    roundLabels[idx],
       avg,
       passRate,
-      count: values.length,
+      count:    scores.length,
     }
   })
 }
