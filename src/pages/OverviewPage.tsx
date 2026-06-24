@@ -283,7 +283,7 @@ export default function OverviewPage() {
             action={t('daily', language)}
           />
           {hasData ? (
-            <TrendChart data={trend} height={300} />
+            <TrendChart data={trend} height={300} language={language} />
           ) : (
             <EmptyInsight message={t('noDataPeriod', language)} />
           )}

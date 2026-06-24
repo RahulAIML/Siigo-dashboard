@@ -275,6 +275,7 @@ const translations = {
     noSessionData:       'Sin datos de sesión disponibles',
     noActivityData:      'Sin datos de actividad para mostrar',
     noTrendData:         'Sin datos de tendencia disponibles aún',
+    singleDayTrend:      'Solo 1 día de datos — la tendencia se construirá a medida que se completen más sesiones.',
 
     // Organization page
     orgTitle:            'Organización',
@@ -655,6 +656,7 @@ const translations = {
     noSessionData:       'No session data available',
     noActivityData:      'No activity data to display',
     noTrendData:         'No trend data available yet',
+    singleDayTrend:      'Only 1 day of data — trend will build as more sessions are completed.',
 
     // Organization page
     orgTitle:            'Organization',
