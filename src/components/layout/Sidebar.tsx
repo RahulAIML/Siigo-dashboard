@@ -4,12 +4,9 @@ import {
   LayoutDashboard,
   PlayCircle,
   MessageSquareText,
-  BrainCircuit,
   Trophy,
   Activity,
   Building2,
-  GitBranch,
-  Award,
   FileText,
   Settings,
   PanelLeftClose,
@@ -41,17 +38,14 @@ const sections: NavSection[] = [
     items: [
       { labelEs: 'Simulaciones', labelEn: 'Simulations', path: '/simulations', icon: PlayCircle },
       { labelEs: 'Conversacional', labelEn: 'Conversational AI', path: '/conversational', icon: MessageSquareText },
-      { labelEs: 'AI Coaching', labelEn: 'AI Coaching', path: '/coaching', icon: BrainCircuit },
       { labelEs: 'Ranking', labelEn: 'Leaderboard', path: '/leaderboard', icon: Trophy },
     ],
   },
   {
     titleKey: 'sectionPlatform',
     items: [
-      { labelEs: 'Actividades',     labelEn: 'Activities',     path: '/activities',     icon: Activity },
-      { labelEs: 'Organización',    labelEn: 'Organization',   path: '/organization',   icon: Building2 },
-      { labelEs: 'Business Lines',  labelEn: 'Business Lines', path: '/business-lines', icon: GitBranch },
-      { labelEs: 'Certificación',   labelEn: 'Certification',  path: '/certification',  icon: Award },
+      { labelEs: 'Actividades',  labelEn: 'Activities',  path: '/activities',  icon: Activity },
+      { labelEs: 'Organización', labelEn: 'Organization', path: '/organization', icon: Building2 },
     ],
   },
   {

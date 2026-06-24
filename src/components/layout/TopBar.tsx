@@ -9,12 +9,9 @@ const PAGE_META: Record<string, { es: string; en: string; subEs: string; subEn: 
   '/':              { es: 'Overview',       en: 'Overview',         subEs: 'Resumen del dashboard',       subEn: 'Dashboard summary' },
   '/simulations':   { es: 'Simulaciones',   en: 'Simulations',      subEs: 'Historial de sesiones',       subEn: 'Session history' },
   '/conversational':{ es: 'Conversacional', en: 'Conversational AI',subEs: 'Sesiones de chat con IA',     subEn: 'AI chat sessions' },
-  '/coaching':      { es: 'AI Coaching',    en: 'AI Coaching',      subEs: 'Análisis de desempeño',       subEn: 'Performance analytics' },
   '/leaderboard':   { es: 'Ranking',        en: 'Leaderboard',      subEs: 'Mejores desempeños del equipo',subEn: 'Top team performers' },
   '/activities':    { es: 'Actividades',    en: 'Activities',       subEs: 'Desglose por actividad',      subEn: 'Activity breakdown' },
   '/organization':  { es: 'Organización',   en: 'Organization',     subEs: 'Estructura del equipo',       subEn: 'Team structure' },
-  '/business-lines':{ es: 'Business Lines', en: 'Business Lines',   subEs: 'Rendimiento por línea de negocio', subEn: 'Performance by business line' },
-  '/certification': { es: 'Certificación',  en: 'Certification',   subEs: 'Seguimiento de certificación de asesores', subEn: 'Advisor certification tracking' },
   '/reports':       { es: 'Reportes',       en: 'Reports',          subEs: 'Reportes descargables',       subEn: 'Downloadable reports' },
   '/settings':      { es: 'Configuración',  en: 'Settings',         subEs: 'Preferencias del dashboard',  subEn: 'Dashboard preferences' },
 }
