@@ -9,6 +9,7 @@ import { downloadSimReport } from '../lib/reportPdf'
 import { cn } from '../lib/cn'
 import { useAppStore } from '../store'
 import { t } from '../lib/i18n'
+import { t } from '../lib/i18n'
 import type { Simulation } from '../api/types'
 
 // ---------------------------------------------------------------------------
@@ -107,9 +108,10 @@ function PassFailBadge({ value, language }: { value: 'si' | 'no' | null; languag
 interface SimReportModalProps {
   sim: Simulation
   onClose: () => void
+  language: 'es' | 'en'
 }
 
-function SimReportModal({ sim, onClose }: SimReportModalProps) {
+function SimReportModal({ sim, onClose, language }: SimReportModalProps) {
   const [downloading, setDownloading] = useState(false)
   const details = buildSimDetails(sim)
 
@@ -158,7 +160,7 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-700">
           <div>
-            <h2 className="text-lg font-semibold text-white">Reporte de Simulación</h2>
+            <h2 className="text-lg font-semibold text-white">{t('simulationReport', language)}</h2>
             <p className="text-xs text-slate-400 mt-0.5">ID #{sim.ID_Sim} — {sim.Actividad}</p>
           </div>
           <button
@@ -174,32 +176,32 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
 
         {/* Session metadata */}
         <div className="px-6 py-4 border-b border-slate-800">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Información de la Sesión</h3>
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t('sessionInfo', language)}</h3>
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
             <div>
-              <span className="text-slate-500">Asesor: </span>
+              <span className="text-slate-500">{t('advisorLabel', language)}: </span>
               <span className="text-slate-200">{sim.Usuario_Nombre || '—'}</span>
             </div>
             <div>
-              <span className="text-slate-500">Actividad: </span>
+              <span className="text-slate-500">{t('activity', language)}: </span>
               <span className="text-slate-200">{sim.Actividad || '—'}</span>
             </div>
             <div>
-              <span className="text-slate-500">Calificación: </span>
+              <span className="text-slate-500">{t('score', language)}: </span>
               <span className={cn('font-semibold', scoreColor(sim.Calificacion))}>
                 {sim.Calificacion !== null && sim.Calificacion !== undefined ? `${sim.Calificacion} / 100` : '—'}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-500">Resultado: </span>
-              <PassFailBadge value={sim.Diagnostico_Final} />
+              <span className="text-slate-500">{t('result', language)}: </span>
+              <PassFailBadge value={sim.Diagnostico_Final} language={language} />
             </div>
             <div>
-              <span className="text-slate-500">Fecha: </span>
+              <span className="text-slate-500">{t('date', language)}: </span>
               <span className="text-slate-200">{formatDateTime(sim.Fecha_y_Hora, language)}</span>
             </div>
             <div>
-              <span className="text-slate-500">ID Sesión: </span>
+              <span className="text-slate-500">{t('sessionId', language)}: </span>
               <span className="text-slate-400 font-mono text-xs">{sim.ID_Sim}</span>
             </div>
           </div>
@@ -207,9 +209,9 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
 
         {/* Interaction details */}
         <div className="px-6 py-4 border-b border-slate-800">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Detalle de Interacciones</h3>
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t('interactionDetails', language)}</h3>
           {details.length === 0 ? (
-            <p className="text-sm text-slate-500 italic">Sin detalle de interacciones disponible.</p>
+            <p className="text-sm text-slate-500 italic">{t('noInteractionDetail', language)}</p>
           ) : (
             <div className="flex flex-col gap-4">
               {details.map((d) => (
@@ -219,21 +221,21 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
                       {d.sequence}
                     </span>
                     <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wide">
-                      Interacción #{d.sequence}
+                      {t('interaction', language)} #{d.sequence}
                     </span>
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Pregunta AI</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('aiQuestion', language)}</p>
                       <p className="text-sm text-slate-200 leading-relaxed">{d.ai_question}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Respuesta del Asesor</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('advisorResponse', language)}</p>
                       <p className="text-sm text-slate-200 leading-relaxed">{d.user_response}</p>
                     </div>
                     {d.feedback && (
                       <div className="rounded-lg bg-slate-700/40 border border-slate-600/40 p-3">
-                        <p className="text-xs font-semibold text-amber-400/80 uppercase tracking-wide mb-1">Retroalimentación</p>
+                        <p className="text-xs font-semibold text-amber-400/80 uppercase tracking-wide mb-1">{t('feedbackLabel', language)}</p>
                         <p className="text-sm text-slate-300 leading-relaxed">{d.feedback}</p>
                       </div>
                     )}
@@ -249,7 +251,7 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
           const text = stripHtml(sim.closing_analysis)
           return text.length > 0 ? (
             <div className="px-6 py-4 border-b border-slate-800">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Análisis de Cierre</h3>
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t('closingAnalysis', language)}</h3>
               <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{text}</p>
             </div>
           ) : null
@@ -268,14 +270,14 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                Generando PDF...
+                {t('generatingPdf', language)}
               </>
             ) : (
               <>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-                Descargar PDF
+                {t('downloadPdf', language)}
               </>
             )}
           </button>
@@ -283,7 +285,7 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
           >
-            Cerrar
+            {t('close', language)}
           </button>
         </div>
       </div>
@@ -295,13 +297,13 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
 // Expanded row detail panel
 // ---------------------------------------------------------------------------
 
-function ExpandedRow({ sim }: { sim: Simulation }) {
+function ExpandedRow({ sim, language }: { sim: Simulation; language: 'es' | 'en' }) {
   const details = buildSimDetails(sim)
 
   if (details.length === 0) {
     return (
       <div className="px-6 py-4 text-sm text-[var(--color-muted)] italic">
-        Sin detalle de interacciones disponible.
+        {t('noInteractionDetail', language)}
       </div>
     )
   }
@@ -314,15 +316,15 @@ function ExpandedRow({ sim }: { sim: Simulation }) {
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600/80 text-white text-xs font-bold">
               {d.sequence}
             </span>
-            <span className="text-xs font-semibold text-indigo-400">Interacción #{d.sequence}</span>
+            <span className="text-xs font-semibold text-indigo-400">{t('interaction', language)} #{d.sequence}</span>
           </div>
-          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">Pregunta AI</p>
+          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">{t('aiQuestion', language)}</p>
           <p className="text-xs text-[var(--color-fg)] mb-2 line-clamp-2">{d.ai_question}</p>
-          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">Respuesta</p>
+          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">{t('result', language)}</p>
           <p className="text-xs text-[var(--color-fg)] line-clamp-2">{d.user_response}</p>
           {d.feedback && (
             <>
-              <p className="text-xs text-amber-500 font-medium mt-2 mb-0.5">Retroalimentación</p>
+              <p className="text-xs text-amber-500 font-medium mt-2 mb-0.5">{t('feedbackLabel', language)}</p>
               <p className="text-xs text-[var(--color-muted)] line-clamp-2">{d.feedback}</p>
             </>
           )}
@@ -498,6 +500,7 @@ export default function SimulationsPage() {
         <SimReportModal
           sim={modalSim}
           onClose={() => setModalSim(null)}
+          language={language}
         />
       )}
 
@@ -737,7 +740,7 @@ export default function SimulationsPage() {
                         {isExpanded && (
                           <tr className="bg-[var(--color-bg-alt)]">
                             <td colSpan={7} className="p-0">
-                              <ExpandedRow sim={sim} />
+                              <ExpandedRow sim={sim} language={language} />
                             </td>
                           </tr>
                         )}

@@ -13,7 +13,8 @@ const PAGE_META: Record<string, { es: string; en: string; subEs: string; subEn: 
   '/leaderboard':   { es: 'Ranking',        en: 'Leaderboard',      subEs: 'Mejores desempeños del equipo',subEn: 'Top team performers' },
   '/activities':    { es: 'Actividades',    en: 'Activities',       subEs: 'Desglose por actividad',      subEn: 'Activity breakdown' },
   '/organization':  { es: 'Organización',   en: 'Organization',     subEs: 'Estructura del equipo',       subEn: 'Team structure' },
-  '/certification': { es: 'Business Lines', en: 'Business Lines',   subEs: 'Seguimiento de certificación',subEn: 'Certification tracking' },
+  '/business-lines':{ es: 'Business Lines', en: 'Business Lines',   subEs: 'Rendimiento por línea de negocio', subEn: 'Performance by business line' },
+  '/certification': { es: 'Certificación',  en: 'Certification',   subEs: 'Seguimiento de certificación de asesores', subEn: 'Advisor certification tracking' },
   '/reports':       { es: 'Reportes',       en: 'Reports',          subEs: 'Reportes descargables',       subEn: 'Downloadable reports' },
   '/settings':      { es: 'Configuración',  en: 'Settings',         subEs: 'Preferencias del dashboard',  subEn: 'Dashboard preferences' },
 }

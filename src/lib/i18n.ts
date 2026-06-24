@@ -145,6 +145,51 @@ const translations = {
     results:         'resultados',
     admin:           'Administrador',
     analyticsTitle:  'Plataforma Analítica SIIGO',
+
+    // Reports page
+    format:              'Formato',
+    generating:          'Generando...',
+    generateAndDownload: 'Generar y Descargar',
+    comingSoon:          'Disponible próximamente',
+    soon:                'Pronto',
+    pdfSoon:             'PDF (próximamente)',
+    customExportNote:    'La exportación personalizada incluye el detalle completo de simulaciones filtrado por el rango de fechas seleccionado. El filtro de asesor y actividad del panel principal también se aplica.',
+    emailReports:        'Reportes por Email',
+    emailReportsDesc:    'Recibe un resumen automático semanal directamente en tu bandeja de entrada.',
+    powerBIInt:          'Integración PowerBI',
+    powerBIDesc:         'Conecta el dashboard directamente con tus reportes de PowerBI via API.',
+    weeklyDigest:        'Resumen Semanal',
+    weeklyDigestDesc:    'Email automático cada lunes con el rendimiento del equipo de la semana anterior.',
+
+    // Simulation report modal
+    simulationReport:    'Reporte de Simulación',
+    sessionInfo:         'Información de la Sesión',
+    advisorLabel:        'Asesor',
+    sessionId:           'ID Sesión',
+    interactionDetails:  'Detalle de Interacciones',
+    noInteractionDetail: 'Sin detalle de interacciones disponible.',
+    interaction:         'Interacción',
+    aiQuestion:          'Pregunta AI',
+    advisorResponse:     'Respuesta del Asesor',
+    feedbackLabel:       'Retroalimentación',
+    closingAnalysis:     'Análisis de Cierre',
+    generatingPdf:       'Generando PDF...',
+    downloadPdf:         'Descargar PDF',
+
+    // Business Lines page
+    businessLinesTitle:  'Líneas de Negocio',
+    businessLinesSub:    'Rendimiento segmentado por línea de producto y unidad de negocio',
+    certificationNav:    'Certificación',
+    certificationSub:    'Seguimiento de certificación de asesores',
+
+    // Toast messages
+    summaryDownloaded:   'Resumen ejecutivo descargado correctamente.',
+    simsDownloaded:      'Detalle de simulaciones descargado correctamente.',
+    leaderDownloaded:    'Ranking de asesores descargado correctamente.',
+    certDownloaded:      'Reporte de certificación descargado correctamente.',
+    exportError:         'Error al generar el archivo.',
+    selectDateRange:     'Selecciona un rango de fechas válido.',
+    dateRangeError:      'La fecha de inicio no puede ser posterior a la fecha de fin.',
   },
   en: {
     dashboard:      'Dashboard',
@@ -279,6 +324,51 @@ const translations = {
     results:         'results',
     admin:           'Administrator',
     analyticsTitle:  'SIIGO Analytics Platform',
+
+    // Reports page
+    format:              'Format',
+    generating:          'Generating...',
+    generateAndDownload: 'Generate & Download',
+    comingSoon:          'Coming soon',
+    soon:                'Soon',
+    pdfSoon:             'PDF (coming soon)',
+    customExportNote:    'The custom export includes the full simulation detail filtered by the selected date range. The advisor and activity filters from the main panel also apply.',
+    emailReports:        'Email Reports',
+    emailReportsDesc:    'Receive an automatic weekly summary directly in your inbox.',
+    powerBIInt:          'PowerBI Integration',
+    powerBIDesc:         'Connect the dashboard directly to your PowerBI reports via API.',
+    weeklyDigest:        'Weekly Digest',
+    weeklyDigestDesc:    'Automatic email every Monday with the previous week\'s team performance.',
+
+    // Simulation report modal
+    simulationReport:    'Simulation Report',
+    sessionInfo:         'Session Info',
+    advisorLabel:        'Advisor',
+    sessionId:           'Session ID',
+    interactionDetails:  'Interaction Details',
+    noInteractionDetail: 'No interaction detail available.',
+    interaction:         'Interaction',
+    aiQuestion:          'AI Question',
+    advisorResponse:     'Advisor Response',
+    feedbackLabel:       'Feedback',
+    closingAnalysis:     'Closing Analysis',
+    generatingPdf:       'Generating PDF...',
+    downloadPdf:         'Download PDF',
+
+    // Business Lines page
+    businessLinesTitle:  'Business Lines',
+    businessLinesSub:    'Performance segmented by product line and business unit',
+    certificationNav:    'Certification',
+    certificationSub:    'Advisor certification tracking',
+
+    // Toast messages
+    summaryDownloaded:   'Executive summary downloaded.',
+    simsDownloaded:      'Simulation detail downloaded.',
+    leaderDownloaded:    'Advisor ranking downloaded.',
+    certDownloaded:      'Certification report downloaded.',
+    exportError:         'Error generating the file.',
+    selectDateRange:     'Please select a valid date range.',
+    dateRangeError:      'Start date cannot be after end date.',
   },
 } as const
 

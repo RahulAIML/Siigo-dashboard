@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback } from 'react'
 import useAppStore from '../store'
+import { t } from '../lib/i18n'
 import { motion } from 'framer-motion'
 import {
   FileText,
@@ -322,30 +323,32 @@ function ComingSoonCard({
   title,
   description,
   icon: Icon,
+  language,
 }: {
   title: string
   description: string
   icon: React.ComponentType<{ className?: string }>
+  language: 'es' | 'en'
 }) {
   return (
-    <div className="rounded-xl bg-card/50 border border-border/30 p-5 opacity-50 select-none">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5 opacity-60 select-none">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-muted-foreground" />
+        <div className="w-10 h-10 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)] flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-[var(--color-muted)]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-foreground">{title}</p>
-            <span className="text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-              Pronto
+            <p className="text-sm font-semibold text-[var(--color-fg)]">{title}</p>
+            <span className="text-[10px] font-semibold bg-[var(--color-bg-alt)] text-[var(--color-muted)] px-1.5 py-0.5 rounded uppercase tracking-wider border border-[var(--color-line)]">
+              {t('soon', language)}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">{description}</p>
         </div>
       </div>
-      <div className="mt-4 w-full py-2 px-3 rounded-lg bg-muted/40 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+      <div className="mt-4 w-full py-2 px-3 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)] flex items-center justify-center gap-2 text-xs text-[var(--color-muted)]">
         <Clock className="w-3.5 h-3.5" />
-        Disponible proximamente
+        {t('comingSoon', language)}
       </div>
     </div>
   )
@@ -357,7 +360,8 @@ function ComingSoonCard({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+    <h2 className="flex items-center gap-2.5 text-xs font-bold text-[var(--color-muted)] uppercase tracking-[0.12em] mb-4">
+      <span className="inline-block w-0.5 h-3.5 rounded-full bg-[var(--color-accent)]" />
       {children}
     </h2>
   )
@@ -386,11 +390,11 @@ export default function ReportsPage() {
     try {
       const adapted = adaptKPIs(kpis)
       exportSummaryCSV(adapted, `siigo-resumen-${effectiveDateFrom}_${effectiveDateTo}.csv`)
-      addToast('Resumen ejecutivo descargado correctamente.')
+      addToast(t('summaryDownloaded', language))
     } catch {
-      addToast('Error al generar el archivo.', 'error')
+      addToast(t('exportError', language), 'error')
     }
-  }, [kpis, effectiveDateFrom, effectiveDateTo, addToast])
+  }, [kpis, effectiveDateFrom, effectiveDateTo, addToast, language])
 
   const handleExportSimulations = useCallback(() => {
     try {
@@ -399,11 +403,11 @@ export default function ReportsPage() {
         adapted,
         `siigo-simulaciones-${effectiveDateFrom}_${effectiveDateTo}.csv`,
       )
-      addToast('Detalle de simulaciones descargado correctamente.')
+      addToast(t('simsDownloaded', language))
     } catch {
-      addToast('Error al generar el archivo.', 'error')
+      addToast(t('exportError', language), 'error')
     }
-  }, [filteredSims, effectiveDateFrom, effectiveDateTo, addToast])
+  }, [filteredSims, effectiveDateFrom, effectiveDateTo, addToast, language])
 
   const handleExportLeaderboard = useCallback(() => {
     try {
@@ -412,11 +416,11 @@ export default function ReportsPage() {
         adapted,
         `siigo-ranking-${effectiveDateFrom}_${effectiveDateTo}.csv`,
       )
-      addToast('Ranking de asesores descargado correctamente.')
+      addToast(t('leaderDownloaded', language))
     } catch {
-      addToast('Error al generar el archivo.', 'error')
+      addToast(t('exportError', language), 'error')
     }
-  }, [userStats, effectiveDateFrom, effectiveDateTo, addToast])
+  }, [userStats, effectiveDateFrom, effectiveDateTo, addToast, language])
 
   const handleExportCertification = useCallback(() => {
     try {
@@ -425,26 +429,24 @@ export default function ReportsPage() {
         csv,
         `siigo-certificacion-${effectiveDateFrom}_${effectiveDateTo}.csv`,
       )
-      addToast('Reporte de certificacion descargado correctamente.')
+      addToast(t('certDownloaded', language))
     } catch {
-      addToast('Error al generar el archivo.', 'error')
+      addToast(t('exportError', language), 'error')
     }
-  }, [filteredSims, effectiveDateFrom, effectiveDateTo, addToast])
+  }, [filteredSims, effectiveDateFrom, effectiveDateTo, addToast, language])
 
-  // Custom config generate
   const handleGenerateCustom = useCallback(() => {
     if (!configDateFrom || !configDateTo) {
-      addToast('Selecciona un rango de fechas valido.', 'error')
+      addToast(t('selectDateRange', language), 'error')
       return
     }
     if (configDateFrom > configDateTo) {
-      addToast('La fecha de inicio no puede ser posterior a la fecha de fin.', 'error')
+      addToast(t('dateRangeError', language), 'error')
       return
     }
 
     setGenerating(true)
     try {
-      // Filter sims to custom date range
       const rangeFrom = configDateFrom
       const rangeTo = configDateTo
 
@@ -455,13 +457,15 @@ export default function ReportsPage() {
 
       const adapted = adaptSims(simsInRange)
       exportSimulationsCSV(adapted, `siigo-export-${rangeFrom}_${rangeTo}.csv`)
-      addToast(`Exportacion generada: ${simsInRange.length} simulaciones.`)
+      addToast(language === 'es'
+        ? `Exportación generada: ${simsInRange.length} simulaciones.`
+        : `Export generated: ${simsInRange.length} simulations.`)
     } catch {
-      addToast('Error al generar la exportacion.', 'error')
+      addToast(t('exportError', language), 'error')
     } finally {
       setGenerating(false)
     }
-  }, [configDateFrom, configDateTo, filteredSims, addToast])
+  }, [configDateFrom, configDateTo, filteredSims, addToast, language])
 
   return (
     <div className="flex flex-col gap-8 p-6 max-w-5xl mx-auto w-full">
@@ -537,13 +541,13 @@ export default function ReportsPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05 }}
-          className="rounded-xl bg-card border border-border/50 shadow-sm p-6"
+          className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] shadow-sm p-6"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             {/* Date from */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Desde
+              <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">
+                {t('dateFrom', language)}
               </label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -560,8 +564,8 @@ export default function ReportsPage() {
 
             {/* Date to */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Hasta
+              <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">
+                {t('dateTo', language)}
               </label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -578,43 +582,41 @@ export default function ReportsPage() {
 
             {/* Format selector + button */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Formato
+              <label className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">
+                {t('format', language)}
               </label>
               <div className="flex gap-2">
                 <div className="flex-1">
                   <select
-                    className="w-full py-2 px-3 rounded-lg bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                    className="w-full py-2 px-3 rounded-lg bg-[var(--color-bg)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40"
                     defaultValue="csv"
                     disabled
                   >
                     <option value="csv">CSV</option>
                     <option value="pdf" disabled>
-                      PDF (proximamente)
+                      {t('pdfSoon', language)}
                     </option>
                   </select>
                 </div>
                 <button
                   onClick={handleGenerateCustom}
                   disabled={generating || isLoading}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-all duration-150 active:scale-95 whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-all duration-150 active:scale-95 whitespace-nowrap"
                 >
                   {generating ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Download className="w-4 h-4" />
                   )}
-                  {generating ? 'Generando...' : 'Generar y Descargar'}
+                  {generating ? t('generating', language) : t('generateAndDownload', language)}
                 </button>
               </div>
             </div>
           </div>
 
           {/* Info note */}
-          <p className="mt-4 text-xs text-muted-foreground">
-            La exportacion personalizada incluye el detalle completo de simulaciones filtrado por el
-            rango de fechas seleccionado. El filtro de asesor y actividad del panel principal tambien
-            se aplica.
+          <p className="mt-4 text-xs text-[var(--color-muted)]">
+            {t('customExportNote', language)}
           </p>
         </motion.div>
       </section>
@@ -624,19 +626,22 @@ export default function ReportsPage() {
         <SectionTitle>{language === 'es' ? 'Funcionalidades en desarrollo' : 'Features in development'}</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <ComingSoonCard
-            title="Reportes por Email"
-            description="Recibe un resumen automatico semanal directamente en tu bandeja de entrada."
+            title={t('emailReports', language)}
+            description={t('emailReportsDesc', language)}
             icon={Mail}
+            language={language}
           />
           <ComingSoonCard
-            title="Integracion PowerBI"
-            description="Conecta el dashboard directamente con tus reportes de PowerBI via API."
+            title={t('powerBIInt', language)}
+            description={t('powerBIDesc', language)}
             icon={BarChart2}
+            language={language}
           />
           <ComingSoonCard
-            title="Resumen Semanal"
-            description="Email automatico cada lunes con el rendimiento del equipo de la semana anterior."
+            title={t('weeklyDigest', language)}
+            description={t('weeklyDigestDesc', language)}
             icon={Users}
+            language={language}
           />
         </div>
       </section>

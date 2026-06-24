@@ -109,6 +109,7 @@ const queryClient = buildQueryClient()
 
 const OverviewPage      = React.lazy(() => import('./pages/OverviewPage'))
 const SimulationsPage   = React.lazy(() => import('./pages/SimulationsPage'))
+const BusinessLinesPage = React.lazy(() => import('./pages/BusinessLinesPage'))
 const CertificationPage = React.lazy(() => import('./pages/CertificationPage'))
 const ConversationalPage= React.lazy(() => import('./pages/ConversationalPage'))
 const CoachingPage      = React.lazy(() => import('./pages/CoachingPage'))
@@ -240,8 +241,9 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Shell />}>
                 <Route index element={<OverviewPage />} />
-                <Route path="simulations"  element={<SimulationsPage />} />
-                <Route path="certification" element={<CertificationPage />} />
+                <Route path="simulations"    element={<SimulationsPage />} />
+                <Route path="business-lines" element={<BusinessLinesPage />} />
+                <Route path="certification"  element={<CertificationPage />} />
                 <Route path="conversational" element={<ConversationalPage />} />
                 <Route path="coaching"     element={<CoachingPage />} />
                 <Route path="leaderboard"  element={<LeaderboardPage />} />

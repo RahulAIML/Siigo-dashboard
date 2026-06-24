@@ -9,6 +9,7 @@ import {
   Activity,
   Building2,
   GitBranch,
+  Award,
   FileText,
   Settings,
   PanelLeftClose,
@@ -47,9 +48,10 @@ const sections: NavSection[] = [
   {
     titleKey: 'sectionPlatform',
     items: [
-      { labelEs: 'Actividades', labelEn: 'Activities', path: '/activities', icon: Activity },
-      { labelEs: 'Organización', labelEn: 'Organization', path: '/organization', icon: Building2 },
-      { labelEs: 'Business Lines', labelEn: 'Business Lines', path: '/certification', icon: GitBranch },
+      { labelEs: 'Actividades',     labelEn: 'Activities',     path: '/activities',     icon: Activity },
+      { labelEs: 'Organización',    labelEn: 'Organization',   path: '/organization',   icon: Building2 },
+      { labelEs: 'Business Lines',  labelEn: 'Business Lines', path: '/business-lines', icon: GitBranch },
+      { labelEs: 'Certificación',   labelEn: 'Certification',  path: '/certification',  icon: Award },
     ],
   },
   {
