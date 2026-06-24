@@ -769,8 +769,8 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
               </div>
             ))}
 
-            {/* Typing indicator */}
-            {thinking && (
+            {/* Typing indicator — only show when no streaming placeholder exists yet */}
+            {thinking && messages[messages.length - 1]?.role !== 'model' && (
               <div className="flex gap-2.5">
                 <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
                   <Bot size={13} className="text-slate-300" />
