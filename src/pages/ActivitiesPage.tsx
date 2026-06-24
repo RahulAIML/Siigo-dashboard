@@ -659,13 +659,16 @@ export default function ActivitiesPage() {
     )
   }
 
-  const totalSessions   = activityStats?.reduce((sum, a) => sum + a.count, 0) ?? 0
-  const totalPass       = activityStats?.reduce((sum, a) => sum + a.passCount, 0) ?? 0
-  const totalFail       = activityStats?.reduce((sum, a) => sum + a.failCount, 0) ?? 0
+  // Ensure activityStats is always an array
+  const safeActivityStats = activityStats ?? []
+
+  const totalSessions   = safeActivityStats.reduce((sum, a) => sum + (a.count ?? 0), 0)
+  const totalPass       = safeActivityStats.reduce((sum, a) => sum + (a.passCount ?? 0), 0)
+  const totalFail       = safeActivityStats.reduce((sum, a) => sum + (a.failCount ?? 0), 0)
   const overallPassRate = totalSessions > 0 ? (totalPass / totalSessions) * 100 : 0
   const overallAvgScore =
-    activityStats && activityStats.length > 0
-      ? activityStats.reduce((sum, a) => sum + a.avgScore * a.count, 0) / Math.max(totalSessions, 1)
+    safeActivityStats.length > 0
+      ? safeActivityStats.reduce((sum, a) => sum + (a.avgScore ?? 0) * (a.count ?? 0), 0) / Math.max(totalSessions, 1)
       : 0
 
   return (
@@ -711,9 +714,9 @@ export default function ActivitiesPage() {
         </div>
 
         {/* Global summary chips */}
-        {activityStats && activityStats.length > 0 && (
+        {safeActivityStats.length > 0 && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-            <Chip label={language === 'es' ? 'Actividades' : 'Activities'} value={String(activityStats.length)} color={SIIGO_BLUE} />
+            <Chip label={language === 'es' ? 'Actividades' : 'Activities'} value={String(safeActivityStats.length)} color={SIIGO_BLUE} />
             <Chip label={language === 'es' ? 'Total Sesiones' : 'Total Sessions'} value={String(totalSessions)} color="#94a3b8" />
             <Chip label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score'} value={fmt1(overallAvgScore)} color={overallAvgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
             <Chip label={language === 'es' ? 'Tasa Aprobación' : 'Overall Pass Rate'} value={`${fmt1(overallPassRate)}%`} color={performanceColor(overallPassRate)} />
@@ -724,7 +727,7 @@ export default function ActivitiesPage() {
       </motion.div>
 
       {/* ── 2. Activity summary cards ────────────────────────────────────── */}
-      {!activityStats || activityStats.length === 0 ? (
+      {safeActivityStats.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -758,7 +761,7 @@ export default function ActivitiesPage() {
             gap: 16,
           }}
         >
-          {activityStats?.map((stat) => (
+          {safeActivityStats.map((stat) => (
             <ActivitySummaryCard key={stat.id} stat={stat} />
           ))}
         </div>
@@ -770,7 +773,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Número de sesiones de simulación completadas por actividad (top 10)' : 'Number of simulation sessions completed per activity (top 10)'}
         icon={BarChart2}
       >
-        <SessionsBarChart data={activityStats ?? []} isDark={isDark} />
+        <SessionsBarChart data={safeActivityStats} isDark={isDark} />
       </Section>
 
       {/* ── 4. Activity detail table ─────────────────────────────────────── */}
@@ -779,7 +782,7 @@ export default function ActivitiesPage() {
         subtitle={language === 'es' ? 'Desglose completo: sesiones, puntajes, aprobados/reprobados por actividad' : 'Full breakdown: sessions, scores, pass/fail counts per activity'}
         icon={LayoutGrid}
       >
-        <DetailTable data={activityStats ?? []} />
+        <DetailTable data={safeActivityStats} />
       </Section>
 
       {/* ── 5. Activity trend over time ──────────────────────────────────── */}
