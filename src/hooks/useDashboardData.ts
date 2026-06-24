@@ -71,15 +71,16 @@ const EMPTY_KPIs: DashboardKPIs = {
 
 export default function useDashboardData(): DashboardData {
   // ── 1. Read filter state from Zustand store ──────────────────────────────
-  const dateFrom        = useAppStore((s) => s.dateFrom)
-  const dateTo          = useAppStore((s) => s.dateTo)
-  const selectedMember  = useAppStore((s) => s.selectedMember)
+  const dateFrom         = useAppStore((s) => s.dateFrom)
+  const dateTo           = useAppStore((s) => s.dateTo)
+  const datePreset       = useAppStore((s) => s.datePreset)
+  const selectedMember   = useAppStore((s) => s.selectedMember)
   const selectedActivity = useAppStore((s) => s.selectedActivity)
 
   // ── 2. Resolve effective date range ──────────────────────────────────────
   const { from: effectiveDateFrom, to: effectiveDateTo } = useMemo(
-    () => resolveEffectiveDates(dateFrom ?? null, dateTo ?? null),
-    [dateFrom, dateTo],
+    () => resolveEffectiveDates(dateFrom ?? null, dateTo ?? null, datePreset),
+    [dateFrom, dateTo, datePreset],
   )
 
   // ── 3. Query all data ─────────────────────────────────────────────────────

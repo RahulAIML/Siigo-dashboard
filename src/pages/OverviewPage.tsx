@@ -249,7 +249,7 @@ export default function OverviewPage() {
           />
           <KpiCard
             title={t('averageScore', language)}
-            value={hasData ? `${averageScore.toFixed(1)}%` : '—'}
+            value={hasData ? averageScore.toFixed(1) : '—'}
             icon={<LineChart className="h-5 w-5" />}
           />
           <KpiCard
@@ -384,7 +384,7 @@ export default function OverviewPage() {
                     <div className="text-xs font-medium text-slate-400">{advisor.count ?? 0} {t('simulationsWord', language)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{(advisor.avgScore ?? 0).toFixed(0)}%</div>
+                    <div className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{(advisor.avgScore ?? 0).toFixed(0)}</div>
                     <div className="text-xs font-semibold text-[#10B981]">↑ {(advisor.passRate ?? 0).toFixed(0)}%</div>
                   </div>
                 </div>

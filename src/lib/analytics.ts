@@ -384,12 +384,16 @@ export function computeActivityStats(
   const stats: ActivityStat[] = Array.from(activityMap.entries()).map(
     ([key, { scores, passCount, failCount, total }]): ActivityStat => {
       const meta = activityMeta.get(key)
+      const displayName = meta?.name ?? key
       return {
-        activityId: key,
-        activityName: meta?.name ?? key,
-        count: total,
-        avgScore: safeMean(scores),
-        passRate: total > 0 ? (passCount / total) * 100 : 0,
+        id:           Number(meta?.ID ?? 0),
+        name:         displayName,
+        activityId:   key,
+        activityName: displayName,
+        activityType: '',
+        count:        total,
+        avgScore:     safeMean(scores),
+        passRate:     total > 0 ? (passCount / total) * 100 : 0,
         passCount,
         failCount,
       }

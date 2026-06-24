@@ -54,12 +54,13 @@ export function resolvePreset(preset: DatePreset): { from: string; to: string } 
 
 export function resolveEffectiveDates(
   from: string | null,
-  to: string | null
+  to: string | null,
+  preset?: DatePreset,
 ): { from: string; to: string } {
   const todayStr = format(startOfDay(new Date()), 'yyyy-MM-dd')
 
   if (from === null && to === null) {
-    return resolvePreset('last30')
+    return resolvePreset(preset ?? 'last30')
   }
 
   let resolvedFrom = from ?? DATA_EPOCH

@@ -368,7 +368,7 @@ export default function CertificationPage() {
                     {/* Best score */}
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                       {u.overallBestScore !== null
-                        ? `${u.overallBestScore.toFixed(1)}%`
+                        ? u.overallBestScore.toFixed(1)
                         : '—'}
                     </span>
 
@@ -414,7 +414,7 @@ export default function CertificationPage() {
                 const actStatus = u.activities[0]
                 const scoreLabel =
                   actStatus?.bestScore !== null && actStatus?.bestScore !== undefined
-                    ? `${actStatus.bestScore.toFixed(1)}%`
+                    ? actStatus.bestScore.toFixed(1)
                     : lang === 'es'
                     ? 'Sin intentos'
                     : 'Not attempted'

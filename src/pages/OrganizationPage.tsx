@@ -135,7 +135,7 @@ function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
           <div className="flex items-center gap-3 text-xs text-muted-foreground hidden md:flex">
             <span>{stat.count} sessions</span>
             <span className={scoreColor(stat.avgScore)}>
-              {stat.avgScore.toFixed(1)}%
+              {stat.avgScore.toFixed(1)}
             </span>
           </div>
         )}
@@ -476,7 +476,7 @@ export default function OrganizationPage() {
                           <td className="px-4 py-3 text-center">
                             {stat ? (
                               <span className={`font-medium ${scoreColor(stat.avgScore)}`}>
-                                {stat.avgScore.toFixed(1)}%
+                                {stat.avgScore.toFixed(1)}
                               </span>
                             ) : (
                               <span className="text-muted-foreground">—</span>
