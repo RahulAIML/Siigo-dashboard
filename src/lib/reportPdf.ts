@@ -339,12 +339,18 @@ export async function downloadSimReport(
     const closingText = sim.closing_analysis
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
+      // block-level tags → newlines
+      .replace(/<\/?(h[1-6]|p|div|section|header|footer|li|tr|br)[^>]*>/gi, '\n')
+      // strip remaining inline tags
+      .replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-      .replace(/\s{2,}/g, ' ')
+      // collapse 3+ newlines to 2, compress horizontal spaces
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/[ \t]{2,}/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
       .trim()
     if (closingText.length > 0) {
       drawSectionHeader(state, t('closingTitle', lang))
