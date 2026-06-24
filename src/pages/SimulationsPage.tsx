@@ -265,29 +265,7 @@ function SimReportModal({ sim, onClose, language }: SimReportModalProps) {
         )}
 
         {/* Footer actions */}
-        <div className="sticky bottom-0 px-6 py-4 bg-slate-900 border-t border-slate-700 flex items-center justify-between gap-3">
-          <button
-            onClick={handlePDF}
-            disabled={downloading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
-          >
-            {downloading ? (
-              <>
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                {t('generatingPdf', language)}
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-                {t('downloadPdf', language)}
-              </>
-            )}
-          </button>
+        <div className="sticky bottom-0 px-6 py-4 bg-slate-900 border-t border-slate-700 flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
