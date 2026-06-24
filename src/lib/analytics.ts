@@ -429,11 +429,21 @@ export function buildAIContext(
   lines.push('')
 
   // Top 10 performers
-  lines.push('=== TOP 10 PERFORMERS ===')
+  lines.push('=== TOP 10 PERFORMERS (highest pass rate) ===')
   const top10 = userStats.slice(0, 10)
   for (const u of top10) {
     lines.push(
-      `${u.name} | avg: ${u.avgScore.toFixed(1)} | pass rate: ${u.passRate.toFixed(1)}% | sessions: ${u.count} | best: ${u.bestScore.toFixed(1)}`,
+      `${u.name} | pass rate: ${u.passRate.toFixed(1)}% | avg: ${u.avgScore.toFixed(1)} | sessions: ${u.count}`,
+    )
+  }
+  lines.push('')
+
+  // Bottom 10 — needs coaching
+  lines.push('=== BOTTOM 10 PERFORMERS (needs coaching, lowest pass rate) ===')
+  const bottom10 = [...userStats].sort((a, b) => a.passRate - b.passRate).slice(0, 10)
+  for (const u of bottom10) {
+    lines.push(
+      `${u.name} | pass rate: ${u.passRate.toFixed(1)}% | avg: ${u.avgScore.toFixed(1)} | sessions: ${u.count}`,
     )
   }
   lines.push('')

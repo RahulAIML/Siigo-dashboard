@@ -293,31 +293,40 @@ CONTEXT:
 - Platform: Rolplay sales training simulation
 - Current page: ${pageName}
 
-AVAILABLE DATABASE TABLES:
-- r_user_session: ID, user_id, simulator_id, score, passed_flag (1=pass 0=fail), date_created, closing_analysis
-- r_user_session_details: ID, session_id (FK→r_user_session.ID), sequence, ai_text, user_text, retro_analysis
-- r_user: ID, name, email, level, disabled, designation, parent_id, client_id
-- r_simulator: ID, name, category, interactions, lang, available
+⚠️ CRITICAL DATA ARCHITECTURE:
+Scores and pass rates ARE NOT stored reliably in the database columns.
+- r_user_session.score → ALWAYS 0 in DB. NEVER use in SQL.
+- r_user_session.passed_flag → ALWAYS 0 in DB. NEVER use in SQL.
+- Real scores are computed by the frontend by parsing HTML in closing_analysis.
+- The LIVE DASHBOARD DATA below contains the ONLY accurate scores and pass rates.
 
-JOIN PATTERN (always use this to filter by client):
-  JOIN r_user u ON u.ID = us.user_id WHERE u.client_id = ${SIIGO_CLIENT_ID}
+AVAILABLE DATABASE TABLES (for counting and listing only — NOT for scores):
+- r_user_session: ID, user_id, simulator_id, date_created, closing_analysis
+- r_user_session_details: ID, session_id, sequence, ai_text, user_text, retro_analysis
+- r_user: ID, name, email, level, client_id
+- r_simulator: ID, name, category
 
-LIVE DASHBOARD DATA (already computed — use this for quick questions):
+JOIN PATTERN (always use this):
+  FROM r_user_session us
+  JOIN r_user u ON u.ID = us.user_id AND u.client_id = ${SIIGO_CLIENT_ID}
+  WHERE us.simulator_id IN (${SIIGO_IDS_SQL})
+
+SQL ALLOWED ONLY FOR: session counts, user lists, date ranges, interaction text, recent activity.
+SQL FORBIDDEN FOR: pass rate, approval rate, scores, rankings, coaching risk — use DASHBOARD DATA instead.
+
+LIVE DASHBOARD DATA (the ONLY source of truth for scores and pass rates):
 ${aiContext || '(No hay datos disponibles en este momento)'}
 
-TWO-PASS RESPONSE PROTOCOL for metric questions:
-When asked about specific numbers or metrics NOT covered by dashboard data above:
-1. State the SQL you need to run (use SELECT only, always filter by client_id = ${SIIGO_CLIENT_ID} and simulator_id IN (${SIIGO_IDS_SQL}))
-2. The system will execute it and return results
-3. Answer ONLY from those results
+TWO-PASS RESPONSE PROTOCOL:
+Only generate SQL when the question requires data NOT in the dashboard above (e.g. raw interaction text, specific date ranges, user details).
+- If dashboard data answers the question → respond directly, say "NO_SQL_NEEDED" internally.
+- If SQL needed → output ONLY the SQL block (triple-backtick sql ... triple-backtick), then answer from results.
+- NEVER generate SQL to calculate pass rates or scores.
 
 INSTRUCTIONS:
-- Be concise, data-driven, and actionable.
-- When showing numbers, round to 1 decimal where appropriate.
-- If user asks about an advisor by name, search the top performers list in dashboard data.
-- For trend questions, reference the trend data if available.
-- Be helpful to sales managers making coaching decisions.
-- Format responses with markdown: use **bold** for key metrics, tables for comparisons, bullet points for lists.
+- Pass rate, scores, top/bottom performers, coaching candidates → ALWAYS use LIVE DASHBOARD DATA above.
+- Be concise, data-driven, and actionable. Round to 1 decimal.
+- Format: **bold** key metrics, tables for comparisons, bullets for lists.
 ${withImage ? '- An image has been attached. FIRST describe what you see in detail. THEN relate it to the dashboard data.' : ''}`.trim()
   }
 
