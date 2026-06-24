@@ -32,9 +32,9 @@ function fmt(n: number, decimals = 1): string {
   return n.toFixed(decimals)
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, lang: 'es' | 'en'): string {
   try {
-    return new Date(dateStr).toLocaleDateString('es-CO', {
+    return new Date(dateStr).toLocaleDateString(lang === 'es' ? 'es-CO' : 'en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -117,6 +117,7 @@ interface AtRiskAdvisor {
 }
 
 function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
+  const language = useAppStore((s) => s.language)
   if (advisors.length === 0) {
     return (
       <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
@@ -164,7 +165,7 @@ function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
                 <div className="flex items-center gap-2 flex-wrap mt-0.5">
                   <span className="flex items-center gap-1 text-xs text-[var(--color-muted)]">
                     <Clock className="w-3 h-3" />
-                    {formatDate(a.lastDate)}
+                    {formatDate(a.lastDate, language)}
                   </span>
                   {a.failStreak >= 2 && <NeedsAttentionBadge />}
                 </div>

@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { Globe, Menu, Moon, Sun } from 'lucide-react'
+import { Menu, Moon, Sun } from 'lucide-react'
 import { useAppStore } from '../../store/index'
 import { t } from '../../lib/i18n'
 
@@ -41,14 +41,6 @@ export default function TopBar() {
         >
           <Menu className="h-4 w-4" />
         </button>
-
-        {/* Mobile: show logo */}
-        <img
-          src="/siigo_logo.jpg"
-          alt="Siigo"
-          className="h-7 w-auto object-contain md:hidden"
-          style={{ maxWidth: '80px' }}
-        />
 
         {/* Desktop: show page title */}
         <div className="hidden md:flex md:items-baseline md:gap-2.5 min-w-0">

@@ -34,18 +34,18 @@ function parseDbDate(raw: string): Date {
   return new Date(raw.includes('T') ? raw : raw.replace(' ', 'T'))
 }
 
-function formatDate(raw: string | null | undefined): string {
+function formatDate(raw: string | null | undefined, lang: 'es' | 'en'): string {
   if (!raw) return '—'
   const d = parseDbDate(raw)
   if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-function formatDateTime(raw: string | null | undefined): string {
+function formatDateTime(raw: string | null | undefined, lang: 'es' | 'en'): string {
   if (!raw) return '—'
   const d = parseDbDate(raw)
   if (isNaN(d.getTime())) return raw
-  return d.toLocaleString('es-MX', {
+  return d.toLocaleString(lang === 'es' ? 'es-MX' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -196,7 +196,7 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
             </div>
             <div>
               <span className="text-slate-500">Fecha: </span>
-              <span className="text-slate-200">{formatDateTime(sim.Fecha_y_Hora)}</span>
+              <span className="text-slate-200">{formatDateTime(sim.Fecha_y_Hora, language)}</span>
             </div>
             <div>
               <span className="text-slate-500">ID Sesión: </span>
@@ -695,7 +695,7 @@ export default function SimulationsPage() {
 
                           {/* Fecha */}
                           <td className="px-4 py-3 text-[var(--color-muted)] whitespace-nowrap">
-                            {formatDate(sim.Fecha_y_Hora)}
+                            {formatDate(sim.Fecha_y_Hora, language)}
                           </td>
 
                           {/* Actions */}

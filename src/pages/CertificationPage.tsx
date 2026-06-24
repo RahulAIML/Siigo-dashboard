@@ -41,11 +41,11 @@ function toValSim(s: ApiSimulation): ValSimulation {
 }
 
 /** Format a date string (YYYY-MM-DD or ISO) into a locale-friendly display */
-function fmtDate(iso: string | undefined | null): string {
+function fmtDate(iso: string | undefined | null, lang: 'es' | 'en'): string {
   if (!iso) return '—'
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('es-CO', {
+  return d.toLocaleDateString(lang === 'es' ? 'es-CO' : 'en-US', {
     year:  'numeric',
     month: 'short',
     day:   '2-digit',
@@ -213,7 +213,7 @@ export default function CertificationPage() {
             {': '}
           </span>
           <span className="text-xs font-semibold text-foreground">
-            {fmtDate(CERT_WINDOW.from)} — {fmtDate(CERT_WINDOW.to)}
+            {fmtDate(CERT_WINDOW.from, lang)} — {fmtDate(CERT_WINDOW.to, lang)}
           </span>
         </div>
       </motion.div>
@@ -374,7 +374,7 @@ export default function CertificationPage() {
 
                     {/* Certification date */}
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {fmtDate(certDate)}
+                      {fmtDate(certDate, lang)}
                     </span>
                   </motion.li>
                 )
