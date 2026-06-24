@@ -69,80 +69,63 @@ export function TrendChart({ data, height = 260, loading = false }: TrendChartPr
     )
   }
 
-  // Single data point — show informational state instead of a lonely dot
-  if (data.length === 1) {
-    const p = data[0]
-    return (
-      <div style={{ height, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '0 24px', textAlign: 'center' }}>
-        <div style={{ display: 'flex', gap: 32 }}>
-          <div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#0066FF', letterSpacing: '-0.04em' }}>{p.avgScore.toFixed(1)}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Avg Score</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#22c55e', letterSpacing: '-0.04em' }}>{p.passRate.toFixed(1)}%</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pass Rate</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', letterSpacing: '-0.04em' }}>{p.count}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sessions</div>
-          </div>
-        </div>
-        <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, maxWidth: 280 }}>
-          First day of data: <strong style={{ color: '#64748b' }}>{formatDate(p.date)}</strong>. Trend will build as more simulations are completed.
-        </p>
-      </div>
-    )
-  }
-
   const chartData = data.map(d => ({ ...d, dateLabel: formatDate(d.date) }))
 
+  const isSinglePoint = data.length === 1
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={chartData} margin={{ top: 8, right: 18, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="4 4" stroke="#edf2f7" vertical={false} />
-        <XAxis
-          dataKey="dateLabel"
-          tick={{ fill: '#94a3b8', fontSize: 11 }}
-          axisLine={false}
-          tickLine={false}
-          interval="preserveStartEnd"
-        />
-        <YAxis
-          domain={[0, 100]}
-          tick={{ fill: '#94a3b8', fontSize: 11 }}
-          axisLine={false}
-          tickLine={false}
-          width={32}
-        />
-        <Tooltip content={<TrendTooltip />} />
-        <ReferenceLine
-          y={PASS_THRESHOLD}
-          stroke="#22c55e"
-          strokeDasharray="6 4"
-          strokeWidth={1.5}
-          label={{ value: `Pass ${PASS_THRESHOLD}`, position: 'insideTopRight', fill: '#22c55e', fontSize: 10 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="avgScore"
-          name="Avg Score"
-          stroke="#0066FF"
-          strokeWidth={2.5}
-          dot={false}
-          activeDot={{ r: 5, fill: '#0066FF', strokeWidth: 0 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="passRate"
-          name="Pass Rate"
-          stroke="#22c55e"
-          strokeWidth={2}
-          strokeDasharray="5 4"
-          dot={false}
-          activeDot={{ r: 4, fill: '#22c55e', strokeWidth: 0 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart data={chartData} margin={{ top: 8, right: 18, bottom: 0, left: 0 }}>
+          <CartesianGrid strokeDasharray="4 4" stroke="#edf2f7" vertical={false} />
+          <XAxis
+            dataKey="dateLabel"
+            tick={{ fill: '#94a3b8', fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            domain={[0, 100]}
+            tick={{ fill: '#94a3b8', fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+            width={32}
+          />
+          <Tooltip content={<TrendTooltip />} />
+          <ReferenceLine
+            y={PASS_THRESHOLD}
+            stroke="#22c55e"
+            strokeDasharray="6 4"
+            strokeWidth={1.5}
+            label={{ value: `Pass ${PASS_THRESHOLD}`, position: 'insideTopRight', fill: '#22c55e', fontSize: 10 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="avgScore"
+            name="Avg Score"
+            stroke="#0066FF"
+            strokeWidth={2.5}
+            dot={isSinglePoint ? { r: 6, fill: '#0066FF', strokeWidth: 0 } : false}
+            activeDot={{ r: 5, fill: '#0066FF', strokeWidth: 0 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="passRate"
+            name="Pass Rate"
+            stroke="#22c55e"
+            strokeWidth={2}
+            strokeDasharray="5 4"
+            dot={isSinglePoint ? { r: 5, fill: '#22c55e', strokeWidth: 0 } : false}
+            activeDot={{ r: 4, fill: '#22c55e', strokeWidth: 0 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      {isSinglePoint && (
+        <p style={{ margin: '4px 0 0', fontSize: 11, color: '#94a3b8', textAlign: 'center' }}>
+          Only 1 day of data — trend will build as more sessions are completed.
+        </p>
+      )}
+    </div>
   )
 }
