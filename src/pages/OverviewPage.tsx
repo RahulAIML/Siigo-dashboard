@@ -72,7 +72,7 @@ function KpiCard({
           <div className="mb-2 truncate text-sm font-semibold text-slate-500 dark:text-slate-400">{title}</div>
           <div className="text-[2.4rem] font-black leading-none tracking-[-0.05em] text-slate-950 dark:text-white">{value}</div>
         </div>
-        <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fff1f2] dark:bg-[#3b0d13] text-[#ff2138]">
+        <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[var(--color-accent)]">
           {icon}
         </div>
       </div>

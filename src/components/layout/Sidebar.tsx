@@ -117,8 +117,8 @@ function SidebarContent({
                         'group flex items-center rounded-xl transition-all duration-150',
                         collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-3 py-2.5',
                         isActive
-                          ? 'bg-[#ff1734] text-white shadow-[0_8px_24px_rgba(255,23,52,0.30)]'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white',
+                          ? 'bg-white/15 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]'
+                          : 'text-white/65 hover:bg-white/8 hover:text-white',
                       ].join(' ')
                     }
                     title={collapsed ? (language === 'es' ? item.labelEs : item.labelEn) : undefined}

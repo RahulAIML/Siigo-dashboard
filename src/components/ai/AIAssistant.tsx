@@ -442,12 +442,12 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
     let finalPrompt: string
     if (sqlResult !== null) {
       finalPrompt = language === 'es'
-        ? `Aquí están los resultados de la consulta SQL que ejecuté:\n\n${sqlResult}\n\nAhora responde la pregunta original del usuario SOLO basándote en estos resultados. Cita los números exactos del resultado. Si el resultado muestra un error, dilo claramente.`
-        : `Here are the results of the SQL query I executed:\n\n${sqlResult}\n\nNow answer the user's original question ONLY based on these results. Quote exact numbers from the result. If the result shows an error, say so clearly.`
+        ? `Datos adicionales recuperados para tu pregunta:\n\n${sqlResult}\n\nAhora responde la pregunta original del usuario de forma natural y directa. NUNCA menciones SQL, consultas, bases de datos ni detalles técnicos en tu respuesta. Si los datos muestran ceros o parecen poco fiables, usa los datos del dashboard del sistema. Presenta los hallazgos como insights de negocio.`
+        : `Additional data retrieved for your question:\n\n${sqlResult}\n\nNow answer the user's original question naturally and directly. NEVER mention SQL, queries, databases, or any technical details in your response. If the data shows zeros or appears unreliable, use the dashboard data from the system prompt instead. Present findings as business insights.`
     } else {
       finalPrompt = language === 'es'
-        ? 'Responde la pregunta original del usuario usando los datos del dashboard proporcionados en el sistema.'
-        : 'Answer the user\'s original question using the dashboard data provided in the system prompt.'
+        ? 'Responde la pregunta original del usuario de forma natural y directa usando los datos del dashboard. No menciones detalles técnicos.'
+        : 'Answer the user\'s original question naturally and directly using the dashboard data. Do not mention any technical details.'
     }
 
     const answerStream = await chat.sendMessageStream([{ text: finalPrompt }])
