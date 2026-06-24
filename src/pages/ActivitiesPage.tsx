@@ -330,9 +330,10 @@ function StatBox({ label, value, color }: { label: string; value: string; color:
 
 // ─── Activity Bar chart (sessions per activity) ───────────────────────────────
 
-function SessionsBarTooltip({ active, payload, label }: any) {
+function SessionsBarTooltip({ active, payload, label, language }: any) {
   if (!active || !payload?.length) return null
   const stat = payload[0]?.payload as ActivityStat & { shortName: string }
+  const lang: 'es' | 'en' = language ?? 'es'
   return (
     <div
       style={{
@@ -349,9 +350,9 @@ function SessionsBarTooltip({ active, payload, label }: any) {
         {stat?.name ?? label}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <TooltipRow color="#94a3b8" label="Sessions"  value={String(stat?.count ?? 0)} />
-        <TooltipRow color={SIIGO_BLUE} label="Avg Score" value={fmt1(stat?.avgScore ?? 0)} />
-        <TooltipRow color={GREEN}      label="Pass Rate" value={`${fmt1(stat?.passRate ?? 0)}%`} />
+        <TooltipRow color="#94a3b8" label={t('sessionsLabel', lang)}  value={String(stat?.count ?? 0)} />
+        <TooltipRow color={SIIGO_BLUE} label={t('avgScoreLabel', lang)} value={fmt1(stat?.avgScore ?? 0)} />
+        <TooltipRow color={GREEN}      label={t('passRateLabel', lang)} value={`${fmt1(stat?.passRate ?? 0)}%`} />
       </div>
     </div>
   )
@@ -398,8 +399,8 @@ function SessionsBarChart({ data, isDark, language }: { data: ActivityStat[]; is
           tickLine={false}
           width={150}
         />
-        <Tooltip content={<SessionsBarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-        <Bar dataKey="count" name="Sessions" radius={[0, 4, 4, 0]}>
+        <Tooltip content={<SessionsBarTooltip language={language} />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+        <Bar dataKey="count" name={t('sessionsLabel', language)} radius={[0, 4, 4, 0]}>
           {chartData.map((entry, i) => (
             <Cell key={i} fill={entry.passRate >= PASS_THRESHOLD ? SIIGO_BLUE : '#1e40af'} />
           ))}
@@ -593,7 +594,7 @@ function ActivityTrendChart({ trend, isDark, language }: { trend: TrendPoint[]; 
             color: isDark ? '#e2e8f0' : '#1e293b',
           }}
           labelStyle={{ color: '#94a3b8', fontSize: 12, marginBottom: 6 }}
-          formatter={(value: number) => [value, 'Sessions']}
+          formatter={(value: number) => [value, t('sessionsLabel', language)]}
         />
         <Legend
           iconType="circle"
@@ -603,7 +604,7 @@ function ActivityTrendChart({ trend, isDark, language }: { trend: TrendPoint[]; 
         <Line
           type="monotone"
           dataKey="count"
-          name="Sessions"
+          name={t('sessionsLabel', language)}
           stroke={SIIGO_BLUE}
           strokeWidth={2}
           dot={false}
