@@ -152,9 +152,8 @@ export interface UserStat {
 }
 
 export interface ActivityStat {
-  id:           number
-  name:         string
-  activityType: string
+  activityId:   string
+  activityName: string
   count:        number
   avgScore:     number
   passRate:     number

@@ -19,17 +19,12 @@ import { exportSimulationsCSV } from '../lib/csvExport'
 import { resolvePreset } from '../lib/dateUtils'
 import { TrendChart } from '../components/charts/TrendChart'
 import { PassFailDonut } from '../components/charts/PassFailDonut'
+import t from '../lib/i18n'
 
 type PresetOption = {
   id: 'all' | 'last90' | 'last30'
-  label: string
+  labelKey: string
 }
-
-const presetOptions: PresetOption[] = [
-  { id: 'all', label: 'All' },
-  { id: 'last90', label: '3M' },
-  { id: 'last30', label: '12M' },
-]
 
 function formatDateInput(value: string) {
   return value
@@ -164,6 +159,12 @@ export default function OverviewPage() {
     )
   }
 
+  const presetOptions: PresetOption[] = [
+    { id: 'all', labelKey: 'allTime' },
+    { id: 'last90', labelKey: 'last3Months' },
+    { id: 'last30', labelKey: 'lastMonth' },
+  ]
+
   const filterSummary =
     language === 'es'
       ? `Tu equipo ha completado ${totalSimulations.toLocaleString()} simulaciones en este periodo.`
@@ -174,8 +175,10 @@ export default function OverviewPage() {
       <div className="mb-8 rounded-[34px] bg-[#f7f9fc]">
         <div className="mb-8 flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="pt-3">
-            <h2 className="text-[3rem] font-black tracking-[-0.06em] text-slate-950">Welcome your dashboard</h2>
-            <p className="mt-2 text-[2rem] font-medium tracking-[-0.04em] text-slate-300">{filterSummary}</p>
+            <h2 className="text-[2.4rem] font-black tracking-[-0.06em] text-slate-950">
+              {language === 'es' ? 'Bienvenido al Dashboard' : 'Welcome to Dashboard'}
+            </h2>
+            <p className="mt-2 text-[1.2rem] font-medium tracking-[-0.02em] text-slate-400">{filterSummary}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 xl:justify-end">
@@ -191,7 +194,7 @@ export default function OverviewPage() {
                       : 'bg-white text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]',
                   ].join(' ')}
                 >
-                  {option.label}
+                  {t(option.labelKey, language)}
                 </button>
               ))}
             </div>
@@ -217,7 +220,7 @@ export default function OverviewPage() {
             </div>
 
             <div className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-400 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
-              Advisors
+              {t('advisors', language)}
             </div>
 
             <button
@@ -225,27 +228,27 @@ export default function OverviewPage() {
               className="inline-flex items-center gap-2 rounded-xl bg-[#ff2138] px-6 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(255,33,56,0.25)] transition hover:brightness-105"
             >
               <Download className="h-4 w-4" />
-              Export All
+              {t('exportAll', language)}
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
-          <KpiCard title="Total Simulations" value={totalSimulations.toLocaleString()} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Average Score" value={`${averageScore.toFixed(0)}%`} icon={<LineChart className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Approval Rate" value={`${passRate.toFixed(0)}`} icon={<CheckCircle2 className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Active Advisors" value={activeAdvisors.toLocaleString()} icon={<Users className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Avaible Activities" value={totalActivities.toLocaleString()} icon={<Grid2X2 className="h-6 w-6" />} footer="vs previos month" />
-          <KpiCard title="Members" value={totalMembers.toLocaleString()} icon={<UserRound className="h-6 w-6" />} footer="vs previos month" />
+          <KpiCard title={t('totalSimulations', language)} value={totalSimulations.toLocaleString()} icon={<LineChart className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
+          <KpiCard title={t('averageScore', language)} value={averageScore > 0 ? `${averageScore.toFixed(0)}%` : '—'} icon={<LineChart className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
+          <KpiCard title={t('passRate', language)} value={`${passRate.toFixed(0)}%`} icon={<CheckCircle2 className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
+          <KpiCard title={t('activeAdvisors', language)} value={activeAdvisors.toLocaleString()} icon={<Users className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
+          <KpiCard title={t('totalActivities', language)} value={totalActivities.toLocaleString()} icon={<Grid2X2 className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
+          <KpiCard title={t('totalMembers', language)} value={totalMembers.toLocaleString()} icon={<UserRound className="h-6 w-6" />} footer={language === 'es' ? 'vs mes anterior' : 'vs previous month'} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.65fr_0.95fr]">
         <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">Score Trend</h3>
+            <h3 className="text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">{t('trend', language)}</h3>
             <div className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500">
-              Daily
+              {language === 'es' ? 'Diario' : 'Daily'}
             </div>
           </div>
           <TrendChart data={trend} height={320} />
@@ -253,7 +256,7 @@ export default function OverviewPage() {
 
         <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
           <div className="mb-4 text-[1.15rem] font-extrabold tracking-[-0.02em] text-slate-900">
-            Approval vs. Disapproval
+            {t('passFailRatio', language)}
           </div>
           <div className="grid gap-4 xl:grid-cols-[0.95fr_0.85fr] xl:items-center">
             <PassFailDonut passCount={approved} failCount={disapproved} />
@@ -262,7 +265,7 @@ export default function OverviewPage() {
                 <div className="flex items-start gap-3">
                   <CircleCheck className="mt-0.5 h-5 w-5 text-[#ff2138]" />
                   <div className="flex-1">
-                    <div className="text-[1.02rem] font-bold text-slate-700">Approved</div>
+                    <div className="text-[1.02rem] font-bold text-slate-700">{t('passCount', language)}</div>
                     <div className="mt-2 flex items-end justify-between">
                       <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{approved}</div>
                       <div className="text-sm font-bold text-slate-400">{passRate.toFixed(0)}%</div>
@@ -275,7 +278,7 @@ export default function OverviewPage() {
                 <div className="flex items-start gap-3">
                   <CircleX className="mt-0.5 h-5 w-5 text-[#ff9aa6]" />
                   <div className="flex-1">
-                    <div className="text-[1.02rem] font-bold text-slate-700">Disapproved</div>
+                    <div className="text-[1.02rem] font-bold text-slate-700">{t('failCount', language)}</div>
                     <div className="mt-2 flex items-end justify-between">
                       <div className="text-[2rem] font-black tracking-[-0.04em] text-slate-950">{disapproved}</div>
                       <div className="text-sm font-bold text-slate-400">{(100 - passRate).toFixed(0)}%</div>
@@ -285,7 +288,7 @@ export default function OverviewPage() {
               </div>
 
               <div className="pt-2 text-center text-[1.02rem] font-semibold text-slate-500">
-                Total: {totalSimulations.toLocaleString()} simulations
+                {language === 'es' ? 'Total:' : 'Total:'} {totalSimulations.toLocaleString()} {language === 'es' ? 'simulaciones' : 'simulations'}
               </div>
             </div>
           </div>
@@ -293,12 +296,14 @@ export default function OverviewPage() {
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <InsightCard title="Activity Breakdown">
+        <InsightCard title={t('activityBreakdown', language)}>
           <div className="space-y-4">
-            {topActivities.map((activity) => (
-              <div key={`${activity.id}-${activity.name}`}>
+            {topActivities.length === 0 ? (
+              <p className="text-sm text-slate-400">{t('noActivities', language)}</p>
+            ) : topActivities.map((activity) => (
+              <div key={`${activity.activityId}-${activity.activityName}`}>
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <div className="truncate text-[1rem] font-semibold text-slate-700">{activity.name}</div>
+                  <div className="truncate text-[1rem] font-semibold text-slate-700">{activity.activityName}</div>
                   <div className="text-sm font-bold text-slate-500">{activity.passRate.toFixed(0)}%</div>
                 </div>
                 <div className="h-3 rounded-full bg-slate-100">
@@ -312,31 +317,37 @@ export default function OverviewPage() {
           </div>
 
           <button className="mt-6 w-full rounded-2xl border border-[#ffb7c0] px-4 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-[#fff5f6]">
-            View all activities
+            {language === 'es' ? 'Ver todas las actividades' : 'View all activities'}
           </button>
         </InsightCard>
 
-        <InsightCard title="Top Advisors" action="View all">
+        <InsightCard title={t('topPerformers', language)} action={language === 'es' ? 'Ver todos' : 'View all'}>
           <div className="space-y-5">
-            {topAdvisors.map((advisor, index) => (
+            {topAdvisors.length === 0 ? (
+              <p className="text-sm text-slate-400">{t('noData', language)}</p>
+            ) : topAdvisors.map((advisor, index) => (
               <div key={`${advisor.userId ?? advisor.name}-${index}`} className="flex items-center gap-4">
                 <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${rankGradient(index)} text-base font-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.12)]`}>
                   {index + 1}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[1rem] font-bold text-slate-900">{advisor.name}</div>
-                  <div className="text-sm font-medium text-slate-400">{advisor.count} simulations</div>
+                  <div className="text-sm font-medium text-slate-400">{advisor.count} {language === 'es' ? 'simulaciones' : 'simulations'}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[1.8rem] font-black tracking-[-0.04em] text-slate-950">{advisor.avgScore.toFixed(0)}%</div>
-                  <div className="text-sm font-semibold text-[#10b836]">↑ {advisor.passRate.toFixed(0)}% Approved</div>
+                  <div className="text-[1.8rem] font-black tracking-[-0.04em] text-slate-950">
+                    {advisor.avgScore > 0 ? `${advisor.avgScore.toFixed(0)}%` : '—'}
+                  </div>
+                  <div className="text-sm font-semibold text-[#10b836]">
+                    {advisor.passRate > 0 ? `↑ ${advisor.passRate.toFixed(0)}% ${language === 'es' ? 'Aprobados' : 'Approved'}` : language === 'es' ? 'Sin puntaje aún' : 'No score yet'}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </InsightCard>
 
-        <InsightCard title="AI Insights" action="View all">
+        <InsightCard title={t('aiInsights', language)} action={t('viewAll', language)}>
           <div className="space-y-4">
             <div className="rounded-[20px] bg-[#fff3f4] p-5">
               <div className="flex items-start gap-4">
@@ -345,10 +356,10 @@ export default function OverviewPage() {
                 </div>
                 <div>
                   <div className="text-sm font-bold text-slate-700">
-                    73% of advisors struggle with
+                    {passRate > 0 ? `${(100 - passRate).toFixed(0)}${t('advisorsStruggle', language)}` : language === 'es' ? 'Aún sin datos de dificultades' : 'No struggle data yet'}
                   </div>
                   <div className="mt-1 text-[1.45rem] font-black tracking-[-0.03em] text-[#ff2138]">
-                    {weakestActivity?.name ?? 'Handling Objections'}.
+                    {weakestActivity?.activityName ?? (language === 'es' ? 'Manejo de Objeciones' : 'Handling Objections')}.
                   </div>
                 </div>
               </div>
@@ -360,15 +371,15 @@ export default function OverviewPage() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-bold text-slate-500">Recommendation</div>
+                  <div className="text-sm font-bold text-slate-500">{t('recommendation', language)}</div>
                   <div className="mt-2 text-[1.05rem] font-semibold leading-7 text-slate-700">
-                    Assign simulation "{weakestActivity?.name ?? 'Objections Level 2'}" to your team.
+                    {t('assignSimulation', language)} "{weakestActivity?.activityName ?? (language === 'es' ? 'Objeciones Nivel 2' : 'Objections Level 2')}" {t('toYourTeam', language)}
                   </div>
                 </div>
               </div>
 
               <button className="mt-5 rounded-2xl border border-[#ffb7c0] px-5 py-3 text-sm font-bold text-[#ff2138] transition hover:bg-white">
-                View recommendation
+                {t('viewRecommendation', language)}
               </button>
             </div>
           </div>
@@ -377,7 +388,7 @@ export default function OverviewPage() {
 
       {!isLoading && (
         <div className="mt-6 rounded-[28px] border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-500 shadow-[0_14px_40px_rgba(15,23,42,0.03)]">
-          Showing data from {formatDisplayDate(effectiveDateFrom)} to {formatDisplayDate(effectiveDateTo)}
+          {t('showingFrom', language)} {formatDisplayDate(effectiveDateFrom)} {t('to', language)} {formatDisplayDate(effectiveDateTo)}
         </div>
       )}
     </div>

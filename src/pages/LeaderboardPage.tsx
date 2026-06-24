@@ -36,11 +36,13 @@ function scoreBg(score: number): string {
   return 'bg-red-500/10 text-red-500'
 }
 
-function fmtScore(n: number): string {
+function fmtScore(n: number | null | undefined): string {
+  if (n === null || n === undefined || n === 0) return '—'
   return n.toFixed(1)
 }
 
 function fmtPct(n: number): string {
+  if (n === 0) return '—'
   return `${(n * 100).toFixed(0)}%`
 }
 

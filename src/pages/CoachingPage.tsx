@@ -33,7 +33,9 @@ function fmt(n: number, decimals = 1): string {
 
 function formatDate(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString('es-CO', {
+    // MySQL DATETIME stored as UTC — normalize to ISO 8601 with Z suffix
+    const normalized = dateStr.replace(' ', 'T').replace(/Z?$/, 'Z')
+    return new Date(normalized).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',

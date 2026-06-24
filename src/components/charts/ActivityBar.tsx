@@ -49,7 +49,7 @@ function ActivityTooltip({ active, payload, label }: any) {
           textOverflow: 'ellipsis',
         }}
       >
-        {stat?.name ?? label}
+        {stat?.activityName ?? label}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <TooltipRow color={SIIGO_BLUE} label="Avg Score"  value={`${(stat?.avgScore ?? 0).toFixed(1)}`} />
@@ -128,7 +128,7 @@ export function ActivityBar({ data, loading = false }: ActivityBarProps) {
 
   const chartData = sorted.map(d => ({
     ...d,
-    shortName: truncate(d.name),
+    shortName: truncate(d.activityName),
   }))
 
   const barHeight = 36

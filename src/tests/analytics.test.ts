@@ -24,10 +24,10 @@ function makeSim(overrides: Partial<Simulation> = {}): Simulation {
 describe('computeQuickKPIs', () => {
   it('returns zeros for empty array', () => {
     const kpis = computeQuickKPIs([])
-    expect(kpis.total).toBe(0)
-    expect(kpis.avgScore).toBe(0)
+    expect(kpis.totalSimulations).toBe(0)
+    expect(kpis.averageScore).toBe(0)
     expect(kpis.passRate).toBe(0)
-    expect(kpis.activeUsers).toBe(0)
+    expect(kpis.activeAdvisors).toBe(0)
     expect(kpis.passCount).toBe(0)
     expect(kpis.failCount).toBe(0)
   })
@@ -39,12 +39,12 @@ describe('computeQuickKPIs', () => {
       makeSim({ Puntos_Totales: 90, Diagnostico_Final: 'si', Usuario_Nombre: 'Alice', Usuario: 'alice@siigo.com', ID_Sim: 3 }),
     ]
     const kpis = computeQuickKPIs(sims)
-    expect(kpis.total).toBe(3)
+    expect(kpis.totalSimulations).toBe(3)
     expect(kpis.passCount).toBe(2)
     expect(kpis.failCount).toBe(1)
     expect(kpis.passRate).toBeCloseTo(66.67, 1)
-    expect(kpis.avgScore).toBeCloseTo(76.67, 1)
-    expect(kpis.activeUsers).toBe(2)
+    expect(kpis.averageScore).toBeCloseTo(76.67, 1)
+    expect(kpis.activeAdvisors).toBe(2)
     expect(kpis.bestScore).toBe(90)
     expect(kpis.worstScore).toBe(60)
   })

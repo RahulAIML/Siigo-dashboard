@@ -71,10 +71,10 @@ export function filterTestUsers(sims: Simulation[]): Simulation[] {
 export function computeQuickKPIs(sims: Simulation[]): QuickKPIs {
   if (!sims || sims.length === 0) {
     return {
-      total: 0,
-      avgScore: 0,
+      totalSimulations: 0,
+      averageScore: 0,
       passRate: 0,
-      activeUsers: 0,
+      activeAdvisors: 0,
       passCount: 0,
       failCount: 0,
       bestScore: 0,
@@ -98,21 +98,21 @@ export function computeQuickKPIs(sims: Simulation[]): QuickKPIs {
     if (passed) passCount++
     else failCount++
 
-    // Scores
+    // Scores — only count non-zero values to avoid polluting avg with unscored sessions
     const score = parseScore(s.Puntos_Totales ?? s.Calificacion ?? null)
-    if (score !== null) numericScores.push(score)
+    if (score !== null && score > 0) numericScores.push(score)
   }
 
-  const avgScore = safeMean(numericScores)
+  const averageScore = safeMean(numericScores)
   const passRate = sims.length > 0 ? (passCount / sims.length) * 100 : 0
   const bestScore = numericScores.length > 0 ? Math.max(...numericScores) : 0
   const worstScore = numericScores.length > 0 ? Math.min(...numericScores) : 0
 
   return {
-    total: sims.length,
-    avgScore,
+    totalSimulations: sims.length,
+    averageScore,
     passRate,
-    activeUsers: userSet.size,
+    activeAdvisors: userSet.size,
     passCount,
     failCount,
     bestScore,
@@ -232,6 +232,7 @@ export function computeRoundStats(sims: Simulation[]): RoundStat[] {
 
     return {
       round: n,
+      label: `Round ${n}`,
       avg,
       passRate,
       count: values.length,
@@ -309,8 +310,9 @@ export function computeUserStats(sims: Simulation[]): UserStat[] {
     const entry = userMap.get(mapKey)!
     entry.total++
 
+    // Only count non-zero scores to avoid polluting averages with unscored sessions
     const score = parseScore(s.Puntos_Totales ?? s.Calificacion ?? null)
-    if (score !== null) entry.scores.push(score)
+    if (score !== null && score > 0) entry.scores.push(score)
 
     const passed =
       typeof s.Diagnostico_Final === 'string' &&
@@ -412,10 +414,10 @@ export function buildAIContext(
 
   // KPI Summary
   lines.push('=== KPI SUMMARY ===')
-  lines.push(`Total simulations: ${kpis.total}`)
-  lines.push(`Average score: ${kpis.avgScore.toFixed(1)}`)
+  lines.push(`Total simulations: ${kpis.totalSimulations}`)
+  lines.push(`Average score: ${kpis.averageScore.toFixed(1)}`)
   lines.push(`Pass rate: ${kpis.passRate.toFixed(1)}%`)
-  lines.push(`Active users: ${kpis.activeUsers}`)
+  lines.push(`Active advisors: ${kpis.activeAdvisors}`)
   lines.push(`Pass count: ${kpis.passCount}`)
   lines.push(`Fail count: ${kpis.failCount}`)
   lines.push(`Best score: ${kpis.bestScore.toFixed(1)}`)

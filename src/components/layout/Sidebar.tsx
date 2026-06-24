@@ -62,16 +62,29 @@ const sections: NavSection[] = [
 
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-6 py-8">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+    <div className={['flex items-center px-4 py-5', collapsed ? 'justify-center' : 'gap-3 px-6'].join(' ')}>
+      <img
+        src="/siigo-logo.png"
+        alt="Siigo"
+        className={['object-contain flex-shrink-0', collapsed ? 'h-8 w-8' : 'h-9 w-auto max-w-[100px]'].join(' ')}
+        onError={(e) => {
+          // Fallback to text when image is unavailable
+          const el = e.currentTarget
+          el.style.display = 'none'
+          const fallback = el.nextElementSibling as HTMLElement | null
+          if (fallback) fallback.style.display = 'flex'
+        }}
+      />
+      {/* Text fallback shown when image fails */}
+      <div className="hidden h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-white shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
         <span className="text-lg font-black tracking-[0.18em]">S</span>
       </div>
       {!collapsed && (
         <div className="min-w-0">
-          <div className="text-[2rem] font-black uppercase tracking-[0.06em] text-[#2da4ff]">
+          <div className="text-[1.6rem] font-black uppercase tracking-[0.06em] text-[#2da4ff] leading-none">
             SIIGO
           </div>
-          <div className="text-[11px] leading-4 text-white/60">
+          <div className="text-[10px] leading-4 text-white/60 mt-0.5">
             Analytics &amp; Training
           </div>
         </div>
@@ -91,9 +104,7 @@ function SidebarContent({
 
   return (
     <div className="flex h-full flex-col">
-      <Brand collapsed={collapsed} />
-
-      <div className="flex-1 overflow-y-auto px-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 pt-4">
         {sections.map((section) => (
           <div key={section.title} className="mb-8">
             {!collapsed && (
@@ -155,13 +166,16 @@ export default function Sidebar() {
         className={[
           'hidden md:flex md:min-h-screen md:flex-col md:border-r md:border-[#08204d]',
           'bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white',
-          collapsed ? 'w-[96px]' : 'w-[320px]',
+          collapsed ? 'w-[80px]' : 'w-[280px]',
+          'transition-[width] duration-200',
         ].join(' ')}
       >
-        <div className="flex items-center justify-end px-5 pt-4">
+        {/* Header: brand + collapse toggle in one row */}
+        <div className={['flex items-center border-b border-white/8 py-3', collapsed ? 'justify-center px-3' : 'justify-between px-4'].join(' ')}>
+          <Brand collapsed={collapsed} />
           <button
             onClick={toggleSidebar}
-            className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+            className="flex-shrink-0 rounded-xl border border-white/10 bg-white/5 p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
@@ -181,16 +195,17 @@ export default function Sidebar() {
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white md:hidden"
-              initial={{ x: -320 }}
+              className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white md:hidden"
+              initial={{ x: -300 }}
               animate={{ x: 0 }}
-              exit={{ x: -320 }}
+              exit={{ x: -300 }}
               transition={{ duration: 0.22 }}
             >
-              <div className="flex items-center justify-end px-5 pt-4">
+              <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
+                <Brand collapsed={false} />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+                  className="flex-shrink-0 rounded-xl border border-white/10 bg-white/5 p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
                   aria-label="Close sidebar"
                 >
                   <X className="h-4 w-4" />

@@ -82,6 +82,19 @@ const translations = {
     noMembers:      'No hay miembros registrados',
     noActivities:   'No hay actividades disponibles',
 
+    // Misc UI
+    advisors:           'Asesores',
+    exportAll:          'Exportar Todo',
+    viewAll:            'Ver todos',
+    aiInsights:         'IA Insights',
+    recommendation:     'Recomendación',
+    viewRecommendation: 'Ver recomendación',
+    advisorsStruggle:   '% de asesores tienen dificultades con',
+    assignSimulation:   'Asignar la simulación',
+    toYourTeam:         'a tu equipo.',
+    showingFrom:        'Mostrando datos desde',
+    to:                 'hasta',
+
     // AI
     aiAssistant:  'Asistente IA SIIGO',
     askQuestion:  'Hacer una pregunta',
@@ -181,6 +194,18 @@ const translations = {
     noSimulations:  'No simulations yet',
     noMembers:      'No members registered',
     noActivities:   'No activities available',
+
+    advisors:           'Advisors',
+    exportAll:          'Export All',
+    viewAll:            'View all',
+    aiInsights:         'AI Insights',
+    recommendation:     'Recommendation',
+    viewRecommendation: 'View recommendation',
+    advisorsStruggle:   '% of advisors struggle with',
+    assignSimulation:   'Assign simulation',
+    toYourTeam:         'to your team.',
+    showingFrom:        'Showing data from',
+    to:                 'to',
 
     aiAssistant:  'SIIGO AI Assistant',
     askQuestion:  'Ask a question',

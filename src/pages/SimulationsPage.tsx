@@ -26,18 +26,26 @@ function scoreColor(score: number | null): string {
   return 'text-red-400'
 }
 
+/** Parse a MySQL DATETIME string (stored as UTC) to a JS Date */
+function parseMysqlUTC(raw: string): Date {
+  // MySQL format: '2026-06-23 23:54:05' — no timezone suffix
+  // Treat it as UTC by replacing space separator and appending Z
+  const normalized = raw.replace(' ', 'T') + 'Z'
+  return new Date(normalized)
+}
+
 function formatDate(raw: string | null | undefined): string {
   if (!raw) return '—'
-  const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00')
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
+  const d = parseMysqlUTC(raw)
+  if (isNaN(d.getTime())) return raw.slice(0, 10)
+  return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 function formatDateTime(raw: string | null | undefined): string {
   if (!raw) return '—'
-  const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00')
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleString('es-MX', {
+  const d = parseMysqlUTC(raw)
+  if (isNaN(d.getTime())) return raw.slice(0, 16).replace('T', ' ')
+  return d.toLocaleString('es-CO', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -66,19 +74,19 @@ function buildSimDetails(sim: Simulation) {
 function PassFailBadge({ value }: { value: 'si' | 'no' | null }) {
   if (value === 'si') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30">
         Aprobado
       </span>
     )
   }
   if (value === 'no') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 border border-red-300 dark:border-red-500/30">
         No aprobado
       </span>
     )
   }
-  return <span className="text-slate-500 text-xs">—</span>
+  return <span className="text-slate-400 text-xs">—</span>
 }
 
 // ---------------------------------------------------------------------------
@@ -482,8 +490,8 @@ export default function SimulationsPage() {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-white">Simulaciones</h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Simulaciones</h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
               {filteredSims.length} total
             </span>
             {displaySims.length !== filteredSims.length && (
@@ -497,7 +505,7 @@ export default function SimulationsPage() {
           <button
             onClick={handleExportCSV}
             disabled={displaySims.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 dark:bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors self-start sm:self-auto"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -523,7 +531,7 @@ export default function SimulationsPage() {
               placeholder="Buscar por usuario..."
               value={searchRaw}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
+              className="w-full pl-9 pr-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
             />
             {searchRaw && (
               <button
@@ -542,7 +550,7 @@ export default function SimulationsPage() {
           <select
             value={activityFilter}
             onChange={(e) => handleActivityChange(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
+            className="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
           >
             <option value="all">Todas las actividades</option>
             {activityOptions.map((name) => (
@@ -551,7 +559,7 @@ export default function SimulationsPage() {
           </select>
 
           {/* Result filter */}
-          <div className="flex rounded-lg overflow-hidden border border-slate-700 text-sm">
+          <div className="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-sm">
             {(['all', 'passed', 'failed'] as const).map((v) => (
               <button
                 key={v}
@@ -564,7 +572,7 @@ export default function SimulationsPage() {
                       : v === 'passed'
                         ? 'bg-emerald-600 text-white'
                         : 'bg-red-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700',
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700',
                 )}
               >
                 {v === 'all' ? 'Todos' : v === 'passed' ? 'Aprobados' : 'No aprobados'}
@@ -574,37 +582,37 @@ export default function SimulationsPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-slate-700/60 overflow-hidden bg-slate-900/60">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700/60 overflow-hidden bg-white dark:bg-slate-900/60">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700/60 bg-slate-800/60">
-                  <th className="w-10 px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">Usuario</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">Actividad</th>
+                <tr className="border-b border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/60">
+                  <th className="w-10 px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">#</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[160px]">NOMBRE</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[160px]">ACTIVIDAD</th>
                   <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none group"
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none group"
                     onClick={() => toggleSort('score')}
                   >
                     <span className="inline-flex items-center gap-1.5">
-                      Calificación
+                      PUNTAJE
                       <SortIcon col="score" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Diagnóstico</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">RESULTADO</th>
                   <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none"
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none"
                     onClick={() => toggleSort('date')}
                   >
                     <span className="inline-flex items-center gap-1.5">
-                      Fecha
+                      FECHA
                       <SortIcon col="date" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ACCIONES</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700/40">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
                 {pageSims.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-4 py-16 text-center">
@@ -627,18 +635,18 @@ export default function SimulationsPage() {
                           className={cn(
                             'group transition-colors cursor-pointer',
                             isExpanded
-                              ? 'bg-slate-800/60'
-                              : 'hover:bg-slate-800/40',
+                              ? 'bg-slate-100 dark:bg-slate-800/60'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/40',
                           )}
                           onClick={() => toggleExpand(sim.ID_Sim)}
                         >
                           {/* # */}
-                          <td className="px-4 py-3 text-slate-500 text-xs font-mono">{globalIdx}</td>
+                          <td className="px-4 py-3 text-slate-400 dark:text-slate-500 text-xs font-mono">{globalIdx}</td>
 
                           {/* Usuario */}
                           <td className="px-4 py-3">
-                            <span className="text-slate-200 font-medium truncate block max-w-[160px]">
-                              {sim.Usuario_Nombre || <span className="text-slate-500 italic">—</span>}
+                            <span className="text-slate-900 dark:text-slate-200 font-medium truncate block max-w-[160px]">
+                              {sim.Usuario_Nombre || <span className="text-slate-400 italic">—</span>}
                             </span>
                             {sim.Usuario && (
                               <span className="text-slate-500 text-xs truncate block max-w-[160px]">{sim.Usuario}</span>
@@ -647,18 +655,20 @@ export default function SimulationsPage() {
 
                           {/* Actividad */}
                           <td className="px-4 py-3">
-                            <span className="text-slate-300 truncate block max-w-[180px]" title={sim.Actividad}>
+                            <span className="text-slate-700 dark:text-slate-300 truncate block max-w-[180px]" title={sim.Actividad}>
                               {sim.Actividad || '—'}
                             </span>
                           </td>
 
                           {/* Calificacion */}
                           <td className="px-4 py-3">
-                            <span className={cn('font-semibold tabular-nums', scoreColor(sim.Calificacion))}>
-                              {sim.Calificacion !== null && sim.Calificacion !== undefined
-                                ? sim.Calificacion
-                                : <span className="text-slate-500">—</span>}
-                            </span>
+                            {sim.Calificacion !== null && sim.Calificacion !== undefined && sim.Calificacion > 0 ? (
+                              <span className={cn('font-semibold tabular-nums', scoreColor(sim.Calificacion))}>
+                                {sim.Calificacion}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 text-xs">—</span>
+                            )}
                           </td>
 
                           {/* Diagnostico */}
@@ -667,8 +677,8 @@ export default function SimulationsPage() {
                           </td>
 
                           {/* Fecha */}
-                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
-                            {formatDate(sim.Fecha_y_Hora)}
+                          <td className="px-4 py-3 text-slate-600 dark:text-slate-400 whitespace-nowrap text-xs">
+                            {formatDateTime(sim.Fecha_y_Hora)}
                           </td>
 
                           {/* Actions */}

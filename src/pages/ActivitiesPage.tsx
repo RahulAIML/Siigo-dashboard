@@ -201,13 +201,8 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
               wordBreak: 'break-word',
             }}
           >
-            {stat.name}
+            {stat.activityName}
           </p>
-          {stat.activityType && (
-            <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {stat.activityType}
-            </p>
-          )}
         </div>
         <span
           style={{
@@ -346,7 +341,7 @@ function SessionsBarTooltip({ active, payload, label }: any) {
       }}
     >
       <p style={{ margin: '0 0 6px', fontWeight: 600, color: '#f1f5f9', fontSize: 13 }}>
-        {stat?.name ?? label}
+        {stat?.activityName ?? label}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <TooltipRow color="#94a3b8" label="Sessions"  value={String(stat?.count ?? 0)} />
@@ -371,7 +366,7 @@ function SessionsBarChart({ data }: { data: ActivityStat[] }) {
   if (!data.length) return <EmptyState message="No session data available" />
 
   const sorted = [...data].sort((a, b) => b.count - a.count).slice(0, 10)
-  const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.name, 24) }))
+  const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.activityName, 24) }))
   const barHeight = 40
   const chartHeight = Math.max(200, chartData.length * barHeight + 60)
 
@@ -456,7 +451,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
             const label = performanceLabel(stat.passRate)
             return (
               <motion.tr
-                key={stat.id}
+                key={stat.activityId}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.04, duration: 0.25 }}
@@ -469,14 +464,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
                 }}
               >
                 <td style={TD_STYLE}>
-                  <div>
-                    <span style={{ color: '#f1f5f9', fontWeight: 500 }}>{stat.name}</span>
-                    {stat.activityType && (
-                      <p style={{ margin: '2px 0 0', fontSize: 11, color: '#475569' }}>
-                        {stat.activityType}
-                      </p>
-                    )}
-                  </div>
+                  <span style={{ color: '#f1f5f9', fontWeight: 500 }}>{stat.activityName}</span>
                 </td>
                 <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 600, color: '#94a3b8' }}>
                   {stat.count}
