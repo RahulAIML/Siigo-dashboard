@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { t } from '../lib/i18n'
 import {
   Users,
   UserCheck,
@@ -79,9 +80,10 @@ interface OrgTreeNodeProps {
   node:       OrgNode
   depth?:     number
   statsMap:   Map<string, UserStat>
+  language:   'es' | 'en'
 }
 
-function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
+function OrgTreeNode({ node, depth = 0, statsMap, language }: OrgTreeNodeProps) {
   const [expanded, setExpanded] = useState(true)
   const hasChildren = node.children.length > 0
   const stat = statsMap.get(node.email) ?? statsMap.get(String(node.id))
@@ -133,7 +135,7 @@ function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
         {/* Stats */}
         {stat && (
           <div className="flex items-center gap-3 text-xs text-muted-foreground hidden md:flex">
-            <span>{stat.count} sessions</span>
+            <span>{stat.count} {t('sessionsOrgCol', language)}</span>
             <span className={scoreColor(stat.avgScore)}>
               {stat.avgScore.toFixed(1)}
             </span>
@@ -143,7 +145,7 @@ function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
         {/* Child count */}
         {hasChildren && (
           <span className="text-xs text-muted-foreground">
-            {node.memberCount} member{node.memberCount !== 1 ? 's' : ''}
+            {node.memberCount} {node.memberCount !== 1 ? t('membersPluralLabel', language) : t('membersLabel', language)}
           </span>
         )}
       </div>
@@ -156,6 +158,7 @@ function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
               node={child}
               depth={depth + 1}
               statsMap={statsMap}
+              language={language}
             />
           ))}
         </div>
@@ -166,19 +169,19 @@ function OrgTreeNode({ node, depth = 0, statsMap }: OrgTreeNodeProps) {
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ disabled }: { disabled: number }) {
+function StatusBadge({ disabled, language }: { disabled: number; language: 'es' | 'en' }) {
   if (disabled) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
         <span className="w-1.5 h-1.5 rounded-full bg-red-400 block" />
-        Disabled
+        {t('disabledBadge', language)}
       </span>
     )
   }
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400">
       <span className="w-1.5 h-1.5 rounded-full bg-green-400 block" />
-      Active
+      {t('activeBadge', language)}
     </span>
   )
 }
@@ -250,40 +253,40 @@ export default function OrganizationPage() {
     <div className="flex flex-col gap-6">
       {/* Page header */}
       <PageHeader
-        title={language === 'es' ? 'Organización' : 'Organization'}
-        subtitle={language === 'es' ? 'Estructura del equipo, estado de inscripción y rendimiento por usuario.' : 'Team structure, enrollment status, and simulation performance per user.'}
+        title={t('orgTitle', language)}
+        subtitle={t('orgSubtitle', language)}
       />
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title={language === 'es' ? 'Total Inscritos' : 'Total Enrolled'}
+          title={t('totalEnrolled', language)}
           value={isLoading ? '—' : totalUsers}
-          subtitle={language === 'es' ? 'Todos los usuarios registrados' : 'All registered users'}
+          subtitle={t('allRegisteredUsers', language)}
           icon={Users}
           color="blue"
           loading={isLoading}
         />
         <KPICard
-          title={language === 'es' ? 'Asesores Activos' : 'Active Advisors'}
+          title={t('activeAdvisorsOrg', language)}
           value={isLoading ? '—' : activeUsers}
-          subtitle={language === 'es' ? 'Cuentas habilitadas' : 'Enabled accounts'}
+          subtitle={t('enabledAccounts', language)}
           icon={UserCheck}
           color="green"
           loading={isLoading}
         />
         <KPICard
-          title={language === 'es' ? 'Usuarios Inactivos' : 'Inactive Users'}
+          title={t('inactiveUsers', language)}
           value={isLoading ? '—' : disabledUsers}
-          subtitle={language === 'es' ? 'Cuentas deshabilitadas' : 'Disabled accounts'}
+          subtitle={t('disabledAccounts', language)}
           icon={UserX}
           color="red"
           loading={isLoading}
         />
         <KPICard
-          title={language === 'es' ? 'Niveles Org.' : 'Org Levels'}
-          value={isLoading ? '—' : (showTree ? (language === 'es' ? 'Jerárquico' : 'Hierarchy') : (language === 'es' ? 'Plano' : 'Flat'))}
-          subtitle={showTree ? (language === 'es' ? 'Estructura multinivel detectada' : 'Multi-level structure detected') : (language === 'es' ? 'Todos en nivel 0' : 'All users at level 0')}
+          title={t('orgLevels', language)}
+          value={isLoading ? '—' : (showTree ? t('hierarchy', language) : t('flat', language))}
+          subtitle={showTree ? t('multiLevelDetected', language) : t('allAtLevel0', language)}
           icon={Building2}
           color="violet"
           loading={isLoading}
@@ -301,13 +304,13 @@ export default function OrganizationPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <Building2 className="w-4 h-4 text-violet-400" />
-              {language === 'es' ? 'Árbol Organizacional' : 'Organizational Tree'}
+              {t('orgTree', language)}
             </h2>
             <button
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setViewMode(viewMode === 'tree' ? 'table' : 'tree')}
             >
-              {viewMode === 'tree' ? (language === 'es' ? 'Ver tabla' : 'Switch to table') : (language === 'es' ? 'Ver árbol' : 'Switch to tree')}
+              {viewMode === 'tree' ? t('switchToTable', language) : t('switchToTree', language)}
             </button>
           </div>
 
@@ -318,6 +321,7 @@ export default function OrganizationPage() {
                   key={node.id}
                   node={node}
                   statsMap={statsMap}
+                  language={language}
                 />
               ))}
             </div>
@@ -336,10 +340,10 @@ export default function OrganizationPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 border-b border-border/50">
           <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-400" />
-            {language === 'es' ? 'Directorio de Usuarios' : 'User Directory'}
+            {t('userDirectory', language)}
             {!isLoading && (
               <span className="text-xs font-normal text-muted-foreground ml-1">
-                ({filteredMembers.length} of {totalUsers})
+                ({filteredMembers.length} {t('pageOf', language)} {totalUsers})
               </span>
             )}
           </h2>
@@ -350,7 +354,7 @@ export default function OrganizationPage() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder={language === 'es' ? 'Buscar nombre o email…' : 'Search name or email…'}
+                placeholder={t('searchNameEmail', language)}
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-background border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
@@ -365,9 +369,9 @@ export default function OrganizationPage() {
                 onChange={(e) => handleStatus(e.target.value as 'all' | 'active' | 'disabled')}
                 className="pl-8 pr-3 py-1.5 text-sm rounded-lg bg-background border border-border/60 text-foreground appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 transition cursor-pointer"
               >
-                <option value="all">{language === 'es' ? 'Todos' : 'All'}</option>
-                <option value="active">{language === 'es' ? 'Activos' : 'Active'}</option>
-                <option value="disabled">{language === 'es' ? 'Inactivos' : 'Disabled'}</option>
+                <option value="all">{t('allStatus', language)}</option>
+                <option value="active">{t('activeStatus', language)}</option>
+                <option value="disabled">{t('disabledStatus', language)}</option>
               </select>
             </div>
           </div>
@@ -376,7 +380,7 @@ export default function OrganizationPage() {
         {/* Error state */}
         {isError && (
           <div className="px-5 py-10 text-center text-sm text-red-400">
-            {language === 'es' ? 'Error al cargar datos de organización. Recarga la página.' : 'Failed to load organization data. Please refresh the page.'}
+            {t('orgLoadError', language)}
           </div>
         )}
 
@@ -386,9 +390,7 @@ export default function OrganizationPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50">
-                  {(language === 'es'
-                    ? ['Nombre', 'Email', 'Nivel', 'Estado', 'Sesiones', 'Prom. Puntaje']
-                    : ['Name', 'Email', 'Level', 'Status', 'Sessions', 'Avg Score']
+                  {([t('name', language), t('email', language), t('levelCol', language), t('statusCol', language), t('sessionsOrgCol', language), t('avgScoreSort', language)]
                   ).map((col) => (
                     <th
                       key={col}
@@ -408,7 +410,7 @@ export default function OrganizationPage() {
                   ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground text-sm">
-                        {language === 'es' ? 'Ningún usuario coincide con tu búsqueda.' : 'No users match your search.'}
+                        {t('noUsersMatch', language)}
                       </td>
                     </tr>
                   )
@@ -458,7 +460,7 @@ export default function OrganizationPage() {
 
                           {/* Status */}
                           <td className="px-4 py-3">
-                            <StatusBadge disabled={member.disabled} />
+                            <StatusBadge disabled={member.disabled} language={language} />
                           </td>
 
                           {/* Sessions */}
@@ -494,7 +496,7 @@ export default function OrganizationPage() {
         {!isLoading && !isError && totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
-              {language === 'es' ? 'Página' : 'Page'} {page} {language === 'es' ? 'de' : 'of'} {totalPages} &mdash; {filteredMembers.length} {language === 'es' ? 'usuarios' : 'users'}
+              {t('pageLabel', language)} {page} {t('pageOf', language)} {totalPages} &mdash; {filteredMembers.length} {t('usersLabel', language)}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -502,7 +504,7 @@ export default function OrganizationPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="px-3 py-1.5 text-xs rounded-lg border border-border/50 text-foreground hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {language === 'es' ? 'Anterior' : 'Previous'}
+                {t('previousPage', language)}
               </button>
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
                 // Show pages around current
@@ -537,7 +539,7 @@ export default function OrganizationPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 className="px-3 py-1.5 text-xs rounded-lg border border-border/50 text-foreground hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {language === 'es' ? 'Siguiente' : 'Next'}
+                {t('nextPage', language)}
               </button>
             </div>
           </div>

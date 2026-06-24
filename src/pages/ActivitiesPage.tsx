@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import useAppStore from '../store'
+import { t } from '../lib/i18n'
 import {
   ResponsiveContainer,
   BarChart,
@@ -44,11 +45,11 @@ function performanceColor(passRate: number): string {
   return RED
 }
 
-function performanceLabel(passRate: number): string {
-  if (passRate >= 80) return 'Strong'
-  if (passRate >= PASS_THRESHOLD) return 'On Track'
-  if (passRate >= 40) return 'Developing'
-  return 'At Risk'
+function performanceLabel(passRate: number, lang: 'es' | 'en' = 'en'): string {
+  if (passRate >= 80) return t('strongStatus', lang)
+  if (passRate >= PASS_THRESHOLD) return t('onTrackStatus', lang)
+  if (passRate >= 40) return t('developingStatus', lang)
+  return t('atRiskStatus', lang)
 }
 
 function fmt1(n: number): string {
@@ -167,9 +168,9 @@ function SkeletonCard() {
 
 // ─── Activity summary card ────────────────────────────────────────────────────
 
-function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
+function ActivitySummaryCard({ stat, language }: { stat: ActivityStat; language: 'es' | 'en' }) {
   const color = performanceColor(stat.passRate ?? 0)
-  const label = performanceLabel(stat.passRate ?? 0)
+  const label = performanceLabel(stat.passRate ?? 0, language)
   const passRatePct = Math.min(100, Math.max(0, stat.passRate ?? 0))
 
   return (
@@ -232,21 +233,21 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
           gap: 10,
         }}
       >
-        <StatBox label="Sessions" value={String(stat.count ?? 0)} color="#94a3b8" />
-        <StatBox label="Avg Score" value={fmt1(stat.avgScore ?? 0)} color={(stat.avgScore ?? 0) >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
-        <StatBox label="Pass Rate" value={`${fmt1(stat.passRate ?? 0)}%`} color={color} />
+        <StatBox label={t('sessionsLabel', language)} value={String(stat.count ?? 0)} color="#94a3b8" />
+        <StatBox label={t('avgScoreLabel', language)} value={fmt1(stat.avgScore ?? 0)} color={(stat.avgScore ?? 0) >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
+        <StatBox label={t('passRateLabel', language)} value={`${fmt1(stat.passRate ?? 0)}%`} color={color} />
       </div>
 
       {/* Pass/Fail counts */}
       <div style={{ display: 'flex', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
           <CheckCircle2 style={{ width: 14, height: 14, color: GREEN }} />
-          <span style={{ color: '#94a3b8' }}>Pass:</span>
+          <span style={{ color: '#94a3b8' }}>{t('passLabel', language)}:</span>
           <span style={{ fontWeight: 700, color: GREEN }}>{stat.passCount ?? 0}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
           <XCircle style={{ width: 14, height: 14, color: RED }} />
-          <span style={{ color: '#94a3b8' }}>Fail:</span>
+          <span style={{ color: '#94a3b8' }}>{t('failLabel', language)}:</span>
           <span style={{ fontWeight: 700, color: RED }}>{stat.failCount ?? 0}</span>
         </div>
       </div>
@@ -254,7 +255,7 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
       {/* Pass rate progress bar */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-          <span style={{ fontSize: 11, color: '#64748b' }}>Pass Rate</span>
+          <span style={{ fontSize: 11, color: '#64748b' }}>{t('passRateLabel', language)}</span>
           <span style={{ fontSize: 11, fontWeight: 700, color }}>{fmt1(passRatePct)}%</span>
         </div>
         <div
@@ -349,7 +350,7 @@ function SessionsBarTooltip({ active, payload, label }: any) {
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <TooltipRow color="#94a3b8" label="Sessions"  value={String(stat?.count ?? 0)} />
-        <TooltipRow color={SIIGO_BLUE} label="Avg Score" value={`${fmt1(stat?.avgScore ?? 0)}`} />
+        <TooltipRow color={SIIGO_BLUE} label="Avg Score" value={fmt1(stat?.avgScore ?? 0)} />
         <TooltipRow color={GREEN}      label="Pass Rate" value={`${fmt1(stat?.passRate ?? 0)}%`} />
       </div>
     </div>
@@ -366,8 +367,8 @@ function TooltipRow({ color, label, value }: { color: string; label: string; val
   )
 }
 
-function SessionsBarChart({ data, isDark }: { data: ActivityStat[]; isDark: boolean }) {
-  if (!data || !data.length) return <EmptyState message="No session data available" />
+function SessionsBarChart({ data, isDark, language }: { data: ActivityStat[]; isDark: boolean; language: 'es' | 'en' }) {
+  if (!data || !data.length) return <EmptyState message={t('noSessionData', language)} />
 
   const sorted = [...data].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).slice(0, 10)
   const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.name ?? '', 24) }))
@@ -430,8 +431,8 @@ const TD_STYLE: React.CSSProperties = {
   verticalAlign: 'middle',
 }
 
-function DetailTable({ data }: { data: ActivityStat[] }) {
-  if (!data || !data.length) return <EmptyState message="No activity data to display" />
+function DetailTable({ data, language }: { data: ActivityStat[]; language: 'es' | 'en' }) {
+  if (!data || !data.length) return <EmptyState message={t('noActivityData', language)} />
 
   const sorted = [...data].sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
 
@@ -440,19 +441,19 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr>
-            <th style={TH_STYLE}>Activity</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Sessions</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Avg Score</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Pass Rate</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Pass</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Fail</th>
-            <th style={{ ...TH_STYLE, textAlign: 'center' }}>Status</th>
+            <th style={TH_STYLE}>{t('activity', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('sessionsLabel', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('avgScoreLabel', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('passRateLabel', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('passLabel', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('failLabel', language)}</th>
+            <th style={{ ...TH_STYLE, textAlign: 'center' }}>{t('statusLabel', language)}</th>
           </tr>
         </thead>
         <tbody>
           {sorted.map((stat, idx) => {
             const color = performanceColor(stat.passRate ?? 0)
-            const label = performanceLabel(stat.passRate ?? 0)
+            const label = performanceLabel(stat.passRate ?? 0, language)
             return (
               <motion.tr
                 key={stat.id}
@@ -560,10 +561,10 @@ function buildActivityTrend(trend: TrendPoint[]): ActivityTrendPoint[] {
   })
 }
 
-function ActivityTrendChart({ trend, isDark }: { trend: TrendPoint[]; isDark: boolean }) {
+function ActivityTrendChart({ trend, isDark, language }: { trend: TrendPoint[]; isDark: boolean; language: 'es' | 'en' }) {
   const chartData = useMemo(() => buildActivityTrend(trend), [trend])
 
-  if (!chartData.length) return <EmptyState message="No trend data available yet" />
+  if (!chartData.length) return <EmptyState message={t('noTrendData', language)} />
 
   return (
     <ResponsiveContainer width="100%" height={240}>
@@ -651,7 +652,7 @@ export default function ActivitiesPage() {
         }}
       >
         <XCircle style={{ width: 40, height: 40 }} />
-        <p style={{ margin: 0, fontWeight: 600 }}>Failed to load activity data</p>
+        <p style={{ margin: 0, fontWeight: 600 }}>{t('failedLoadActivity', language)}</p>
         {error && (
           <p style={{ margin: 0, fontSize: 12, color: MUTED }}>{error.message}</p>
         )}
@@ -703,12 +704,10 @@ export default function ActivitiesPage() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-fg)' }}>
-              {language === 'es' ? 'Actividades' : 'Activities'}
+              {t('activitiesTitle', language)}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: '#64748b', marginTop: 1 }}>
-              {language === 'es'
-                ? 'Desglose de uso del simulador, puntajes y tasas de aprobación por actividad'
-                : 'Simulator usage breakdown, scores, and pass rates per activity'}
+              {t('activitiesSubtitle', language)}
             </p>
           </div>
         </div>
@@ -716,12 +715,12 @@ export default function ActivitiesPage() {
         {/* Global summary chips */}
         {safeActivityStats.length > 0 && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-            <Chip label={language === 'es' ? 'Actividades' : 'Activities'} value={String(safeActivityStats.length)} color={SIIGO_BLUE} />
-            <Chip label={language === 'es' ? 'Total Sesiones' : 'Total Sessions'} value={String(totalSessions)} color="#94a3b8" />
-            <Chip label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score'} value={fmt1(overallAvgScore)} color={overallAvgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
-            <Chip label={language === 'es' ? 'Tasa Aprobación' : 'Overall Pass Rate'} value={`${fmt1(overallPassRate)}%`} color={performanceColor(overallPassRate)} />
-            <Chip label={language === 'es' ? 'Aprobados' : 'Passed'} value={String(totalPass)} color={GREEN} />
-            <Chip label={language === 'es' ? 'Reprobados' : 'Failed'} value={String(totalFail)} color={totalFail > 0 ? RED : MUTED} />
+            <Chip label={t('activitiesTitle', language)} value={String(safeActivityStats.length)} color={SIIGO_BLUE} />
+            <Chip label={t('totalSessions', language)} value={String(totalSessions)} color="#94a3b8" />
+            <Chip label={t('avgScoreLabel', language)} value={fmt1(overallAvgScore)} color={overallAvgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
+            <Chip label={t('overallPassRate', language)} value={`${fmt1(overallPassRate)}%`} color={performanceColor(overallPassRate)} />
+            <Chip label={t('approved', language)} value={String(totalPass)} color={GREEN} />
+            <Chip label={t('disapproved', language)} value={String(totalFail)} color={totalFail > 0 ? RED : MUTED} />
           </div>
         )}
       </motion.div>
@@ -745,12 +744,10 @@ export default function ActivitiesPage() {
         >
           <LayoutGrid style={{ width: 44, height: 44, opacity: 0.35 }} />
           <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#64748b' }}>
-            {language === 'es' ? 'Sin datos de actividades aún' : 'No activity data yet'}
+            {t('noActivityDataYet', language)}
           </p>
           <p style={{ margin: 0, fontSize: 13, color: MUTED, textAlign: 'center', maxWidth: 380 }}>
-            {language === 'es'
-              ? 'Las estadísticas de actividad aparecerán aquí cuando se completen sesiones de simulación.'
-              : 'Activity statistics will appear here once simulation sessions are completed.'}
+            {t('noActivityDataYetSub', language)}
           </p>
         </motion.div>
       ) : (
@@ -762,36 +759,36 @@ export default function ActivitiesPage() {
           }}
         >
           {safeActivityStats.map((stat) => (
-            <ActivitySummaryCard key={stat.id} stat={stat} />
+            <ActivitySummaryCard key={stat.id} stat={stat} language={language} />
           ))}
         </div>
       )}
 
       {/* ── 3. Sessions per activity (horizontal bar) ────────────────────── */}
       <Section
-        title={language === 'es' ? 'Sesiones por Actividad' : 'Sessions per Activity'}
-        subtitle={language === 'es' ? 'Número de sesiones de simulación completadas por actividad (top 10)' : 'Number of simulation sessions completed per activity (top 10)'}
+        title={t('sessionsPerActivity', language)}
+        subtitle={t('sessionsPerActivitySub', language)}
         icon={BarChart2}
       >
-        <SessionsBarChart data={safeActivityStats} isDark={isDark} />
+        <SessionsBarChart data={safeActivityStats} isDark={isDark} language={language} />
       </Section>
 
       {/* ── 4. Activity detail table ─────────────────────────────────────── */}
       <Section
-        title={language === 'es' ? 'Detalle de Actividad' : 'Activity Detail'}
-        subtitle={language === 'es' ? 'Desglose completo: sesiones, puntajes, aprobados/reprobados por actividad' : 'Full breakdown: sessions, scores, pass/fail counts per activity'}
+        title={t('activityDetail', language)}
+        subtitle={t('activityDetailSub', language)}
         icon={LayoutGrid}
       >
-        <DetailTable data={safeActivityStats} />
+        <DetailTable data={safeActivityStats} language={language} />
       </Section>
 
       {/* ── 5. Activity trend over time ──────────────────────────────────── */}
       <Section
-        title={language === 'es' ? 'Tendencia de Actividad en el Tiempo' : 'Activity Trend Over Time'}
-        subtitle={language === 'es' ? 'Volumen diario de sesiones — indica qué períodos están creciendo' : 'Daily session volume — indicates which periods are growing in usage'}
+        title={t('activityTrendTitle', language)}
+        subtitle={t('activityTrendSub', language)}
         icon={TrendingUp}
       >
-        <ActivityTrendChart trend={trend ?? []} isDark={isDark} />
+        <ActivityTrendChart trend={trend ?? []} isDark={isDark} language={language} />
       </Section>
     </div>
   )

@@ -407,9 +407,7 @@ export default function OverviewPage() {
                   </div>
                   <div>
                     <div className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                      {language === 'es'
-                        ? `La actividad con menor aprobación es:`
-                        : `Lowest approval rate activity:`}
+                      {t('lowestApprovalIs', language)}
                     </div>
                     <div className="mt-1 text-base font-black tracking-tight text-[#ff2138]">
                       {weakestActivity.name ?? ''}
@@ -429,9 +427,7 @@ export default function OverviewPage() {
                   <div className="flex-1">
                     <div className="text-xs font-bold text-slate-400">{t('recommendation', language)}</div>
                     <div className="mt-1 text-sm font-semibold leading-relaxed text-slate-700 dark:text-slate-200">
-                      {language === 'es'
-                        ? `Asigna más práctica de "${weakestActivity.name}" al equipo para mejorar la tasa de aprobación.`
-                        : `Assign more practice of "${weakestActivity.name}" to the team to improve the pass rate.`}
+                      {t('assignMorePracticePre', language)} "{weakestActivity.name}" {t('assignMorePracticePost', language)}
                     </div>
                   </div>
                 </div>

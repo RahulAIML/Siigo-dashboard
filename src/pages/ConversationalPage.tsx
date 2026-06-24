@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import useAppStore from '../store'
+import { t } from '../lib/i18n'
 import {
   ResponsiveContainer,
   BarChart,
@@ -133,19 +134,19 @@ function RoundCard({ stat, index, language }: { stat: RoundStat; index: number; 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2">
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground mb-0.5">Avg Score</span>
+          <span className="text-xs text-muted-foreground mb-0.5">{t('avgScoreCol', language)}</span>
           <span className="text-lg font-bold" style={{ color }}>
             {stat.avg.toFixed(1)}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground mb-0.5">{language === 'es' ? 'Tasa Aprob.' : 'Pass Rate'}</span>
+          <span className="text-xs text-muted-foreground mb-0.5">{t('passRateCol', language)}</span>
           <span className="text-lg font-bold text-foreground">
             {stat.passRate.toFixed(1)}%
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground mb-0.5">{language === 'es' ? 'Respuestas' : 'Responses'}</span>
+          <span className="text-xs text-muted-foreground mb-0.5">{t('responsesCol', language)}</span>
           <span className="text-lg font-bold text-foreground">
             {stat.count.toLocaleString()}
           </span>
@@ -288,7 +289,7 @@ function TierTableRow({ stat, language }: { stat: RoundStat; language: 'es' | 'e
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
-function EmptyState() {
+function EmptyState({ language }: { language: 'es' | 'en' }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
       <div
@@ -298,10 +299,9 @@ function EmptyState() {
         <MessageSquare className="w-7 h-7" style={{ color: SIIGO_BLUE }} />
       </div>
       <div className="text-center">
-        <p className="text-base font-semibold text-foreground">No interaction data yet</p>
+        <p className="text-base font-semibold text-foreground">{t('noInteractionData', language)}</p>
         <p className="text-sm mt-1 max-w-xs text-center">
-          Round-by-round analysis will appear here once simulations with interaction rounds are
-          completed.
+          {t('noInteractionSub', language)}
         </p>
       </div>
     </div>
@@ -378,13 +378,13 @@ export default function ConversationalPage() {
             <MessageSquare className="w-5 h-5" style={{ color: SIIGO_BLUE }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">{language === 'es' ? 'Análisis de Interacciones' : 'Interaction Analysis'}</h1>
+            <h1 className="text-xl font-bold text-foreground">{t('interactionAnalysis', language)}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {language === 'es' ? 'Rendimiento por ronda de interacción' : 'Round-by-round performance breakdown'}
+              {t('roundByRoundPerf', language)}
             </p>
           </div>
         </div>
-        <EmptyState />
+        <EmptyState language={language} />
       </div>
     )
   }
@@ -428,9 +428,9 @@ export default function ConversationalPage() {
             <MessageSquare className="w-5 h-5" style={{ color: SIIGO_BLUE }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">{language === 'es' ? 'Análisis de Interacciones' : 'Interaction Analysis'}</h1>
+            <h1 className="text-xl font-bold text-foreground">{t('interactionAnalysis', language)}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {language === 'es' ? 'Rendimiento por ronda en' : 'Round-by-round performance across'} {filteredSims.length.toLocaleString()} {language === 'es' ? 'simulación' : 'simulation'}
+              {t('roundPerformanceIn', language)} {filteredSims.length.toLocaleString()} {t('simulationSingular', language)}
               {filteredSims.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -443,7 +443,7 @@ export default function ConversationalPage() {
               className="text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ color: GREEN, backgroundColor: 'rgba(34,197,94,0.10)' }}
             >
-              {strongRounds.length} Strong
+              {strongRounds.length} {t('strongPerformers', language)}
             </span>
           )}
           {developingRounds.length > 0 && (
@@ -451,7 +451,7 @@ export default function ConversationalPage() {
               className="text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ color: AMBER, backgroundColor: 'rgba(245,158,11,0.10)' }}
             >
-              {developingRounds.length} Developing
+              {developingRounds.length} {t('developingLabel', language)}
             </span>
           )}
           {needsRounds.length > 0 && (
@@ -459,7 +459,7 @@ export default function ConversationalPage() {
               className="text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ color: RED, backgroundColor: 'rgba(239,68,68,0.10)' }}
             >
-              {needsRounds.length} Needs Coaching
+              {needsRounds.length} {t('needsCoachingLabel', language)}
             </span>
           )}
         </div>
@@ -477,16 +477,16 @@ export default function ConversationalPage() {
 
         {/* Radar */}
         <SectionCard
-          title="Round Comparison Radar"
-          subtitle={`Avg score vs pass rate across all ${roundStats.length} rounds`}
+          title={t('roundComparisonRadar', language)}
+          subtitle={`${t('radarSubtitle', language)} (${roundStats.length})`}
         >
           <RoundRadar data={roundStats} loading={isLoading} />
         </SectionCard>
 
         {/* Grouped bar chart */}
         <SectionCard
-          title="Round-by-Round Breakdown"
-          subtitle="Avg score and pass rate per interaction round"
+          title={t('roundByRoundBreakdown', language)}
+          subtitle={t('breakdownSubtitle', language)}
         >
           <ResponsiveContainer width="100%" height={280}>
             <BarChart
@@ -529,8 +529,8 @@ export default function ConversationalPage() {
 
       {/* ── 4. Performance tier table ────────────────────────────────────────── */}
       <SectionCard
-        title="Performance Tier Classification"
-        subtitle={`Strong ≥${STRONG_TIER}  |  Developing ${DEVELOPING_TIER}–${STRONG_TIER - 1}  |  Needs Coaching <${DEVELOPING_TIER}`}
+        title={t('perfTierClass', language)}
+        subtitle={`${t('strongPerformers', language)} ≥${STRONG_TIER}  |  ${t('developingLabel', language)} ${DEVELOPING_TIER}–${STRONG_TIER - 1}  |  ${t('needsCoachingLabel', language)} <${DEVELOPING_TIER}`}
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
           {/* Strong */}
@@ -541,13 +541,13 @@ export default function ConversationalPage() {
             <Award className="w-5 h-5 flex-shrink-0" style={{ color: GREEN }} />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: GREEN }}>
-                Strong Performers
+                {t('strongPerformers', language)}
               </p>
               <p className="text-lg font-bold text-foreground mt-0.5">
-                {strongRounds.length} Round{strongRounds.length !== 1 ? 's' : ''}
+                {strongRounds.length} {strongRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {strongRounds.map(r => r.label).join(', ') || 'None'}
+                {strongRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -560,13 +560,13 @@ export default function ConversationalPage() {
             <Zap className="w-5 h-5 flex-shrink-0" style={{ color: AMBER }} />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: AMBER }}>
-                Developing
+                {t('developingLabel', language)}
               </p>
               <p className="text-lg font-bold text-foreground mt-0.5">
-                {developingRounds.length} Round{developingRounds.length !== 1 ? 's' : ''}
+                {developingRounds.length} {developingRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {developingRounds.map(r => r.label).join(', ') || 'None'}
+                {developingRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -579,13 +579,13 @@ export default function ConversationalPage() {
             <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: RED }} />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: RED }}>
-                Needs Coaching
+                {t('needsCoachingLabel', language)}
               </p>
               <p className="text-lg font-bold text-foreground mt-0.5">
-                {needsRounds.length} Round{needsRounds.length !== 1 ? 's' : ''}
+                {needsRounds.length} {needsRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {needsRounds.map(r => r.label).join(', ') || 'None'}
+                {needsRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -597,19 +597,19 @@ export default function ConversationalPage() {
             <thead>
               <tr className="bg-muted/30">
                 <th className="py-2.5 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Round
+                  {t('roundCol', language)}
                 </th>
                 <th className="py-2.5 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">
-                  Avg Score
+                  {t('avgScoreCol', language)}
                 </th>
                 <th className="py-2.5 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">
-                  Pass Rate
+                  {t('passRateCol', language)}
                 </th>
                 <th className="py-2.5 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">
-                  Responses
+                  {t('responsesCol', language)}
                 </th>
                 <th className="py-2.5 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">
-                  Tier
+                  {t('tierCol', language)}
                 </th>
               </tr>
             </thead>
@@ -624,23 +624,23 @@ export default function ConversationalPage() {
 
       {/* ── 5. Feedback highlights ───────────────────────────────────────────── */}
       <SectionCard
-        title="Feedback Highlights"
-        subtitle="Key insights derived from round performance patterns"
+        title={t('feedbackHighlights', language)}
+        subtitle={t('feedbackSubtitle', language)}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Best round */}
           {bestRound ? (
             <FeedbackCard
               icon={TrendingUp}
-              label="Best Round"
+              label={t('bestRound', language)}
               roundLabel={bestRound.label}
-              value={`${bestRound.avg.toFixed(1)} avg`}
+              value={`${bestRound.avg.toFixed(1)} ${t('avgLabel', language)}`}
               color={GREEN}
-              description={`Highest average score across all rounds with a ${bestRound.passRate.toFixed(1)}% pass rate and ${bestRound.count.toLocaleString()} responses. Reps perform most confidently here.`}
+              description={`${t('highestAvgScore', language)} ${bestRound.passRate.toFixed(1)}% ${t('passRateCol', language).toLowerCase()} — ${bestRound.count.toLocaleString()} ${t('responsesCol', language).toLowerCase()}. ${t('performMostConf', language)}`}
             />
           ) : (
             <div className="rounded-xl border border-border/40 bg-muted/20 p-4 flex items-center justify-center text-xs text-muted-foreground">
-              No best round data
+              {t('noBestRoundData', language)}
             </div>
           )}
 
@@ -648,15 +648,15 @@ export default function ConversationalPage() {
           {worstRound ? (
             <FeedbackCard
               icon={TrendingDown}
-              label="Weakest Round"
+              label={t('weakestRound', language)}
               roundLabel={worstRound.label}
-              value={`${worstRound.avg.toFixed(1)} avg`}
+              value={`${worstRound.avg.toFixed(1)} ${t('avgLabel', language)}`}
               color={RED}
-              description={`Lowest average score with a ${worstRound.passRate.toFixed(1)}% pass rate. Priority target for coaching intervention and script reinforcement.`}
+              description={`${t('lowestAvgScore', language)} ${worstRound.passRate.toFixed(1)}% ${t('passRateCol', language).toLowerCase()}. ${t('priorityCoaching', language)}`}
             />
           ) : (
             <div className="rounded-xl border border-border/40 bg-muted/20 p-4 flex items-center justify-center text-xs text-muted-foreground">
-              No weakest round data
+              {t('noWeakestRoundData', language)}
             </div>
           )}
 
@@ -664,11 +664,11 @@ export default function ConversationalPage() {
           {mostImprovedRound ? (
             <FeedbackCard
               icon={Zap}
-              label="Most Improved"
+              label={t('mostImproved', language)}
               roundLabel={mostImprovedRound.stat.label}
               value={`+${mostImprovedRound.delta.toFixed(1)} pts`}
               color={AMBER}
-              description={`Largest positive jump between consecutive rounds. Reps show progressive adaptation and learning momentum entering this round.`}
+              description={t('largestPositiveJump', language)}
             />
           ) : (
             <div
@@ -678,12 +678,11 @@ export default function ConversationalPage() {
               <div className="flex items-center gap-2">
                 <Minus className="w-4 h-4 text-muted-foreground" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Most Improved
+                  {t('mostImproved', language)}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                No upward trend detected between rounds. Scores are flat or declining — review
-                simulation flow sequencing.
+                {t('noUpwardTrend', language)}
               </p>
             </div>
           )}
@@ -693,13 +692,13 @@ export default function ConversationalPage() {
         <div className="mt-4 pt-4 border-t border-border/30 flex items-center gap-2 text-xs text-muted-foreground">
           <Users className="w-3.5 h-3.5 flex-shrink-0" />
           <span>
-            Analysis based on{' '}
+            {t('analysisBasedOn', language)}{' '}
             <span className="font-semibold text-foreground">
               {filteredSims.length.toLocaleString()}
             </span>{' '}
-            simulation{filteredSims.length !== 1 ? 's' : ''} across{' '}
-            <span className="font-semibold text-foreground">{roundStats.length}</span> interaction
-            round{roundStats.length !== 1 ? 's' : ''}.
+            {t('simulationSingular', language)}{filteredSims.length !== 1 ? 's' : ''} {t('simulationsAcross', language)}{' '}
+            <span className="font-semibold text-foreground">{roundStats.length}</span>{' '}
+            {roundStats.length !== 1 ? t('interactionRounds', language) : t('interactionRound', language)}.
           </span>
         </div>
       </SectionCard>

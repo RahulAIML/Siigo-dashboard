@@ -72,7 +72,12 @@ function buildSimDetails(sim: Simulation) {
     const r = sim[`Respuesta_${i}` as keyof Simulation] as string | null
     const f = sim[`Retroalimentacion_${i}` as keyof Simulation] as string | null
     if (q || r) {
-      details.push({ sequence: i, ai_question: q ?? '—', user_response: r ?? '—', feedback: f ?? null })
+      details.push({
+        sequence:      i,
+        ai_question:   stripHtml(q ?? '—'),
+        user_response: stripHtml(r ?? '—'),
+        feedback:      f ? stripHtml(f) : null,
+      })
     }
   }
   return details
@@ -86,14 +91,14 @@ function PassFailBadge({ value, language }: { value: 'si' | 'no' | null; languag
   if (value === 'si') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-        {language === 'es' ? 'Aprobado' : 'Passed'}
+        {t('pass', language)}
       </span>
     )
   }
   if (value === 'no') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
-        {language === 'es' ? 'No aprobado' : 'Failed'}
+        {t('fail', language)}
       </span>
     )
   }
@@ -245,16 +250,19 @@ function SimReportModal({ sim, onClose, language }: SimReportModalProps) {
           )}
         </div>
 
-        {/* Closing analysis */}
-        {sim.closing_analysis && sim.closing_analysis.trim().length > 0 && (() => {
-          const text = stripHtml(sim.closing_analysis)
-          return text.length > 0 ? (
-            <div className="px-6 py-4 border-b border-slate-800">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t('closingAnalysis', language)}</h3>
-              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{text}</p>
-            </div>
-          ) : null
-        })()}
+        {/* Closing analysis — rendered as iframe to preserve full platform HTML styling */}
+        {sim.closing_analysis && sim.closing_analysis.trim().length > 0 && (
+          <div className="px-6 py-4 border-b border-slate-800">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{t('closingAnalysis', language)}</h3>
+            <iframe
+              srcDoc={sim.closing_analysis}
+              title="Closing Analysis"
+              sandbox="allow-same-origin"
+              className="w-full rounded-lg border border-slate-700"
+              style={{ height: 520, background: '#fff' }}
+            />
+          </div>
+        )}
 
         {/* Footer actions */}
         <div className="sticky bottom-0 px-6 py-4 bg-slate-900 border-t border-slate-700 flex items-center justify-between gap-3">
@@ -486,7 +494,7 @@ export default function SimulationsPage() {
   if (isError) {
     return (
       <div className="flex items-center justify-center h-64 text-[var(--color-muted)]">
-        <p>{language === 'es' ? 'Error al cargar simulaciones. Intente de nuevo.' : 'Error loading simulations. Please try again.'}</p>
+        <p>{t('errorLoadingSims', language)}</p>
       </div>
     )
   }
@@ -545,7 +553,7 @@ export default function SimulationsPage() {
             </svg>
             <input
               type="text"
-              placeholder={language === 'es' ? 'Buscar por usuario...' : 'Search by user...'}
+              placeholder={t('searchByUser', language)}
               value={searchRaw}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
@@ -569,7 +577,7 @@ export default function SimulationsPage() {
             onChange={(e) => handleActivityChange(e.target.value)}
             className="px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
           >
-            <option value="all">{language === 'es' ? 'Todas las actividades' : 'All activities'}</option>
+            <option value="all">{t('allActivities', language)}</option>
             {activityOptions.map((name) => (
               <option key={name} value={name}>{name}</option>
             ))}
@@ -593,10 +601,10 @@ export default function SimulationsPage() {
                 )}
               >
                 {v === 'all'
-                  ? (language === 'es' ? 'Todos' : 'All')
+                  ? t('allResult', language)
                   : v === 'passed'
-                  ? (language === 'es' ? 'Aprobados' : 'Passed')
-                  : (language === 'es' ? 'No aprobados' : 'Failed')}
+                  ? t('passedResult', language)
+                  : t('failedResult', language)}
               </button>
             ))}
           </div>
@@ -630,7 +638,7 @@ export default function SimulationsPage() {
                       <SortIcon col="date" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">{language === 'es' ? 'Acciones' : 'Actions'}</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">{t('actionsCol', language)}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-line)]">
@@ -641,8 +649,8 @@ export default function SimulationsPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-[var(--color-line)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p className="text-base font-medium text-[var(--color-fg)]">{language === 'es' ? 'Sin resultados' : 'No results'}</p>
-                        <p className="text-sm">{language === 'es' ? 'No hay simulaciones que coincidan con los filtros aplicados.' : 'No simulations match the applied filters.'}</p>
+                        <p className="text-base font-medium text-[var(--color-fg)]">{t('noResults', language)}</p>
+                        <p className="text-sm">{t('noSimsMatchFilters', language)}</p>
                       </div>
                     </td>
                   </tr>
@@ -756,7 +764,7 @@ export default function SimulationsPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between gap-4 text-sm">
             <p className="text-[var(--color-muted)]">
-              {language === 'es' ? 'Mostrando' : 'Showing'} {pageStart + 1}–{Math.min(pageEnd, displaySims.length)} {language === 'es' ? 'de' : 'of'} {displaySims.length}
+              {t('showing', language)} {pageStart + 1}–{Math.min(pageEnd, displaySims.length)} {t('pageOf', language)} {displaySims.length}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -767,7 +775,7 @@ export default function SimulationsPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                {language === 'es' ? 'Anterior' : 'Previous'}
+                {t('previousPage', language)}
               </button>
 
               {/* Page numbers — show up to 5 around current */}
@@ -808,7 +816,7 @@ export default function SimulationsPage() {
                 disabled={safePage === totalPages}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-[var(--color-fg)] hover:bg-[var(--color-bg-alt)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {language === 'es' ? 'Siguiente' : 'Next'}
+                {t('nextPage', language)}
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                 </svg>

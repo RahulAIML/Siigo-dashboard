@@ -309,7 +309,7 @@ function QuickExportCard({
         ) : (
           <Download className="w-3.5 h-3.5" />
         )}
-        {loading ? (language === 'es' ? 'Generando...' : 'Generating...') : (language === 'es' ? 'Descargar CSV' : 'Download CSV')}
+        {loading ? t('generating', language) : t('downloadCsv', language)}
       </button>
     </motion.div>
   )
@@ -457,9 +457,7 @@ export default function ReportsPage() {
 
       const adapted = adaptSims(simsInRange)
       exportSimulationsCSV(adapted, `siigo-export-${rangeFrom}_${rangeTo}.csv`)
-      addToast(language === 'es'
-        ? `Exportación generada: ${simsInRange.length} simulaciones.`
-        : `Export generated: ${simsInRange.length} simulations.`)
+      addToast(`${t('exportGenerated', language)}: ${simsInRange.length} ${t('simulationsWord', language)}.`)
     } catch {
       addToast(t('exportError', language), 'error')
     } finally {
@@ -481,23 +479,21 @@ export default function ReportsPage() {
             <FileText className="w-5 h-5 text-blue-500" />
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            {language === 'es' ? 'Reportes & Exportaciones' : 'Reports & Exports'}
+            {t('reportsTitle', language)}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground ml-12">
-          {language === 'es'
-            ? 'Descarga datos de rendimiento, simulaciones y certificaciones en formato CSV.'
-            : 'Download performance data, simulations, and certifications in CSV format.'}
+          {t('reportsSubtitle', language)}
         </p>
       </motion.div>
 
       {/* ── Quick export cards ────────────────────────────────────────────── */}
       <section>
-        <SectionTitle>{language === 'es' ? 'Exportación rápida' : 'Quick export'}</SectionTitle>
+        <SectionTitle>{t('quickExport', language)}</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <QuickExportCard
-            title={language === 'es' ? 'Resumen Ejecutivo' : 'Executive Summary'}
-            description={language === 'es' ? 'KPIs principales del periodo activo: simulaciones, aprobación, promedio.' : 'Key KPIs for the active period: simulations, pass rate, avg score.'}
+            title={t('execSummaryTitle', language)}
+            description={t('execSummaryDesc', language)}
             icon={BarChart2}
             color="blue"
             language={language}
@@ -505,8 +501,8 @@ export default function ReportsPage() {
             disabled={isLoading}
           />
           <QuickExportCard
-            title={language === 'es' ? 'Detalle de Simulaciones' : 'Simulation Detail'}
-            description={language === 'es' ? 'Todas las sesiones con usuario, puntaje, diagnóstico y fecha.' : 'All sessions with user, score, diagnosis, and date.'}
+            title={t('simDetailTitle', language)}
+            description={t('simDetailDesc', language)}
             icon={FileText}
             color="green"
             language={language}
@@ -514,8 +510,8 @@ export default function ReportsPage() {
             disabled={isLoading}
           />
           <QuickExportCard
-            title={language === 'es' ? 'Ranking de Asesores' : 'Advisor Ranking'}
-            description={language === 'es' ? 'Clasificación de asesores por puntaje promedio y tasa de aprobación.' : 'Advisor ranking by average score and pass rate.'}
+            title={t('advisorRankingTitle', language)}
+            description={t('advisorRankingDesc', language)}
             icon={Trophy}
             color="amber"
             language={language}
@@ -523,8 +519,8 @@ export default function ReportsPage() {
             disabled={isLoading || userStats.length === 0}
           />
           <QuickExportCard
-            title={language === 'es' ? 'Reporte de Certificación' : 'Certification Report'}
-            description={language === 'es' ? 'Estado de certificación por asesor: quién pasó y quién está pendiente.' : 'Certification status per advisor: who passed and who is pending.'}
+            title={t('certReportTitle', language)}
+            description={t('certReportDesc', language)}
             icon={Award}
             color="violet"
             language={language}
@@ -536,7 +532,7 @@ export default function ReportsPage() {
 
       {/* ── Export configuration ──────────────────────────────────────────── */}
       <section>
-        <SectionTitle>{language === 'es' ? 'Configuración de exportación' : 'Export configuration'}</SectionTitle>
+        <SectionTitle>{t('exportConfig', language)}</SectionTitle>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -623,7 +619,7 @@ export default function ReportsPage() {
 
       {/* ── Coming soon ───────────────────────────────────────────────────── */}
       <section>
-        <SectionTitle>{language === 'es' ? 'Funcionalidades en desarrollo' : 'Features in development'}</SectionTitle>
+        <SectionTitle>{t('featuresInDev', language)}</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <ComingSoonCard
             title={t('emailReports', language)}

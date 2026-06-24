@@ -146,8 +146,8 @@ export default function SettingsPage() {
     { value: 'last7',     label: t('lastWeek', language) },
     { value: 'last30',    label: t('lastMonth', language) },
     { value: 'last90',    label: t('last3Months', language) },
-    { value: 'thisMonth', label: language === 'es' ? 'Este mes'    : 'This month' },
-    { value: 'lastMonth', label: language === 'es' ? 'Mes anterior' : 'Last month' },
+    { value: 'thisMonth', label: t('thisMonth', language) },
+    { value: 'lastMonth', label: t('lastMonthLabel', language) },
     { value: 'all',       label: t('allTime', language) },
   ]
 
@@ -164,21 +164,19 @@ export default function SettingsPage() {
             {t('settings', language)}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {language === 'es'
-              ? 'Personaliza la experiencia del dashboard'
-              : 'Customize your dashboard experience'}
+            {t('settingsSubtitle', language)}
           </p>
         </div>
       </div>
 
       {/* ── Display settings ── */}
       <SectionCard
-        title={language === 'es' ? 'Visualización' : 'Display'}
+        title={t('displaySection', language)}
         icon={<Globe size={16} />}
       >
         <SettingRow
-          label={language === 'es' ? 'Idioma' : 'Language'}
-          description={language === 'es' ? 'Español / Inglés' : 'Spanish / English'}
+          label={t('languageLabel', language)}
+          description={t('languageDesc', language)}
         >
           <ToggleGroup
             value={language}
@@ -191,14 +189,14 @@ export default function SettingsPage() {
         </SettingRow>
 
         <SettingRow
-          label={language === 'es' ? 'Tema' : 'Theme'}
-          description={language === 'es' ? 'Modo claro u oscuro' : 'Light or dark mode'}
+          label={t('themeLabel', language)}
+          description={t('themeDesc', language)}
         >
           <ToggleGroup
             value={theme}
             options={[
-              { value: 'light', label: language === 'es' ? 'Claro' : 'Light' },
-              { value: 'dark',  label: language === 'es' ? 'Oscuro' : 'Dark' },
+              { value: 'light', label: t('lightTheme', language) },
+              { value: 'dark',  label: t('darkTheme', language) },
             ]}
             onChange={setTheme}
           />
@@ -207,16 +205,12 @@ export default function SettingsPage() {
 
       {/* ── Dashboard settings ── */}
       <SectionCard
-        title={language === 'es' ? 'Dashboard' : 'Dashboard'}
+        title={t('dashboardSection', language)}
         icon={<Calendar size={16} />}
       >
         <SettingRow
-          label={language === 'es' ? 'Rango de fechas predeterminado' : 'Default date range'}
-          description={
-            language === 'es'
-              ? 'Se aplica al cargar el dashboard'
-              : 'Applied when loading the dashboard'
-          }
+          label={t('defaultDateRange', language)}
+          description={t('defaultDateRangeDesc', language)}
         >
           <select
             value={datePreset}
@@ -232,12 +226,8 @@ export default function SettingsPage() {
         </SettingRow>
 
         <SettingRow
-          label={language === 'es' ? 'Umbral de aprobación' : 'Pass threshold'}
-          description={
-            language === 'es'
-              ? 'Puntaje mínimo para aprobar una simulación'
-              : 'Minimum score to pass a simulation'
-          }
+          label={t('passThreshold', language)}
+          description={t('passThresholdDesc', language)}
         >
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold px-3 py-1.5 border border-emerald-200 dark:border-emerald-700">
@@ -245,7 +235,7 @@ export default function SettingsPage() {
               {PASS_THRESHOLD}%
             </span>
             <span className="text-xs text-slate-400 dark:text-slate-500">
-              {language === 'es' ? '(fijo)' : '(fixed)'}
+              {t('fixedLabel', language)}
             </span>
           </div>
         </SettingRow>
@@ -253,16 +243,12 @@ export default function SettingsPage() {
 
       {/* ── Data settings ── */}
       <SectionCard
-        title={language === 'es' ? 'Datos y caché' : 'Data & cache'}
+        title={t('dataCacheSection', language)}
         icon={<Database size={16} />}
       >
         <SettingRow
-          label={language === 'es' ? 'Limpiar caché' : 'Clear cache'}
-          description={
-            language === 'es'
-              ? 'Elimina los datos almacenados localmente y fuerza una recarga'
-              : 'Removes locally stored data and forces a fresh fetch'
-          }
+          label={t('clearCache', language)}
+          description={t('clearCacheDesc', language)}
         >
           <button
             onClick={handleClearCache}
@@ -276,56 +262,50 @@ export default function SettingsPage() {
             {clearDone ? (
               <>
                 <CheckCircle size={13} />
-                {language === 'es' ? 'Limpiado' : 'Cleared'}
+                {t('cleared', language)}
               </>
             ) : (
               <>
                 <Trash2 size={13} />
-                {language === 'es' ? 'Limpiar caché' : 'Clear cache'}
+                {t('clearCache', language)}
               </>
             )}
           </button>
         </SettingRow>
 
         <SettingRow
-          label={language === 'es' ? 'Estado del caché' : 'Cache status'}
-          description={
-            language === 'es'
-              ? 'Última vez que se limpió el caché'
-              : 'Last time the cache was cleared'
-          }
+          label={t('cacheStatus', language)}
+          description={t('cacheStatusDesc', language)}
         >
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
             <RefreshCw size={12} />
             {lastCleared
               ? lastCleared
-              : language === 'es'
-              ? 'Sin limpiar en esta sesión'
-              : 'Not cleared this session'}
+              : t('notClearedThisSession', language)}
           </div>
         </SettingRow>
       </SectionCard>
 
       {/* ── About ── */}
       <SectionCard
-        title={language === 'es' ? 'Acerca de' : 'About'}
+        title={t('aboutSection', language)}
         icon={<Info size={16} />}
       >
         {[
           {
-            label:   language === 'es' ? 'Versión'   : 'Version',
+            label:   t('versionLabel', language),
             value:   '1.0.0',
           },
           {
-            label:   language === 'es' ? 'Plataforma' : 'Platform',
+            label:   t('platformLabel', language),
             value:   'Rolplay',
           },
           {
-            label:   language === 'es' ? 'Cliente'    : 'Client',
+            label:   t('clientLabel', language),
             value:   'SIIGO',
           },
           {
-            label:   language === 'es' ? 'Soporte'    : 'Support',
+            label:   t('supportLabel', language),
             value:   'soporte@rolplay.app',
             isEmail: true,
           },

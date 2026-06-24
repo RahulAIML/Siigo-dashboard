@@ -30,7 +30,7 @@ const sections: NavSection[] = [
   {
     titleKey: 'sectionGeneral',
     items: [
-      { labelEs: 'Overview', labelEn: 'Overview', path: '/', icon: LayoutDashboard },
+      { labelEs: 'Vista General', labelEn: 'Overview', path: '/', icon: LayoutDashboard },
     ],
   },
   {

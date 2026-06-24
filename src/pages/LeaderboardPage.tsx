@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store'
+import { t } from '../lib/i18n'
 import {
   Trophy,
   Medal,
@@ -50,7 +51,7 @@ function fmtPct(n: number): string {
 const MEDAL_CONFIG = [
   {
     rank: 1,
-    label: 'Gold',
+    labelKey: 'medalGold',
     icon: '🥇',
     ring: 'ring-yellow-400',
     bg: 'bg-yellow-400/10',
@@ -63,7 +64,7 @@ const MEDAL_CONFIG = [
   },
   {
     rank: 2,
-    label: 'Silver',
+    labelKey: 'medalSilver',
     icon: '🥈',
     ring: 'ring-slate-400',
     bg: 'bg-slate-400/10',
@@ -76,7 +77,7 @@ const MEDAL_CONFIG = [
   },
   {
     rank: 3,
-    label: 'Bronze',
+    labelKey: 'medalBronze',
     icon: '🥉',
     ring: 'ring-amber-700',
     bg: 'bg-amber-700/10',
@@ -116,9 +117,10 @@ interface PodiumCardProps {
   stat: UserStat
   position: number
   delay: number
+  language: 'es' | 'en'
 }
 
-function PodiumCard({ stat, position, delay }: PodiumCardProps) {
+function PodiumCard({ stat, position, delay, language }: PodiumCardProps) {
   const cfg = MEDAL_CONFIG[position]
 
   return (
@@ -156,7 +158,7 @@ function PodiumCard({ stat, position, delay }: PodiumCardProps) {
         <p className="font-semibold text-[var(--color-fg)] text-sm leading-tight max-w-[120px] truncate">
           {stat.name}
         </p>
-        <p className="text-xs text-[var(--color-muted)] mt-0.5">{cfg.label}</p>
+        <p className="text-xs text-[var(--color-muted)] mt-0.5">{t(cfg.labelKey, language)}</p>
       </div>
 
       {/* Score */}
@@ -164,26 +166,26 @@ function PodiumCard({ stat, position, delay }: PodiumCardProps) {
         <p className={cn('text-2xl font-bold tabular-nums', cfg.text)}>
           {fmtScore(stat.avgScore)}
         </p>
-        <p className="text-xs text-[var(--color-muted)]">avg score</p>
+        <p className="text-xs text-[var(--color-muted)]">{t('avgScoreSmall', language)}</p>
       </div>
 
       {/* Stats row */}
       <div className="flex gap-4 text-center">
         <div>
           <p className="text-xs font-semibold text-[var(--color-fg)]">{stat.count}</p>
-          <p className="text-[10px] text-[var(--color-muted)]">sims</p>
+          <p className="text-[10px] text-[var(--color-muted)]">{t('simsSmall', language)}</p>
         </div>
         <div>
           <p className="text-xs font-semibold text-[var(--color-fg)]">
             {fmtScore(stat.bestScore)}
           </p>
-          <p className="text-[10px] text-[var(--color-muted)]">best</p>
+          <p className="text-[10px] text-[var(--color-muted)]">{t('bestSmall', language)}</p>
         </div>
         <div>
           <p className="text-xs font-semibold text-[var(--color-fg)]">
             {fmtPct(stat.passRate)}
           </p>
-          <p className="text-[10px] text-[var(--color-muted)]">pass</p>
+          <p className="text-[10px] text-[var(--color-muted)]">{t('passSmall', language)}</p>
         </div>
       </div>
 
@@ -348,8 +350,8 @@ export default function LeaderboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3 text-[var(--color-muted)]">
         <Trophy className="w-12 h-12 opacity-30" />
-        <p className="text-lg font-medium">{language === 'es' ? 'Sin datos de simulaciones' : 'No simulation data available'}</p>
-        <p className="text-sm">{language === 'es' ? 'Completa simulaciones para ver el ranking.' : 'Run some simulations to see the leaderboard.'}</p>
+        <p className="text-lg font-medium">{t('noSimData', language)}</p>
+        <p className="text-sm">{t('noSimDataSub', language)}</p>
       </div>
     )
   }
@@ -369,8 +371,8 @@ export default function LeaderboardPage() {
             <Trophy className="w-5 h-5 text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-fg)]">{language === 'es' ? 'Ranking' : 'Leaderboard'}</h1>
-            <p className="text-sm text-[var(--color-muted)]">{language === 'es' ? 'Mejores Desempeños' : 'Top Performers'}</p>
+            <h1 className="text-2xl font-bold text-[var(--color-fg)]">{t('leaderboardTitle', language)}</h1>
+            <p className="text-sm text-[var(--color-muted)]">{t('topPerformers', language)}</p>
           </div>
         </div>
       </motion.div>
@@ -379,21 +381,21 @@ export default function LeaderboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <SummaryCard
           icon={Users}
-          label={language === 'es' ? 'Total Asesores' : 'Total Advisors'}
+          label={t('totalAdvisors', language)}
           value={String(userStats.length)}
           color="#0066FF"
           delay={0.05}
         />
         <SummaryCard
           icon={TrendingUp}
-          label={language === 'es' ? 'Prom. Puntaje' : 'Avg Score (All)'}
+          label={t('avgScoreAll', language)}
           value={fmtScore(kpis.averageScore ?? 0)}
           color="#10B981"
           delay={0.1}
         />
         <SummaryCard
           icon={Award}
-          label={language === 'es' ? 'Tasa de Certificación' : 'Certification Rate'}
+          label={t('certificationRate', language)}
           value={fmtPct(certRate)}
           color="#8B5CF6"
           delay={0.15}
@@ -405,16 +407,16 @@ export default function LeaderboardPage() {
         <div>
           <h2 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-4 flex items-center gap-2">
             <Medal className="w-4 h-4" />
-            {language === 'es' ? 'Top 3 Podio' : 'Top 3 Podium'}
+            {t('topPodium', language)}
           </h2>
           {/* Order: 2nd | 1st | 3rd */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             {podium.length >= 2 && (
-              <PodiumCard stat={podium[1]} position={1} delay={0.15} />
+              <PodiumCard stat={podium[1]} position={1} delay={0.15} language={language} />
             )}
-            <PodiumCard stat={podium[0]} position={0} delay={0.05} />
+            <PodiumCard stat={podium[0]} position={0} delay={0.05} language={language} />
             {podium.length >= 3 && (
-              <PodiumCard stat={podium[2]} position={2} delay={0.25} />
+              <PodiumCard stat={podium[2]} position={2} delay={0.25} language={language} />
             )}
           </div>
         </div>
@@ -436,7 +438,7 @@ export default function LeaderboardPage() {
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder={language === 'es' ? 'Buscar por nombre...' : 'Search by name...'}
+              placeholder={t('searchByName', language)}
               className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
             />
           </div>
@@ -445,7 +447,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center gap-3 flex-wrap">
             {/* Top N filter */}
             <div className="flex items-center gap-1">
-              <span className="text-xs text-[var(--color-muted)] mr-1">Show:</span>
+              <span className="text-xs text-[var(--color-muted)] mr-1">{t('showLabel', language)}</span>
               {([10, 25, 'all'] as TopNFilter[]).map((n) => (
                 <button
                   key={String(n)}
@@ -457,7 +459,7 @@ export default function LeaderboardPage() {
                       : 'bg-[var(--color-bg-alt)] text-[var(--color-muted)] hover:bg-[var(--color-line)]',
                   )}
                 >
-                  {n === 'all' ? 'All' : `Top ${n}`}
+                  {n === 'all' ? t('allFilter', language) : `Top ${n}`}
                 </button>
               ))}
             </div>
@@ -466,17 +468,17 @@ export default function LeaderboardPage() {
             <div className="flex items-center gap-1">
               <ArrowUpDown className="w-3 h-3 text-[var(--color-muted)]" />
               <SortButton
-                label="Avg Score"
+                label={t('avgScoreSort', language)}
                 active={sortKey === 'avgScore'}
                 onClick={() => handleSort('avgScore')}
               />
               <SortButton
-                label="Best Score"
+                label={t('bestScoreSort', language)}
                 active={sortKey === 'bestScore'}
                 onClick={() => handleSort('bestScore')}
               />
               <SortButton
-                label="Attempts"
+                label={t('attemptsSort', language)}
                 active={sortKey === 'count'}
                 onClick={() => handleSort('count')}
               />
@@ -490,22 +492,22 @@ export default function LeaderboardPage() {
             <thead>
               <tr className="border-b border-[var(--color-line)] bg-[var(--color-bg-alt)]">
                 <th className="py-3 px-4 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide w-12">
-                  {language === 'es' ? 'Puesto' : 'Rank'}
+                  {t('rank', language)}
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
-                  {language === 'es' ? 'Nombre' : 'Name'}
+                  {t('name', language)}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
-                  {language === 'es' ? 'Simulaciones' : 'Simulations'}
+                  {t('simulationsWord', language)}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
-                  {language === 'es' ? 'Prom. Puntaje' : 'Avg Score'}
+                  {t('avgScoreSort', language)}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
-                  {language === 'es' ? 'Tasa Aprobación' : 'Pass Rate'}
+                  {t('passRate', language)}
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
-                  {language === 'es' ? 'Mejor Puntaje' : 'Best Score'}
+                  {t('bestScore', language)}
                 </th>
               </tr>
             </thead>
@@ -514,7 +516,7 @@ export default function LeaderboardPage() {
                 {pageRows.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-[var(--color-muted)] text-sm">
-                      {language === 'es' ? 'Ningún asesor coincide con tu búsqueda.' : 'No advisors match your search.'}
+                      {t('noAdvisorsMatch', language)}
                     </td>
                   </tr>
                 ) : (
@@ -620,16 +622,16 @@ export default function LeaderboardPage() {
         {totalPages > 1 && (
           <div className="p-4 border-t border-[var(--color-line)] flex items-center justify-between">
             <p className="text-xs text-[var(--color-muted)]">
-              Showing{' '}
+              {t('showingOf', language)}{' '}
               <span className="font-medium text-[var(--color-fg)]">
                 {(safePage - 1) * PAGE_SIZE + 1}–
                 {Math.min(safePage * PAGE_SIZE, afterSearch.length)}
               </span>{' '}
-              of{' '}
+              {t('pageOf', language)}{' '}
               <span className="font-medium text-[var(--color-fg)]">
                 {afterSearch.length}
               </span>{' '}
-              advisors
+              {t('advisorsLabel', language)}
             </p>
 
             <div className="flex items-center gap-2">
