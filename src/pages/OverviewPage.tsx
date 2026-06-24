@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CheckCircle2,
   Download,
@@ -86,7 +87,7 @@ function SectionHeader({ title, action, onAction }: { title: string; action?: st
   return (
     <div className="mb-4 flex items-center justify-between">
       <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">{title}</h3>
-      {action && (
+      {action && onAction && (
         <button
           onClick={onAction}
           className="text-xs font-semibold text-[#0066FF] dark:text-blue-400 hover:underline"
@@ -108,6 +109,7 @@ function EmptyInsight({ message }: { message: string }) {
 }
 
 export default function OverviewPage() {
+  const navigate = useNavigate()
   const language = useAppStore((state) => state.language)
   const datePreset = useAppStore((state) => state.datePreset)
   const setDatePreset = useAppStore((state) => state.setDatePreset)
@@ -351,7 +353,10 @@ export default function OverviewPage() {
                   </div>
                 </div>
               ))}
-              <button className="mt-4 w-full rounded-2xl border border-[var(--color-line)] px-4 py-2.5 text-xs font-bold text-[#0066FF] dark:text-blue-400 transition hover:bg-[var(--color-bg-alt)]">
+              <button
+                onClick={() => navigate('/activities')}
+                className="mt-4 w-full rounded-2xl border border-[var(--color-line)] px-4 py-2.5 text-xs font-bold text-[#0066FF] dark:text-blue-400 transition hover:bg-[var(--color-bg-alt)]"
+              >
                 {t('viewAllActivities', language)}
               </button>
             </div>
@@ -362,7 +367,11 @@ export default function OverviewPage() {
 
         {/* Top Advisors */}
         <Card>
-          <SectionHeader title={t('topPerformers', language)} action={t('viewAll', language)} />
+          <SectionHeader
+            title={t('topPerformers', language)}
+            action={t('viewAll', language)}
+            onAction={() => navigate('/leaderboard')}
+          />
           {topAdvisors.length > 0 ? (
             <div className="space-y-4">
               {topAdvisors.map((advisor, index) => (
