@@ -174,10 +174,27 @@ class ErrorBoundary extends Component<
 
   override componentDidCatch(error: unknown, info: React.ErrorInfo) {
     console.error('[ErrorBoundary]', error, info)
+    const msg = error instanceof Error ? error.message : String(error)
+    if (/dynamically imported module|Loading chunk|Failed to fetch/i.test(msg)) {
+      const KEY = 'errb_chunk_reload'
+      if (!sessionStorage.getItem(KEY)) {
+        sessionStorage.setItem(KEY, '1')
+        window.location.reload()
+      }
+    }
   }
 
   override render() {
     if (this.state.hasError) {
+      const isChunk = /dynamically imported module|Loading chunk|Failed to fetch/i.test(this.state.message)
+      if (isChunk) {
+        return (
+          <div className="flex flex-col items-center justify-center h-screen gap-4 text-slate-400 bg-slate-900 p-8">
+            <span className="text-4xl animate-spin">&#8635;</span>
+            <p className="text-base font-medium">Updating dashboard…</p>
+          </div>
+        )
+      }
       return (
         <div className="flex flex-col items-center justify-center h-screen gap-4 text-slate-300 bg-slate-900 p-8">
           <span className="text-5xl">&#9888;</span>

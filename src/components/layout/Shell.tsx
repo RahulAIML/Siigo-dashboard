@@ -16,13 +16,15 @@ export default function Shell() {
   }, [theme])
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="flex h-screen overflow-hidden bg-[var(--color-bg)] text-[var(--color-fg)] transition-colors">
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto px-4 py-5 md:px-7 md:py-6">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto">
+          <div className="px-5 py-5 md:px-7 md:py-6">
+            <Outlet />
+          </div>
         </main>
       </div>
 

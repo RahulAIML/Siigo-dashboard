@@ -28,16 +28,22 @@ function scoreColor(score: number | null): string {
   return 'text-red-400'
 }
 
+function parseDbDate(raw: string): Date {
+  // MySQL returns "2026-06-23 21:05:05" — replace space with T so JS parses it
+  // as local time rather than producing an invalid date
+  return new Date(raw.includes('T') ? raw : raw.replace(' ', 'T'))
+}
+
 function formatDate(raw: string | null | undefined): string {
   if (!raw) return '—'
-  const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00')
+  const d = parseDbDate(raw)
   if (isNaN(d.getTime())) return raw
   return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 function formatDateTime(raw: string | null | undefined): string {
   if (!raw) return '—'
-  const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00')
+  const d = parseDbDate(raw)
   if (isNaN(d.getTime())) return raw
   return d.toLocaleString('es-MX', {
     year: 'numeric',
@@ -46,6 +52,17 @@ function formatDateTime(raw: string | null | undefined): string {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function stripHtml(html: string): string {
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    // Remove style/script elements entirely
+    doc.querySelectorAll('style,script').forEach((el) => el.remove())
+    return (doc.body.textContent ?? '').trim()
+  } catch {
+    return html.replace(/<[^>]+>/g, '').trim()
+  }
 }
 
 function buildSimDetails(sim: Simulation) {
@@ -228,12 +245,15 @@ function SimReportModal({ sim, onClose }: SimReportModalProps) {
         </div>
 
         {/* Closing analysis */}
-        {sim.closing_analysis && sim.closing_analysis.trim().length > 0 && (
-          <div className="px-6 py-4 border-b border-slate-800">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Análisis de Cierre</h3>
-            <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{sim.closing_analysis.trim()}</p>
-          </div>
-        )}
+        {sim.closing_analysis && sim.closing_analysis.trim().length > 0 && (() => {
+          const text = stripHtml(sim.closing_analysis)
+          return text.length > 0 ? (
+            <div className="px-6 py-4 border-b border-slate-800">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Análisis de Cierre</h3>
+              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{text}</p>
+            </div>
+          ) : null
+        })()}
 
         {/* Footer actions */}
         <div className="sticky bottom-0 px-6 py-4 bg-slate-900 border-t border-slate-700 flex items-center justify-between gap-3">
@@ -280,30 +300,30 @@ function ExpandedRow({ sim }: { sim: Simulation }) {
 
   if (details.length === 0) {
     return (
-      <div className="px-6 py-4 text-sm text-slate-500 italic">
+      <div className="px-6 py-4 text-sm text-[var(--color-muted)] italic">
         Sin detalle de interacciones disponible.
       </div>
     )
   }
 
   return (
-    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-800/30">
+    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       {details.map((d) => (
-        <div key={d.sequence} className="rounded-xl bg-slate-800/70 border border-slate-700/40 p-3">
+        <div key={d.sequence} className="rounded-xl bg-[var(--color-bg-alt)] border border-[var(--color-line)] p-3">
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600/80 text-white text-xs font-bold">
               {d.sequence}
             </span>
-            <span className="text-xs font-semibold text-indigo-300">Interacción #{d.sequence}</span>
+            <span className="text-xs font-semibold text-indigo-400">Interacción #{d.sequence}</span>
           </div>
-          <p className="text-xs text-slate-500 font-medium mb-0.5">Pregunta AI</p>
-          <p className="text-xs text-slate-300 mb-2 line-clamp-2">{d.ai_question}</p>
-          <p className="text-xs text-slate-500 font-medium mb-0.5">Respuesta</p>
-          <p className="text-xs text-slate-300 line-clamp-2">{d.user_response}</p>
+          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">Pregunta AI</p>
+          <p className="text-xs text-[var(--color-fg)] mb-2 line-clamp-2">{d.ai_question}</p>
+          <p className="text-xs text-[var(--color-muted)] font-medium mb-0.5">Respuesta</p>
+          <p className="text-xs text-[var(--color-fg)] line-clamp-2">{d.user_response}</p>
           {d.feedback && (
             <>
-              <p className="text-xs text-amber-400/70 font-medium mt-2 mb-0.5">Retroalimentación</p>
-              <p className="text-xs text-slate-400 line-clamp-2">{d.feedback}</p>
+              <p className="text-xs text-amber-500 font-medium mt-2 mb-0.5">Retroalimentación</p>
+              <p className="text-xs text-[var(--color-muted)] line-clamp-2">{d.feedback}</p>
             </>
           )}
         </div>
@@ -435,7 +455,7 @@ export default function SimulationsPage() {
   function SortIcon({ col }: { col: SortKey }) {
     if (sortKey !== col) {
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-slate-600" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-[var(--color-muted)]" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5 10a1 1 0 011-1h8a1 1 0 010 2H6a1 1 0 01-1-1zM3 6a1 1 0 011-1h12a1 1 0 010 2H4a1 1 0 01-1-1zm4 8a1 1 0 011-1h4a1 1 0 010 2H8a1 1 0 01-1-1z" />
         </svg>
       )
@@ -455,16 +475,16 @@ export default function SimulationsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4 p-6 animate-pulse">
-        <div className="h-8 w-64 rounded bg-slate-700/40" />
-        <div className="h-12 rounded-xl bg-slate-700/30" />
-        <div className="h-96 rounded-xl bg-slate-700/20" />
+        <div className="h-8 w-64 rounded bg-[var(--color-line)]" />
+        <div className="h-12 rounded-xl bg-[var(--color-line)]" />
+        <div className="h-96 rounded-xl bg-[var(--color-bg-alt)]" />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
+      <div className="flex items-center justify-center h-64 text-[var(--color-muted)]">
         <p>{language === 'es' ? 'Error al cargar simulaciones. Intente de nuevo.' : 'Error loading simulations. Please try again.'}</p>
       </div>
     )
@@ -485,7 +505,7 @@ export default function SimulationsPage() {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-white">{t('simulations', language)}</h1>
+            <h1 className="text-xl font-semibold text-[var(--color-fg)]">{t('simulations', language)}</h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
               {filteredSims.length} total
             </span>
@@ -500,7 +520,7 @@ export default function SimulationsPage() {
           <button
             onClick={handleExportCSV}
             disabled={displaySims.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-bg-alt)] hover:bg-[var(--color-line)] border border-[var(--color-line)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--color-fg)] text-sm font-medium transition-colors self-start sm:self-auto"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -515,7 +535,7 @@ export default function SimulationsPage() {
           <div className="relative flex-1 max-w-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-muted)] pointer-events-none"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -526,12 +546,12 @@ export default function SimulationsPage() {
               placeholder={language === 'es' ? 'Buscar por usuario...' : 'Search by user...'}
               value={searchRaw}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
+              className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
             />
             {searchRaw && (
               <button
                 onClick={() => handleSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
                 aria-label="Limpiar búsqueda"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -545,7 +565,7 @@ export default function SimulationsPage() {
           <select
             value={activityFilter}
             onChange={(e) => handleActivityChange(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
+            className="px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
           >
             <option value="all">{language === 'es' ? 'Todas las actividades' : 'All activities'}</option>
             {activityOptions.map((name) => (
@@ -554,7 +574,7 @@ export default function SimulationsPage() {
           </select>
 
           {/* Result filter */}
-          <div className="flex rounded-lg overflow-hidden border border-slate-700 text-sm">
+          <div className="flex rounded-lg overflow-hidden border border-[var(--color-line)] text-sm">
             {(['all', 'passed', 'failed'] as const).map((v) => (
               <button
                 key={v}
@@ -567,7 +587,7 @@ export default function SimulationsPage() {
                       : v === 'passed'
                         ? 'bg-emerald-600 text-white'
                         : 'bg-red-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700',
+                    : 'bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-alt)]',
                 )}
               >
                 {v === 'all'
@@ -581,16 +601,16 @@ export default function SimulationsPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-slate-700/60 overflow-hidden bg-slate-900/60">
+        <div className="rounded-xl border border-[var(--color-line)] overflow-hidden bg-[var(--color-card)]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700/60 bg-slate-800/60">
-                  <th className="w-10 px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">{t('name', language)}</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[160px]">{t('activity', language)}</th>
+                <tr className="border-b border-[var(--color-line)] bg-[var(--color-bg-alt)]">
+                  <th className="w-10 px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">#</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider min-w-[160px]">{t('name', language)}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider min-w-[160px]">{t('activity', language)}</th>
                   <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none group"
+                    className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider cursor-pointer select-none group"
                     onClick={() => toggleSort('score')}
                   >
                     <span className="inline-flex items-center gap-1.5">
@@ -598,9 +618,9 @@ export default function SimulationsPage() {
                       <SortIcon col="score" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('result', language)}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">{t('result', language)}</th>
                   <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none"
+                    className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider cursor-pointer select-none"
                     onClick={() => toggleSort('date')}
                   >
                     <span className="inline-flex items-center gap-1.5">
@@ -608,18 +628,18 @@ export default function SimulationsPage() {
                       <SortIcon col="date" />
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">{language === 'es' ? 'Acciones' : 'Actions'}</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">{language === 'es' ? 'Acciones' : 'Actions'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700/40">
+              <tbody className="divide-y divide-[var(--color-line)]">
                 {pageSims.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-4 py-16 text-center">
-                      <div className="flex flex-col items-center gap-3 text-slate-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="flex flex-col items-center gap-3 text-[var(--color-muted)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-[var(--color-line)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p className="text-base font-medium text-slate-400">{language === 'es' ? 'Sin resultados' : 'No results'}</p>
+                        <p className="text-base font-medium text-[var(--color-fg)]">{language === 'es' ? 'Sin resultados' : 'No results'}</p>
                         <p className="text-sm">{language === 'es' ? 'No hay simulaciones que coincidan con los filtros aplicados.' : 'No simulations match the applied filters.'}</p>
                       </div>
                     </td>
@@ -634,27 +654,27 @@ export default function SimulationsPage() {
                           className={cn(
                             'group transition-colors cursor-pointer',
                             isExpanded
-                              ? 'bg-slate-800/60'
-                              : 'hover:bg-slate-800/40',
+                              ? 'bg-[var(--color-bg-alt)]'
+                              : 'hover:bg-[var(--color-bg-alt)]',
                           )}
                           onClick={() => toggleExpand(sim.ID_Sim)}
                         >
                           {/* # */}
-                          <td className="px-4 py-3 text-slate-500 text-xs font-mono">{globalIdx}</td>
+                          <td className="px-4 py-3 text-[var(--color-muted)] text-xs font-mono">{globalIdx}</td>
 
                           {/* Usuario */}
                           <td className="px-4 py-3">
-                            <span className="text-slate-200 font-medium truncate block max-w-[160px]">
-                              {sim.Usuario_Nombre || <span className="text-slate-500 italic">—</span>}
+                            <span className="text-[var(--color-fg)] font-medium truncate block max-w-[160px]">
+                              {sim.Usuario_Nombre || <span className="text-[var(--color-muted)] italic">—</span>}
                             </span>
                             {sim.Usuario && (
-                              <span className="text-slate-500 text-xs truncate block max-w-[160px]">{sim.Usuario}</span>
+                              <span className="text-[var(--color-muted)] text-xs truncate block max-w-[160px]">{sim.Usuario}</span>
                             )}
                           </td>
 
                           {/* Actividad */}
                           <td className="px-4 py-3">
-                            <span className="text-slate-300 truncate block max-w-[180px]" title={sim.Actividad}>
+                            <span className="text-[var(--color-fg)] truncate block max-w-[180px]" title={sim.Actividad}>
                               {sim.Actividad || '—'}
                             </span>
                           </td>
@@ -674,7 +694,7 @@ export default function SimulationsPage() {
                           </td>
 
                           {/* Fecha */}
-                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                          <td className="px-4 py-3 text-[var(--color-muted)] whitespace-nowrap">
                             {formatDate(sim.Fecha_y_Hora)}
                           </td>
 
@@ -684,7 +704,7 @@ export default function SimulationsPage() {
                               {/* Expand indicator */}
                               <button
                                 onClick={(e) => { e.stopPropagation(); toggleExpand(sim.ID_Sim) }}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-700 transition-colors"
+                                className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-alt)] transition-colors"
                                 aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
                                 title={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
                               >
@@ -700,7 +720,7 @@ export default function SimulationsPage() {
                               {/* Open modal */}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setModalSim(sim) }}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-300 hover:bg-indigo-600/20 transition-colors"
+                                className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
                                 aria-label="Ver reporte completo"
                                 title="Ver reporte completo"
                               >
@@ -715,7 +735,7 @@ export default function SimulationsPage() {
 
                         {/* Expanded detail row */}
                         {isExpanded && (
-                          <tr className="bg-slate-800/30">
+                          <tr className="bg-[var(--color-bg-alt)]">
                             <td colSpan={7} className="p-0">
                               <ExpandedRow sim={sim} />
                             </td>
@@ -733,14 +753,14 @@ export default function SimulationsPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between gap-4 text-sm">
-            <p className="text-slate-500">
+            <p className="text-[var(--color-muted)]">
               {language === 'es' ? 'Mostrando' : 'Showing'} {pageStart + 1}–{Math.min(pageEnd, displaySims.length)} {language === 'es' ? 'de' : 'of'} {displaySims.length}
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-[var(--color-fg)] hover:bg-[var(--color-bg-alt)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -768,7 +788,7 @@ export default function SimulationsPage() {
                           'w-8 h-8 rounded-lg text-sm font-medium transition-colors',
                           safePage === item
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-200',
+                            : 'bg-[var(--color-surface)] border border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-fg)]',
                         )}
                       >
                         {item}
@@ -777,14 +797,14 @@ export default function SimulationsPage() {
                   )}
               </div>
 
-              <span className="sm:hidden text-slate-500">
+              <span className="sm:hidden text-[var(--color-muted)]">
                 {safePage} / {totalPages}
               </span>
 
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-line)] text-[var(--color-fg)] hover:bg-[var(--color-bg-alt)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {language === 'es' ? 'Siguiente' : 'Next'}
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

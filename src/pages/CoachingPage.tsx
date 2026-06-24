@@ -78,9 +78,9 @@ function SectionHeader({
         <Icon className="w-4 h-4" style={{ color }} />
       </div>
       <div>
-        <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        <h2 className="text-base font-semibold text-[var(--color-fg)]">{title}</h2>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+          <p className="text-xs text-[var(--color-muted)] mt-0.5">{subtitle}</p>
         )}
       </div>
     </div>
@@ -92,7 +92,7 @@ function TrendIcon({ direction }: { direction: 'up' | 'down' | 'flat' }) {
     return <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
   if (direction === 'down')
     return <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-  return <Minus className="w-3.5 h-3.5 text-muted-foreground" />
+  return <Minus className="w-3.5 h-3.5 text-[var(--color-muted)]" />
 }
 
 function NeedsAttentionBadge() {
@@ -119,7 +119,7 @@ interface AtRiskAdvisor {
 function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
   if (advisors.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
         <SectionHeader
           icon={AlertTriangle}
           title="At-Risk Advisors"
@@ -128,7 +128,7 @@ function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
         />
         <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
           <CheckCircle className="w-10 h-10 text-emerald-400 opacity-60" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--color-muted)]">
             All advisors are above the pass threshold.
           </p>
         </div>
@@ -137,7 +137,7 @@ function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
       <SectionHeader
         icon={AlertTriangle}
         title="At-Risk Advisors"
@@ -154,15 +154,15 @@ function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
           >
             {/* Avatar + name */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-xs font-bold text-muted-foreground uppercase">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-bg-alt)] flex items-center justify-center flex-shrink-0 text-xs font-bold text-[var(--color-muted)] uppercase">
                 {a.name.charAt(0)}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-[var(--color-fg)] truncate">
                   {a.name}
                 </p>
                 <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1 text-xs text-[var(--color-muted)]">
                     <Clock className="w-3 h-3" />
                     {formatDate(a.lastDate)}
                   </span>
@@ -177,23 +177,23 @@ function AtRiskSection({ advisors }: { advisors: AtRiskAdvisor[] }) {
                 <p className={`text-lg font-bold leading-none ${scoreColor(a.avgScore)}`}>
                   {fmt(a.avgScore, 0)}
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Avg score</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-0.5">Avg score</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold leading-none text-foreground">
-                  {fmt(a.passRate * 100, 0)}%
+                <p className="text-lg font-bold leading-none text-[var(--color-fg)]">
+                  {fmt(a.passRate, 0)}%
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Pass rate</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-0.5">Pass rate</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold leading-none text-foreground">
+                <p className="text-lg font-bold leading-none text-[var(--color-fg)]">
                   {a.count}
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Sessions</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-0.5">Sessions</p>
               </div>
               <div className="flex items-center gap-1">
                 <TrendIcon direction={a.trend} />
-                <span className="text-xs text-muted-foreground capitalize">
+                <span className="text-xs text-[var(--color-muted)] capitalize">
                   {a.trend === 'flat' ? 'Stable' : a.trend === 'up' ? 'Improving' : 'Declining'}
                 </span>
               </div>
@@ -218,7 +218,7 @@ interface StrongPerformer {
 function StrongPerformersSection({ performers }: { performers: StrongPerformer[] }) {
   if (performers.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
         <SectionHeader
           icon={Award}
           title="Strong Performers"
@@ -227,7 +227,7 @@ function StrongPerformersSection({ performers }: { performers: StrongPerformer[]
         />
         <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
           <Star className="w-10 h-10 text-amber-400 opacity-60" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--color-muted)]">
             Not enough data to identify top performers yet.
           </p>
         </div>
@@ -236,7 +236,7 @@ function StrongPerformersSection({ performers }: { performers: StrongPerformer[]
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
       <SectionHeader
         icon={Award}
         title="Strong Performers"
@@ -257,8 +257,8 @@ function StrongPerformersSection({ performers }: { performers: StrongPerformer[]
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-semibold text-[var(--color-fg)] truncate">{p.name}</p>
+              <p className="text-xs text-[var(--color-muted)]">
                 {p.count} sessions &middot; Best {fmt(p.bestScore, 0)}
               </p>
             </div>
@@ -266,8 +266,8 @@ function StrongPerformersSection({ performers }: { performers: StrongPerformer[]
               <p className="text-base font-bold text-emerald-400 leading-none">
                 {fmt(p.avgScore, 0)}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {fmt(p.passRate * 100, 0)}% pass
+              <p className="text-[10px] text-[var(--color-muted)] mt-0.5">
+                {fmt(p.passRate, 0)}% pass
               </p>
             </div>
           </motion.div>
@@ -297,14 +297,14 @@ function WeaknessAnalysisSection({ weaknesses }: { weaknesses: RoundWeakness[] }
 
   if (weaknesses.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
         <SectionHeader
           icon={BarChart2}
           title="Activity Weakness Analysis"
           subtitle="Round-by-round performance breakdown"
           color="#8B5CF6"
         />
-        <p className="text-sm text-muted-foreground py-6 text-center">
+        <p className="text-sm text-[var(--color-muted)] py-6 text-center">
           No round data available yet. Run simulations to see per-round breakdowns.
         </p>
       </div>
@@ -312,7 +312,7 @@ function WeaknessAnalysisSection({ weaknesses }: { weaknesses: RoundWeakness[] }
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
       <SectionHeader
         icon={BarChart2}
         title="Activity Weakness Analysis"
@@ -331,10 +331,10 @@ function WeaknessAnalysisSection({ weaknesses }: { weaknesses: RoundWeakness[] }
             >
               <div className="flex items-center justify-between gap-4 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                     Round {w.round}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                  <span className="text-xs text-[var(--color-muted)] truncate max-w-[200px]">
                     {w.label}
                   </span>
                 </div>
@@ -342,21 +342,21 @@ function WeaknessAnalysisSection({ weaknesses }: { weaknesses: RoundWeakness[] }
                   <span className={`text-sm font-bold ${colors.text}`}>
                     {fmt(w.avg, 0)}/100
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {fmt(w.passRate * 100, 0)}% pass
+                  <span className="text-xs text-[var(--color-muted)]">
+                    {fmt(w.passRate, 0)}% pass
                   </span>
                 </div>
               </div>
               {/* Progress bar */}
-              <div className="h-1.5 w-full bg-muted rounded-full mb-2">
+              <div className="h-1.5 w-full bg-[var(--color-bg-alt)] rounded-full mb-2">
                 <div
                   className={`h-full rounded-full ${colors.bar}`}
                   style={{ width: `${Math.min(w.avg, 100)}%` }}
                 />
               </div>
               {/* Recommendation */}
-              <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground/70">Recommendation: </span>
+              <p className="text-xs text-[var(--color-muted)]">
+                <span className="font-medium text-[var(--color-fg-sub)]">Recommendation: </span>
                 {w.recommendation}
               </p>
             </motion.div>
@@ -385,14 +385,14 @@ function CoachingActionsSection({ actions }: { actions: CoachingAction[] }) {
 
   if (actions.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
         <SectionHeader
           icon={Zap}
           title="Coaching Action Plan"
           subtitle="Priority-ordered interventions"
           color="#F59E0B"
         />
-        <p className="text-sm text-muted-foreground py-6 text-center">
+        <p className="text-sm text-[var(--color-muted)] py-6 text-center">
           No immediate actions required. Keep monitoring performance trends.
         </p>
       </div>
@@ -400,7 +400,7 @@ function CoachingActionsSection({ actions }: { actions: CoachingAction[] }) {
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
       <SectionHeader
         icon={Zap}
         title="Coaching Action Plan"
@@ -416,14 +416,14 @@ function CoachingActionsSection({ actions }: { actions: CoachingAction[] }) {
               key={i}
               {...FADE_UP}
               transition={{ delay: i * 0.05 }}
-              className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/40 hover:bg-muted/60 transition-colors"
+              className="flex items-start gap-3 p-3 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)] hover:bg-[var(--color-surface)] transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-card border border-border/50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <ActionIcon className="w-4 h-4 text-muted-foreground" />
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-card)] border border-[var(--color-line)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <ActionIcon className="w-4 h-4 text-[var(--color-muted)]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <p className="text-sm font-medium text-foreground">{action.title}</p>
+                  <p className="text-sm font-medium text-[var(--color-fg)]">{action.title}</p>
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${style.badge}`}
                   >
@@ -431,7 +431,7 @@ function CoachingActionsSection({ actions }: { actions: CoachingAction[] }) {
                     {action.priority}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-xs text-[var(--color-muted)]">{action.description}</p>
               </div>
             </motion.div>
           )
@@ -454,14 +454,14 @@ interface ProgressEntry {
 function ProgressTrackingSection({ entries }: { entries: ProgressEntry[] }) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
         <SectionHeader
           icon={TrendingUp}
           title="Progress Tracking"
           subtitle="Most improved in last 7 days vs previous period"
           color="#06B6D4"
         />
-        <p className="text-sm text-muted-foreground py-6 text-center">
+        <p className="text-sm text-[var(--color-muted)] py-6 text-center">
           Not enough data for comparison. Requires sessions in at least two time periods.
         </p>
       </div>
@@ -469,7 +469,7 @@ function ProgressTrackingSection({ entries }: { entries: ProgressEntry[] }) {
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] p-5">
       <SectionHeader
         icon={TrendingUp}
         title="Progress Tracking"
@@ -479,31 +479,31 @@ function ProgressTrackingSection({ entries }: { entries: ProgressEntry[] }) {
       <div className="space-y-2">
         {entries.map((e, i) => {
           const improved = e.scoreDelta > 0
-          const deltaColor = improved ? 'text-emerald-400' : e.scoreDelta < 0 ? 'text-red-400' : 'text-muted-foreground'
+          const deltaColor = improved ? 'text-emerald-400' : e.scoreDelta < 0 ? 'text-red-400' : 'text-[var(--color-muted)]'
           const DeltaIcon = improved ? TrendingUp : e.scoreDelta < 0 ? TrendingDown : Minus
           return (
             <motion.div
               key={e.name}
               {...FADE_UP}
               transition={{ delay: i * 0.04 }}
-              className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30"
+              className="flex items-center gap-3 p-3 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)]"
             >
               <div className="w-7 h-7 rounded-full bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
                 <span className="text-[11px] font-bold text-cyan-400 uppercase">
                   {e.name.charAt(0)}
                 </span>
               </div>
-              <p className="flex-1 text-sm font-medium text-foreground truncate">{e.name}</p>
+              <p className="flex-1 text-sm font-medium text-[var(--color-fg)] truncate">{e.name}</p>
               <div className="flex items-center gap-4 flex-shrink-0">
                 <div className="text-center hidden sm:block">
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-[var(--color-muted)]">
                     {fmt(e.prevAvg, 0)} → {fmt(e.currAvg, 0)}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60">Avg score</p>
+                  <p className="text-[10px] text-[var(--color-fg-sub)]">Avg score</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">{e.sessions7d}</p>
-                  <p className="text-[10px] text-muted-foreground/60">Sessions</p>
+                  <p className="text-xs text-[var(--color-muted)]">{e.sessions7d}</p>
+                  <p className="text-[10px] text-[var(--color-fg-sub)]">Sessions</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <DeltaIcon className={`w-3.5 h-3.5 ${deltaColor}`} />
@@ -656,7 +656,7 @@ function useCoachingData(
       actions.push({
         priority: 'high',
         title: `Schedule extra practice for Round ${r.round}`,
-        description: `Average score is ${fmt(r.avg, 0)}/100 (${fmt(r.passRate * 100, 0)}% pass rate). ${r.recommendation}`,
+        description: `Average score is ${fmt(r.avg, 0)}/100 (${fmt(r.passRate, 0)}% pass rate). ${r.recommendation}`,
         icon: Target,
       })
     }
@@ -675,7 +675,7 @@ function useCoachingData(
       actions.push({
         priority: 'high',
         title: 'Review closing technique across the team',
-        description: `Overall pass rate is ${fmt(kpisPassRate * 100, 0)}% — below 50%. Focus coaching sessions on closing frameworks and commitment language.`,
+        description: `Overall pass rate is ${fmt(kpisPassRate, 0)}% — below 50%. Focus coaching sessions on closing frameworks and commitment language.`,
         icon: AlertTriangle,
       })
     }
@@ -738,10 +738,10 @@ export default function CoachingPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 p-6 animate-pulse">
-        <div className="h-8 w-64 rounded bg-muted" />
-        <div className="h-4 w-80 rounded bg-muted/60" />
+        <div className="h-8 w-64 rounded bg-[var(--color-bg-alt)]" />
+        <div className="h-4 w-80 rounded bg-[var(--color-line)]" />
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-40 rounded-xl bg-muted/30" />
+          <div key={i} className="h-40 rounded-xl bg-[var(--color-bg-alt)]" />
         ))}
       </div>
     )
@@ -771,7 +771,7 @@ export default function CoachingPage() {
       label: language === 'es' ? 'Acciones Pendientes' : 'Pending Actions',
       value: actions.filter((a) => a.priority === 'high').length,
       icon: Zap,
-      color: actions.filter((a) => a.priority === 'high').length > 0 ? 'text-amber-400' : 'text-muted-foreground',
+      color: actions.filter((a) => a.priority === 'high').length > 0 ? 'text-amber-400' : 'text-[var(--color-muted)]',
     },
   ]
 
@@ -784,8 +784,8 @@ export default function CoachingPage() {
             <BookOpen className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{language === 'es' ? 'Insights de Coaching' : 'Coaching Insights'}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="text-2xl font-bold text-[var(--color-fg)]">{language === 'es' ? 'Insights de Coaching' : 'Coaching Insights'}</h1>
+            <p className="text-sm text-[var(--color-muted)] mt-0.5">
               {language === 'es'
                 ? 'Identifica oportunidades de coaching, reconoce los mejores asesores y prioriza intervenciones.'
                 : 'Identify coaching opportunities, recognize top performers, and prioritize interventions based on simulation data.'}
@@ -805,14 +805,14 @@ export default function CoachingPage() {
           return (
             <div
               key={item.label}
-              className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 shadow-sm"
+              className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] shadow-sm"
             >
               <ItemIcon className={`w-5 h-5 flex-shrink-0 ${item.color}`} />
               <div>
                 <p className={`text-xl font-bold leading-none ${item.color}`}>
                   {item.value}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{item.label}</p>
+                <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{item.label}</p>
               </div>
             </div>
           )

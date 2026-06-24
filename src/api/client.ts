@@ -1,6 +1,6 @@
 import type { Activity, Admin, Member, Simulation, SimReport } from './types'
 import { resolveEffectiveDates } from '../lib/dateUtils'
-import { API_BRIDGE, SIIGO_CLIENT_ID, SIIGO_IDS_SQL } from '../config/constants'
+import { API_BRIDGE, SIIGO_CLIENT_ID, SIIGO_IDS_SQL, PASS_THRESHOLD } from '../config/constants'
 
 const REMOTE = API_BRIDGE
 
@@ -16,6 +16,15 @@ function decodeEntities(s: string | null | undefined): string {
   if (!_entityEl || !s.includes('&')) return s
   _entityEl.innerHTML = s
   return _entityEl.value
+}
+
+/** Extract overall score (0–100) from the closing_analysis HTML report */
+function parseHtmlScore(html: string | null | undefined): number | null {
+  if (!html) return null
+  const m = html.match(/rp-sim-report-score-number[^>]*>\s*(\d+)\s*</)
+  if (!m) return null
+  const n = parseInt(m[1], 10)
+  return isNaN(n) ? null : Math.min(100, Math.max(0, n))
 }
 
 function isInternalEmail(email: string | null | undefined): boolean {
@@ -95,7 +104,18 @@ export async function fetchSimulations(
      ORDER BY us.date_created DESC`,
     signal,
   )
-  return rows.filter((r) => !isInternalEmail(r.Usuario))
+  return rows
+    .filter((r) => !isInternalEmail(r.Usuario))
+    .map((r) => {
+      const htmlScore = parseHtmlScore(r.closing_analysis)
+      const score = htmlScore ?? 0
+      return {
+        ...r,
+        Calificacion:      score,
+        Puntos_Totales:    score,
+        Diagnostico_Final: (score >= PASS_THRESHOLD ? 'si' : 'no') as 'si' | 'no',
+      }
+    })
 }
 
 export async function fetchSimReport(simId: number, signal?: AbortSignal): Promise<SimReport> {
@@ -103,16 +123,17 @@ export async function fetchSimReport(simId: number, signal?: AbortSignal): Promi
 
   const [session] = await remoteSQL<{
     ID_Sim: number; ID_Caso_de_Uso: number; Usuario: string | null; Usuario_Nombre: string | null
-    Fecha_y_Hora: string | null; Calificacion: number; Producto: string
+    Fecha_y_Hora: string | null; Calificacion: number; Producto: string; closing_analysis: string | null
   }>(
     `SELECT
-       us.ID           AS ID_Sim,
-       us.simulator_id AS ID_Caso_de_Uso,
-       u.email         AS Usuario,
-       u.name          AS Usuario_Nombre,
-       us.date_created AS Fecha_y_Hora,
-       us.score        AS Calificacion,
-       rs.name         AS Producto
+       us.ID              AS ID_Sim,
+       us.simulator_id    AS ID_Caso_de_Uso,
+       u.email            AS Usuario,
+       u.name             AS Usuario_Nombre,
+       us.date_created    AS Fecha_y_Hora,
+       us.score           AS Calificacion,
+       rs.name            AS Producto,
+       us.closing_analysis
      FROM r_user_session us
      JOIN r_user      u  ON u.ID  = us.user_id
      JOIN r_simulator rs ON rs.ID = us.simulator_id
@@ -120,6 +141,7 @@ export async function fetchSimReport(simId: number, signal?: AbortSignal): Promi
     signal,
   )
   if (!session) throw new Error(`Session ${id} not found`)
+  const reportScore = parseHtmlScore(session.closing_analysis) ?? session.Calificacion
 
   const details = await remoteSQL<{
     sequence: number; ai_text: string | null; user_text: string | null; retro_analysis: string | null
@@ -137,7 +159,7 @@ export async function fetchSimReport(simId: number, signal?: AbortSignal): Promi
     Usuario:        session.Usuario,
     Usuario_Nombre: session.Usuario_Nombre,
     Fecha_y_Hora:   session.Fecha_y_Hora,
-    Calificacion:   session.Calificacion,
+    Calificacion:   reportScore,
     Producto:       session.Producto,
     Titulo:         session.Producto,
     Rondas: details.map((d) => ({

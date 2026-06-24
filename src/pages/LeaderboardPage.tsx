@@ -42,7 +42,7 @@ function fmtScore(n: number): string {
 }
 
 function fmtPct(n: number): string {
-  return `${(n * 100).toFixed(0)}%`
+  return `${n.toFixed(0)}%`
 }
 
 // ─── Medal config ─────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ function RankBadge({ rank }: { rank: number }) {
   if (rank === 2) return <span className="text-base">🥈</span>
   if (rank === 3) return <span className="text-base">🥉</span>
   return (
-    <span className="text-sm font-semibold text-muted-foreground tabular-nums w-6 text-center inline-block">
+    <span className="text-sm font-semibold text-[var(--color-muted)] tabular-nums w-6 text-center inline-block">
       {rank}
     </span>
   )
@@ -128,7 +128,7 @@ function PodiumCard({ stat, position, delay }: PodiumCardProps) {
       transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       className={cn(
         'flex flex-col items-center gap-3 p-5 rounded-2xl border',
-        'bg-card backdrop-blur-sm',
+        'bg-[var(--color-card)] backdrop-blur-sm',
         cfg.border,
         position === 0 ? 'md:-mt-4 z-10' : '',
       )}
@@ -153,10 +153,10 @@ function PodiumCard({ stat, position, delay }: PodiumCardProps) {
 
       {/* Name */}
       <div className="text-center">
-        <p className="font-semibold text-foreground text-sm leading-tight max-w-[120px] truncate">
+        <p className="font-semibold text-[var(--color-fg)] text-sm leading-tight max-w-[120px] truncate">
           {stat.name}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">{cfg.label}</p>
+        <p className="text-xs text-[var(--color-muted)] mt-0.5">{cfg.label}</p>
       </div>
 
       {/* Score */}
@@ -164,26 +164,26 @@ function PodiumCard({ stat, position, delay }: PodiumCardProps) {
         <p className={cn('text-2xl font-bold tabular-nums', cfg.text)}>
           {fmtScore(stat.avgScore)}
         </p>
-        <p className="text-xs text-muted-foreground">avg score</p>
+        <p className="text-xs text-[var(--color-muted)]">avg score</p>
       </div>
 
       {/* Stats row */}
       <div className="flex gap-4 text-center">
         <div>
-          <p className="text-xs font-semibold text-foreground">{stat.count}</p>
-          <p className="text-[10px] text-muted-foreground">sims</p>
+          <p className="text-xs font-semibold text-[var(--color-fg)]">{stat.count}</p>
+          <p className="text-[10px] text-[var(--color-muted)]">sims</p>
         </div>
         <div>
-          <p className="text-xs font-semibold text-foreground">
+          <p className="text-xs font-semibold text-[var(--color-fg)]">
             {fmtScore(stat.bestScore)}
           </p>
-          <p className="text-[10px] text-muted-foreground">best</p>
+          <p className="text-[10px] text-[var(--color-muted)]">best</p>
         </div>
         <div>
-          <p className="text-xs font-semibold text-foreground">
+          <p className="text-xs font-semibold text-[var(--color-fg)]">
             {fmtPct(stat.passRate)}
           </p>
-          <p className="text-[10px] text-muted-foreground">pass</p>
+          <p className="text-[10px] text-[var(--color-muted)]">pass</p>
         </div>
       </div>
 
@@ -219,8 +219,8 @@ function SortButton({ label, active, onClick }: SortButtonProps) {
       className={cn(
         'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
         active
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-muted text-muted-foreground hover:bg-muted/80',
+          ? 'bg-[#0066FF] text-white'
+          : 'bg-[var(--color-bg-alt)] text-[var(--color-muted)] hover:bg-[var(--color-line)]',
       )}
     >
       {label}
@@ -244,7 +244,7 @@ function SummaryCard({ icon: Icon, label, value, color, delay }: SummaryCardProp
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 shadow-sm"
+      className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] shadow-sm"
     >
       <div
         className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
@@ -253,10 +253,10 @@ function SummaryCard({ icon: Icon, label, value, color, delay }: SummaryCardProp
         <Icon className="w-5 h-5" style={{ color }} />
       </div>
       <div>
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+        <p className="text-xs text-[var(--color-muted)] font-medium uppercase tracking-wide">
           {label}
         </p>
-        <p className="text-xl font-bold text-foreground leading-tight">{value}</p>
+        <p className="text-xl font-bold text-[var(--color-fg)] leading-tight">{value}</p>
       </div>
     </motion.div>
   )
@@ -303,14 +303,13 @@ export default function LeaderboardPage() {
   }, [afterSearch, safePage])
 
   // ── Top 3 podium ───────────────────────────────────────────────────────────
-  // Always from full sorted list (not filtered by search/topN)
   const podium = withRank.slice(0, 3)
 
   // ── Summary stats ──────────────────────────────────────────────────────────
   const certRate = useMemo(() => {
     if (userStats.length === 0) return 0
-    const passed = userStats.filter((u) => u.passRate >= 0.7).length
-    return passed / userStats.length
+    const passed = userStats.filter((u) => u.passRate >= 70).length
+    return (passed / userStats.length) * 100
   }, [userStats])
 
   // ── Reset page when filters change ─────────────────────────────────────────
@@ -332,13 +331,13 @@ export default function LeaderboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse">
-        <div className="h-8 w-48 rounded bg-muted" />
+        <div className="h-8 w-48 rounded bg-[var(--color-bg-alt)]" />
         <div className="grid grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-64 rounded-2xl bg-muted" />
+            <div key={i} className="h-64 rounded-2xl bg-[var(--color-bg-alt)]" />
           ))}
         </div>
-        <div className="h-64 rounded-xl bg-muted" />
+        <div className="h-64 rounded-xl bg-[var(--color-bg-alt)]" />
       </div>
     )
   }
@@ -347,7 +346,7 @@ export default function LeaderboardPage() {
 
   if (userStats.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center h-64 gap-3 text-[var(--color-muted)]">
         <Trophy className="w-12 h-12 opacity-30" />
         <p className="text-lg font-medium">{language === 'es' ? 'Sin datos de simulaciones' : 'No simulation data available'}</p>
         <p className="text-sm">{language === 'es' ? 'Completa simulaciones para ver el ranking.' : 'Run some simulations to see the leaderboard.'}</p>
@@ -370,8 +369,8 @@ export default function LeaderboardPage() {
             <Trophy className="w-5 h-5 text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{language === 'es' ? 'Ranking' : 'Leaderboard'}</h1>
-            <p className="text-sm text-muted-foreground">{language === 'es' ? 'Mejores Desempeños' : 'Top Performers'}</p>
+            <h1 className="text-2xl font-bold text-[var(--color-fg)]">{language === 'es' ? 'Ranking' : 'Leaderboard'}</h1>
+            <p className="text-sm text-[var(--color-muted)]">{language === 'es' ? 'Mejores Desempeños' : 'Top Performers'}</p>
           </div>
         </div>
       </motion.div>
@@ -404,7 +403,7 @@ export default function LeaderboardPage() {
       {/* ── Top 3 podium ────────────────────────────────────────────────── */}
       {podium.length >= 1 && (
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-4 flex items-center gap-2">
             <Medal className="w-4 h-4" />
             {language === 'es' ? 'Top 3 Podio' : 'Top 3 Podium'}
           </h2>
@@ -426,19 +425,19 @@ export default function LeaderboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="rounded-xl bg-card border border-border/50 shadow-sm overflow-hidden"
+        className="rounded-xl bg-[var(--color-card)] border border-[var(--color-line)] shadow-sm overflow-hidden"
       >
         {/* Toolbar */}
-        <div className="p-4 border-b border-border/50 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="p-4 border-b border-[var(--color-line)] flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           {/* Search */}
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)] pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder={language === 'es' ? 'Buscar por nombre...' : 'Search by name...'}
-              className="w-full pl-9 pr-3 py-2 rounded-lg bg-muted border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-line)] text-sm text-[var(--color-fg)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
             />
           </div>
 
@@ -446,7 +445,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center gap-3 flex-wrap">
             {/* Top N filter */}
             <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground mr-1">Show:</span>
+              <span className="text-xs text-[var(--color-muted)] mr-1">Show:</span>
               {([10, 25, 'all'] as TopNFilter[]).map((n) => (
                 <button
                   key={String(n)}
@@ -454,8 +453,8 @@ export default function LeaderboardPage() {
                   className={cn(
                     'px-2.5 py-1 rounded-md text-xs font-medium transition-colors',
                     topN === n
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                      ? 'bg-[#0066FF] text-white'
+                      : 'bg-[var(--color-bg-alt)] text-[var(--color-muted)] hover:bg-[var(--color-line)]',
                   )}
                 >
                   {n === 'all' ? 'All' : `Top ${n}`}
@@ -465,7 +464,7 @@ export default function LeaderboardPage() {
 
             {/* Sort */}
             <div className="flex items-center gap-1">
-              <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+              <ArrowUpDown className="w-3 h-3 text-[var(--color-muted)]" />
               <SortButton
                 label="Avg Score"
                 active={sortKey === 'avgScore'}
@@ -489,23 +488,23 @@ export default function LeaderboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border/50 bg-muted/30">
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide w-12">
+              <tr className="border-b border-[var(--color-line)] bg-[var(--color-bg-alt)]">
+                <th className="py-3 px-4 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide w-12">
                   {language === 'es' ? 'Puesto' : 'Rank'}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <th className="py-3 px-4 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                   {language === 'es' ? 'Nombre' : 'Name'}
                 </th>
-                <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                   {language === 'es' ? 'Simulaciones' : 'Simulations'}
                 </th>
-                <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                   {language === 'es' ? 'Prom. Puntaje' : 'Avg Score'}
                 </th>
-                <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                   {language === 'es' ? 'Tasa Aprobación' : 'Pass Rate'}
                 </th>
-                <th className="py-3 px-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <th className="py-3 px-4 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">
                   {language === 'es' ? 'Mejor Puntaje' : 'Best Score'}
                 </th>
               </tr>
@@ -514,7 +513,7 @@ export default function LeaderboardPage() {
               <AnimatePresence mode="popLayout">
                 {pageRows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">
+                    <td colSpan={6} className="py-12 text-center text-[var(--color-muted)] text-sm">
                       {language === 'es' ? 'Ningún asesor coincide con tu búsqueda.' : 'No advisors match your search.'}
                     </td>
                   </tr>
@@ -531,10 +530,10 @@ export default function LeaderboardPage() {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2, delay: idx * 0.02 }}
                         className={cn(
-                          'border-b border-border/30 transition-colors',
+                          'border-b border-[var(--color-line)] transition-colors',
                           isMedal
                             ? medalCfg!.bg + ' hover:brightness-105'
-                            : 'hover:bg-muted/30',
+                            : 'hover:bg-[var(--color-bg-alt)]',
                         )}
                       >
                         {/* Rank */}
@@ -552,7 +551,7 @@ export default function LeaderboardPage() {
                                 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
                                 isMedal
                                   ? cn(medalCfg!.bg, medalCfg!.text, 'ring-1', medalCfg!.ring)
-                                  : 'bg-muted text-muted-foreground',
+                                  : 'bg-[var(--color-bg-alt)] text-[var(--color-muted)]',
                               )}
                             >
                               {getInitials(row.name)}
@@ -560,7 +559,7 @@ export default function LeaderboardPage() {
                             <span
                               className={cn(
                                 'font-medium truncate max-w-[180px]',
-                                isMedal ? medalCfg!.text : 'text-foreground',
+                                isMedal ? medalCfg!.text : 'text-[var(--color-fg)]',
                               )}
                             >
                               {row.name}
@@ -569,7 +568,7 @@ export default function LeaderboardPage() {
                         </td>
 
                         {/* Simulations */}
-                        <td className="py-3 px-4 text-right tabular-nums text-foreground">
+                        <td className="py-3 px-4 text-right tabular-nums text-[var(--color-fg)]">
                           {row.count}
                         </td>
 
@@ -590,7 +589,7 @@ export default function LeaderboardPage() {
                           <span
                             className={cn(
                               'tabular-nums font-medium text-sm',
-                              scoreColor(row.passRate * 100),
+                              scoreColor(row.passRate),
                             )}
                           >
                             {fmtPct(row.passRate)}
@@ -619,15 +618,15 @@ export default function LeaderboardPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border/50 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
+          <div className="p-4 border-t border-[var(--color-line)] flex items-center justify-between">
+            <p className="text-xs text-[var(--color-muted)]">
               Showing{' '}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-[var(--color-fg)]">
                 {(safePage - 1) * PAGE_SIZE + 1}–
                 {Math.min(safePage * PAGE_SIZE, afterSearch.length)}
               </span>{' '}
               of{' '}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-[var(--color-fg)]">
                 {afterSearch.length}
               </span>{' '}
               advisors
@@ -637,9 +636,9 @@ export default function LeaderboardPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-bg-alt)] hover:bg-[var(--color-line)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                <ChevronLeft className="w-4 h-4 text-foreground" />
+                <ChevronLeft className="w-4 h-4 text-[var(--color-fg)]" />
               </button>
 
               {/* Page numbers */}
@@ -661,8 +660,8 @@ export default function LeaderboardPage() {
                     className={cn(
                       'w-8 h-8 rounded-lg text-xs font-medium transition-colors',
                       pageNum === safePage
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                        ? 'bg-[#0066FF] text-white'
+                        : 'bg-[var(--color-bg-alt)] text-[var(--color-muted)] hover:bg-[var(--color-line)]',
                     )}
                   >
                     {pageNum}
@@ -673,9 +672,9 @@ export default function LeaderboardPage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-bg-alt)] hover:bg-[var(--color-line)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                <ChevronRight className="w-4 h-4 text-foreground" />
+                <ChevronRight className="w-4 h-4 text-[var(--color-fg)]" />
               </button>
             </div>
           </div>

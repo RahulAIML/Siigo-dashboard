@@ -63,20 +63,18 @@ const sections: NavSection[] = [
 
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-6 py-8">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
-        <span className="text-lg font-black tracking-[0.18em]">S</span>
+    <div className={['flex items-center', collapsed ? 'justify-center px-0 py-4' : 'px-4 py-4'].join(' ')}>
+      <div className={[
+        'flex items-center justify-center rounded-xl bg-white/95',
+        collapsed ? 'h-9 w-9 p-1' : 'px-3 py-1.5',
+      ].join(' ')}>
+        <img
+          src="/siigo_logo.jpg"
+          alt="Siigo"
+          className={collapsed ? 'h-6 w-6 object-contain' : 'h-7 w-auto object-contain'}
+          style={collapsed ? {} : { maxWidth: '88px' }}
+        />
       </div>
-      {!collapsed && (
-        <div className="min-w-0">
-          <div className="text-[2rem] font-black uppercase tracking-[0.06em] text-[#2da4ff]">
-            SIIGO
-          </div>
-          <div className="text-[11px] leading-4 text-white/60">
-            Analytics &amp; Training
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -94,16 +92,16 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <Brand collapsed={collapsed} />
 
-      <div className="flex-1 overflow-y-auto px-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-3 pb-4">
         {sections.map((section) => (
-          <div key={section.titleKey} className="mb-8">
+          <div key={section.titleKey} className="mb-5">
             {!collapsed && (
-              <div className="mb-4 px-2 text-[12px] font-bold uppercase tracking-[0.12em] text-white/60">
+              <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/40">
                 {t(section.titleKey, language)}
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-0.5">
               {section.items.map((item) => {
                 const Icon = item.icon
                 return (
@@ -114,20 +112,20 @@ function SidebarContent({
                     onClick={onNavigate}
                     className={({ isActive }) =>
                       [
-                        'group flex items-center rounded-2xl transition-all duration-200',
-                        collapsed ? 'justify-center px-0 py-4' : 'gap-4 px-5 py-4',
+                        'group flex items-center rounded-xl transition-all duration-150',
+                        collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-3 py-2.5',
                         isActive
-                          ? 'bg-[#ff1734] text-white shadow-[0_18px_44px_rgba(255,23,52,0.25)]'
-                          : 'text-white/84 hover:bg-white/8',
+                          ? 'bg-[#ff1734] text-white shadow-[0_8px_24px_rgba(255,23,52,0.30)]'
+                          : 'text-white/70 hover:bg-white/10 hover:text-white',
                       ].join(' ')
                     }
                     title={collapsed ? (language === 'es' ? item.labelEs : item.labelEn) : undefined}
                   >
                     {({ isActive }) => (
                       <>
-                        <Icon className={['h-5 w-5 shrink-0', isActive ? 'text-white' : 'text-white/84'].join(' ')} />
+                        <Icon className={['h-4 w-4 shrink-0', isActive ? 'text-white' : 'text-white/70 group-hover:text-white'].join(' ')} />
                         {!collapsed && (
-                          <span className="truncate text-[1.02rem] font-semibold">
+                          <span className="truncate text-[13px] font-medium">
                             {language === 'es' ? item.labelEs : item.labelEn}
                           </span>
                         )}
@@ -154,15 +152,16 @@ export default function Sidebar() {
     <>
       <aside
         className={[
-          'hidden md:flex md:min-h-screen md:flex-col md:border-r md:border-[#08204d]',
+          'hidden md:flex md:flex-col md:border-r md:border-[#08204d]',
           'bg-[linear-gradient(180deg,#092458_0%,#061b45_55%,#08204f_100%)] text-white',
-          collapsed ? 'w-[96px]' : 'w-[320px]',
+          'transition-all duration-200',
+          collapsed ? 'w-[72px]' : 'w-[240px]',
         ].join(' ')}
       >
-        <div className="flex items-center justify-end px-5 pt-4">
+        <div className="flex items-center justify-end px-3 pt-3">
           <button
             onClick={toggleSidebar}
-            className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg border border-white/10 bg-white/5 p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
@@ -191,7 +190,7 @@ export default function Sidebar() {
               <div className="flex items-center justify-end px-5 pt-4">
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-lg border border-white/10 bg-white/5 p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
                   aria-label="Close sidebar"
                 >
                   <X className="h-4 w-4" />

@@ -71,14 +71,14 @@ export function filterTestUsers(sims: Simulation[]): Simulation[] {
 export function computeQuickKPIs(sims: Simulation[]): QuickKPIs {
   if (!sims || sims.length === 0) {
     return {
-      total: 0,
-      avgScore: 0,
-      passRate: 0,
-      activeUsers: 0,
-      passCount: 0,
-      failCount: 0,
-      bestScore: 0,
-      worstScore: 0,
+      totalSimulations: 0,
+      averageScore:     0,
+      passRate:         0,
+      activeAdvisors:   0,
+      passCount:        0,
+      failCount:        0,
+      bestScore:        0,
+      worstScore:       0,
     }
   }
 
@@ -109,10 +109,10 @@ export function computeQuickKPIs(sims: Simulation[]): QuickKPIs {
   const worstScore = numericScores.length > 0 ? Math.min(...numericScores) : 0
 
   return {
-    total: sims.length,
-    avgScore,
+    totalSimulations: sims.length,
+    averageScore:     avgScore,
     passRate,
-    activeUsers: userSet.size,
+    activeAdvisors:   userSet.size,
     passCount,
     failCount,
     bestScore,
@@ -412,14 +412,14 @@ export function buildAIContext(
 
   // KPI Summary
   lines.push('=== KPI SUMMARY ===')
-  lines.push(`Total simulations: ${kpis.total}`)
-  lines.push(`Average score: ${kpis.avgScore.toFixed(1)}`)
-  lines.push(`Pass rate: ${kpis.passRate.toFixed(1)}%`)
-  lines.push(`Active users: ${kpis.activeUsers}`)
+  lines.push(`Total simulations: ${kpis.totalSimulations}`)
+  lines.push(`Average score: ${(kpis.averageScore ?? 0).toFixed(1)}`)
+  lines.push(`Pass rate: ${(kpis.passRate ?? 0).toFixed(1)}%`)
+  lines.push(`Active users: ${kpis.activeAdvisors}`)
   lines.push(`Pass count: ${kpis.passCount}`)
   lines.push(`Fail count: ${kpis.failCount}`)
-  lines.push(`Best score: ${kpis.bestScore.toFixed(1)}`)
-  lines.push(`Worst score: ${kpis.worstScore.toFixed(1)}`)
+  lines.push(`Best score: ${(kpis.bestScore ?? 0).toFixed(1)}`)
+  lines.push(`Worst score: ${(kpis.worstScore ?? 0).toFixed(1)}`)
   lines.push(`Total activities: ${kpis.totalActivities}`)
   lines.push(`Total members: ${kpis.totalMembers}`)
   lines.push('')
