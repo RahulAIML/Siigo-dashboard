@@ -168,9 +168,9 @@ function SkeletonCard() {
 // ─── Activity summary card ────────────────────────────────────────────────────
 
 function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
-  const color = performanceColor(stat.passRate)
-  const label = performanceLabel(stat.passRate)
-  const passRatePct = Math.min(100, Math.max(0, stat.passRate))
+  const color = performanceColor(stat.passRate ?? 0)
+  const label = performanceLabel(stat.passRate ?? 0)
+  const passRatePct = Math.min(100, Math.max(0, stat.passRate ?? 0))
 
   return (
     <motion.div
@@ -200,7 +200,7 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
               wordBreak: 'break-word',
             }}
           >
-            {stat.name}
+            {stat.name ?? ''}
           </p>
           {stat.activityType && (
             <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -232,9 +232,9 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
           gap: 10,
         }}
       >
-        <StatBox label="Sessions" value={String(stat.count)} color="#94a3b8" />
-        <StatBox label="Avg Score" value={fmt1(stat.avgScore)} color={stat.avgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
-        <StatBox label="Pass Rate" value={`${fmt1(stat.passRate)}%`} color={color} />
+        <StatBox label="Sessions" value={String(stat.count ?? 0)} color="#94a3b8" />
+        <StatBox label="Avg Score" value={fmt1(stat.avgScore ?? 0)} color={(stat.avgScore ?? 0) >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER} />
+        <StatBox label="Pass Rate" value={`${fmt1(stat.passRate ?? 0)}%`} color={color} />
       </div>
 
       {/* Pass/Fail counts */}
@@ -242,12 +242,12 @@ function ActivitySummaryCard({ stat }: { stat: ActivityStat }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
           <CheckCircle2 style={{ width: 14, height: 14, color: GREEN }} />
           <span style={{ color: '#94a3b8' }}>Pass:</span>
-          <span style={{ fontWeight: 700, color: GREEN }}>{stat.passCount}</span>
+          <span style={{ fontWeight: 700, color: GREEN }}>{stat.passCount ?? 0}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
           <XCircle style={{ width: 14, height: 14, color: RED }} />
           <span style={{ color: '#94a3b8' }}>Fail:</span>
-          <span style={{ fontWeight: 700, color: RED }}>{stat.failCount}</span>
+          <span style={{ fontWeight: 700, color: RED }}>{stat.failCount ?? 0}</span>
         </div>
       </div>
 
@@ -369,8 +369,8 @@ function TooltipRow({ color, label, value }: { color: string; label: string; val
 function SessionsBarChart({ data, isDark }: { data: ActivityStat[]; isDark: boolean }) {
   if (!data || !data.length) return <EmptyState message="No session data available" />
 
-  const sorted = [...data].sort((a, b) => b.count - a.count).slice(0, 10)
-  const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.name, 24) }))
+  const sorted = [...data].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).slice(0, 10)
+  const chartData = sorted.map((d) => ({ ...d, shortName: truncate(d.name ?? '', 24) }))
   const barHeight = 40
   const chartHeight = Math.max(200, chartData.length * barHeight + 60)
 
@@ -433,7 +433,7 @@ const TD_STYLE: React.CSSProperties = {
 function DetailTable({ data }: { data: ActivityStat[] }) {
   if (!data || !data.length) return <EmptyState message="No activity data to display" />
 
-  const sorted = [...data].sort((a, b) => b.count - a.count)
+  const sorted = [...data].sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -451,8 +451,8 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
         </thead>
         <tbody>
           {sorted.map((stat, idx) => {
-            const color = performanceColor(stat.passRate)
-            const label = performanceLabel(stat.passRate)
+            const color = performanceColor(stat.passRate ?? 0)
+            const label = performanceLabel(stat.passRate ?? 0)
             return (
               <motion.tr
                 key={stat.id}
@@ -469,7 +469,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
               >
                 <td style={TD_STYLE}>
                   <div>
-                    <span style={{ color: 'var(--color-fg)', fontWeight: 500 }}>{stat.name}</span>
+                    <span style={{ color: 'var(--color-fg)', fontWeight: 500 }}>{stat.name ?? ''}</span>
                     {stat.activityType && (
                       <p style={{ margin: '2px 0 0', fontSize: 11, color: '#475569' }}>
                         {stat.activityType}
@@ -478,14 +478,14 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
                   </div>
                 </td>
                 <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 600, color: '#94a3b8' }}>
-                  {stat.count}
+                  {stat.count ?? 0}
                 </td>
-                <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 700, color: stat.avgScore >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER }}>
-                  {fmt1(stat.avgScore)}
+                <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 700, color: (stat.avgScore ?? 0) >= PASS_THRESHOLD ? SIIGO_BLUE : AMBER }}>
+                  {fmt1(stat.avgScore ?? 0)}
                 </td>
                 <td style={{ ...TD_STYLE, textAlign: 'center' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontWeight: 700, color }}>{fmt1(stat.passRate)}%</span>
+                    <span style={{ fontWeight: 700, color }}>{fmt1(stat.passRate ?? 0)}%</span>
                     <div
                       style={{
                         width: 60,
@@ -498,7 +498,7 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
                       <div
                         style={{
                           height: '100%',
-                          width: `${Math.min(100, stat.passRate)}%`,
+                          width: `${Math.min(100, stat.passRate ?? 0)}%`,
                           borderRadius: 2,
                           background: color,
                         }}
@@ -507,10 +507,10 @@ function DetailTable({ data }: { data: ActivityStat[] }) {
                   </div>
                 </td>
                 <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 700, color: GREEN }}>
-                  {stat.passCount}
+                  {stat.passCount ?? 0}
                 </td>
-                <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 700, color: stat.failCount > 0 ? RED : '#64748b' }}>
-                  {stat.failCount}
+                <td style={{ ...TD_STYLE, textAlign: 'center', fontWeight: 700, color: (stat.failCount ?? 0) > 0 ? RED : '#64748b' }}>
+                  {stat.failCount ?? 0}
                 </td>
                 <td style={{ ...TD_STYLE, textAlign: 'center' }}>
                   <span
@@ -550,13 +550,13 @@ interface ActivityTrendPoint {
 function buildActivityTrend(trend: TrendPoint[]): ActivityTrendPoint[] {
   if (!trend || !trend.length) return []
   return trend.map((t) => {
-    let label = t.date
+    let label = t.date ?? ''
     try {
-      label = format(parseISO(t.date), 'MMM d')
+      label = format(parseISO(t.date ?? ''), 'MMM d')
     } catch {
       // keep raw
     }
-    return { date: t.date, dateLabel: label, count: t.count }
+    return { date: t.date ?? '', dateLabel: label, count: t.count ?? 0 }
   })
 }
 

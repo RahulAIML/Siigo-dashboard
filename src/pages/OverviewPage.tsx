@@ -138,12 +138,12 @@ export default function OverviewPage() {
   const disapproved     = kpis.failCount ?? 0
 
   const topActivities = useMemo(
-    () => [...activityStats].sort((a, b) => b.passRate - a.passRate).slice(0, 5),
+    () => [...(activityStats ?? [])].sort((a, b) => (b.passRate ?? 0) - (a.passRate ?? 0)).slice(0, 5),
     [activityStats],
   )
 
   const topAdvisors = useMemo(
-    () => [...userStats].sort((a, b) => b.avgScore - a.avgScore).slice(0, 3),
+    () => [...(userStats ?? [])].sort((a, b) => (b.avgScore ?? 0) - (a.avgScore ?? 0)).slice(0, 3),
     [userStats],
   )
 
@@ -153,13 +153,13 @@ export default function OverviewPage() {
 
   function handleExport() {
     const rows = filteredSims.map((simulation) => ({
-      ID:         simulation.ID_Sim,
-      Usuario:    simulation.Usuario_Nombre,
-      Email:      simulation.Usuario ?? '',
-      Actividad:  simulation.Actividad,
-      Puntaje:    simulation.Calificacion ?? simulation.Puntos_Totales ?? 0,
-      Diagnostico:simulation.Diagnostico_Final ?? '',
-      Fecha:      simulation.Fecha_y_Hora,
+      ID:             simulation.ID_Sim,
+      Usuario_Nombre:  simulation.Usuario_Nombre ?? '',
+      Usuario_Email:   simulation.Usuario ?? '',
+      Actividad:       simulation.Actividad ?? '',
+      Calificacion:    simulation.Calificacion ?? simulation.Puntos_Totales ?? null,
+      Diagnostico_Final: simulation.Diagnostico_Final ?? '',
+      Fecha:           simulation.Fecha_y_Hora ?? '',
     }))
     exportSimulationsCSV(rows, `siigo-dashboard-${effectiveDateFrom}-${effectiveDateTo}.csv`)
   }
@@ -340,15 +340,15 @@ export default function OverviewPage() {
           {topActivities.length > 0 ? (
             <div className="space-y-3">
               {topActivities.map((activity) => (
-                <div key={`${activity.id}-${activity.name}`}>
+                <div key={`${activity.id ?? activity.name}-${activity.name}`}>
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <div className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{activity.name}</div>
-                    <div className="shrink-0 text-xs font-bold text-slate-500 dark:text-slate-400">{activity.passRate.toFixed(0)}%</div>
+                    <div className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{activity.name ?? ''}</div>
+                    <div className="shrink-0 text-xs font-bold text-slate-500 dark:text-slate-400">{(activity.passRate ?? 0).toFixed(0)}%</div>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[var(--color-line)]">
                     <div
                       className="h-2 rounded-full bg-[linear-gradient(90deg,#0066FF,#3b82f6)]"
-                      style={{ width: `${Math.min(100, Math.max(0, activity.passRate))}%` }}
+                      style={{ width: `${Math.min(100, Math.max(0, activity.passRate ?? 0))}%` }}
                     />
                   </div>
                 </div>
@@ -380,12 +380,12 @@ export default function OverviewPage() {
                     {index + 1}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold text-slate-900 dark:text-white">{advisor.name}</div>
-                    <div className="text-xs font-medium text-slate-400">{advisor.count} {t('simulationsWord', language)}</div>
+                    <div className="truncate text-sm font-bold text-slate-900 dark:text-white">{advisor.name ?? ''}</div>
+                    <div className="text-xs font-medium text-slate-400">{advisor.count ?? 0} {t('simulationsWord', language)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{advisor.avgScore.toFixed(0)}%</div>
-                    <div className="text-xs font-semibold text-[#10B981]">↑ {advisor.passRate.toFixed(0)}%</div>
+                    <div className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{(advisor.avgScore ?? 0).toFixed(0)}%</div>
+                    <div className="text-xs font-semibold text-[#10B981]">↑ {(advisor.passRate ?? 0).toFixed(0)}%</div>
                   </div>
                 </div>
               ))}
@@ -412,10 +412,10 @@ export default function OverviewPage() {
                         : `Lowest approval rate activity:`}
                     </div>
                     <div className="mt-1 text-base font-black tracking-tight text-[#ff2138]">
-                      {weakestActivity.name}
+                      {weakestActivity.name ?? ''}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">
-                      {weakestActivity.passRate.toFixed(0)}% {t('passRate', language).toLowerCase()}
+                      {(weakestActivity.passRate ?? 0).toFixed(0)}% {t('passRate', language).toLowerCase()}
                     </div>
                   </div>
                 </div>
