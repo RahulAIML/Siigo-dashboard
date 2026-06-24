@@ -45,6 +45,10 @@ const ROUND_COLORS = [
 
 type Tier = 'strong' | 'developing' | 'needs'
 
+function rLabel(round: number, lang: 'es' | 'en'): string {
+  return `${t('roundWord', lang)} ${round}`
+}
+
 function getTier(avg: number): Tier {
   if (avg >= STRONG_TIER)    return 'strong'
   if (avg >= DEVELOPING_TIER) return 'developing'
@@ -121,7 +125,7 @@ function RoundCard({ stat, index, language }: { stat: RoundStat; index: number; 
           >
             {stat.round}
           </div>
-          <span className="text-sm font-medium text-foreground">{stat.label}</span>
+          <span className="text-sm font-medium text-foreground">{rLabel(stat.round, language)}</span>
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -265,7 +269,7 @@ function TierTableRow({ stat, language }: { stat: RoundStat; language: 'es' | 'e
 
   return (
     <tr className="border-t border-border/30 hover:bg-muted/30 transition-colors">
-      <td className="py-2.5 px-3 text-sm text-foreground font-medium">{stat.label}</td>
+      <td className="py-2.5 px-3 text-sm text-foreground font-medium">{rLabel(stat.round, language)}</td>
       <td className="py-2.5 px-3 text-sm text-foreground text-right font-mono">
         {stat.avg.toFixed(1)}
       </td>
@@ -355,11 +359,11 @@ export default function ConversationalPage() {
   const groupedBarData = useMemo(
     () =>
       roundStats.map(r => ({
-        name:     r.label,
+        name:     rLabel(r.round, language),
         'Avg Score': Math.round(r.avg * 10) / 10,
         'Pass Rate': Math.round(r.passRate * 10) / 10,
       })),
-    [roundStats],
+    [roundStats, language],
   )
 
   // ── Empty state ──────────────────────────────────────────────────────────────
@@ -547,7 +551,7 @@ export default function ConversationalPage() {
                 {strongRounds.length} {strongRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {strongRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
+                {strongRounds.map(r => rLabel(r.round, language)).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -566,7 +570,7 @@ export default function ConversationalPage() {
                 {developingRounds.length} {developingRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {developingRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
+                {developingRounds.map(r => rLabel(r.round, language)).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -585,7 +589,7 @@ export default function ConversationalPage() {
                 {needsRounds.length} {needsRounds.length !== 1 ? t('roundsWord', language) : t('roundWord', language)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {needsRounds.map(r => r.label).join(', ') || t('noneLabel', language)}
+                {needsRounds.map(r => rLabel(r.round, language)).join(', ') || t('noneLabel', language)}
               </p>
             </div>
           </div>
@@ -633,7 +637,7 @@ export default function ConversationalPage() {
             <FeedbackCard
               icon={TrendingUp}
               label={t('bestRound', language)}
-              roundLabel={bestRound.label}
+              roundLabel={rLabel(bestRound.round, language)}
               value={`${bestRound.avg.toFixed(1)} ${t('avgLabel', language)}`}
               color={GREEN}
               description={`${t('highestAvgScore', language)} ${bestRound.passRate.toFixed(1)}% ${t('passRateCol', language).toLowerCase()} — ${bestRound.count.toLocaleString()} ${t('responsesCol', language).toLowerCase()}. ${t('performMostConf', language)}`}
@@ -649,7 +653,7 @@ export default function ConversationalPage() {
             <FeedbackCard
               icon={TrendingDown}
               label={t('weakestRound', language)}
-              roundLabel={worstRound.label}
+              roundLabel={rLabel(worstRound.round, language)}
               value={`${worstRound.avg.toFixed(1)} ${t('avgLabel', language)}`}
               color={RED}
               description={`${t('lowestAvgScore', language)} ${worstRound.passRate.toFixed(1)}% ${t('passRateCol', language).toLowerCase()}. ${t('priorityCoaching', language)}`}
@@ -665,7 +669,7 @@ export default function ConversationalPage() {
             <FeedbackCard
               icon={Zap}
               label={t('mostImproved', language)}
-              roundLabel={mostImprovedRound.stat.label}
+              roundLabel={rLabel(mostImprovedRound.stat.round, language)}
               value={`+${mostImprovedRound.delta.toFixed(1)} pts`}
               color={AMBER}
               description={t('largestPositiveJump', language)}
