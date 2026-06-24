@@ -2,8 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design token CSS variables ───────────────────────────────────────────── */
+/* These power bg-card, text-foreground, border-border, etc. via Tailwind.    */
+
+:root {
+  /* Semantic surface colours (light mode) */
+  --background:        214 36% 97%;   /* #f4f7fb */
+  --foreground:        222 47% 11%;   /* slate-900 */
+  --card:              0   0%  100%;  /* white */
+  --card-foreground:   222 47% 11%;
+  --muted:             210 40% 96%;   /* slate-50 */
+  --muted-foreground:  215 16% 47%;   /* slate-500 */
+  --border:            214 32% 91%;   /* slate-200 */
+  --input:             214 32% 91%;
+  --ring:              221 83% 53%;   /* blue-500 */
+  --radius:            0.5rem;
+
+  /* Legacy colour-var aliases used by tailwind.config.ts */
+  --color-bg:      hsl(214, 36%, 97%);
+  --color-bg-alt:  hsl(210, 40%, 96%);
+  --color-card:    hsl(0, 0%, 100%);
+  --color-surface: hsl(0, 0%, 100%);
+  --color-muted:   hsl(210, 40%, 96%);
+  --color-line:    hsl(214, 32%, 91%);
+}
+
+.dark {
+  /* Semantic surface colours (dark mode) */
+  --background:        222 47%  7%;   /* deep blue-slate */
+  --foreground:        210 40% 98%;   /* near white */
+  --card:              222 47% 10%;   /* dark card */
+  --card-foreground:   210 40% 98%;
+  --muted:             217 33% 17%;   /* dark muted */
+  --muted-foreground:  215 20% 65%;   /* medium slate */
+  --border:            217 33% 20%;   /* dark border */
+  --input:             217 33% 20%;
+  --ring:              221 83% 53%;
+
+  /* Legacy colour-var aliases */
+  --color-bg:      hsl(222, 47%,  7%);
+  --color-bg-alt:  hsl(222, 47%, 10%);
+  --color-card:    hsl(222, 47%, 10%);
+  --color-surface: hsl(222, 47%,  7%);
+  --color-muted:   hsl(217, 33%, 17%);
+  --color-line:    hsl(217, 33%, 20%);
+}
+
 html {
-  background: #f4f7fb;
+  background: hsl(var(--background));
 }
 
 * {
@@ -12,14 +58,10 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #f4f7fb;
-  color: #1e293b;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.dark body {
-  color: #F1F5F9;
 }
 
 #root {

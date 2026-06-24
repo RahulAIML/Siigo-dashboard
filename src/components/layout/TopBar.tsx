@@ -1,9 +1,10 @@
 import { Globe, Menu, Moon, Sun, ChevronDown } from 'lucide-react'
 import { useAppStore } from '../../store/index'
+import t from '../../lib/i18n'
 
 export default function TopBar() {
   const language = useAppStore((state) => state.language)
-  const theme = useAppStore((state) => state.theme)
+  const theme    = useAppStore((state) => state.theme)
   const setLanguage = useAppStore((state) => state.setLanguage)
   const setTheme = useAppStore((state) => state.setTheme)
   const setMobileMenuOpen = useAppStore((state) => state.setMobileMenuOpen)
@@ -23,8 +24,8 @@ export default function TopBar() {
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
             SIIGO
           </div>
-          <h1 className="truncate text-[2rem] font-extrabold tracking-[-0.03em] text-slate-950">
-            SIIGO Analytics Platform
+          <h1 className="truncate text-[2rem] font-extrabold tracking-[-0.03em] text-slate-950 dark:text-slate-100">
+            {language === 'es' ? 'Plataforma de Analítica' : 'Analytics Platform'}
           </h1>
         </div>
       </div>
@@ -62,11 +63,11 @@ export default function TopBar() {
 
         <div className="flex items-center gap-3 rounded-full bg-white px-2 py-1">
           <div className="hidden text-right md:block">
-            <div className="text-[1.02rem] font-bold text-slate-900">Carlos Ramirez</div>
-            <div className="text-sm font-medium text-slate-400">Admin</div>
+            <div className="text-[1.02rem] font-bold text-slate-900 dark:text-slate-100">SIIGO</div>
+            <div className="text-sm font-medium text-slate-400">{language === 'es' ? 'Administrador' : 'Administrator'}</div>
           </div>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff3b4f,#ff7c8a)] text-sm font-bold text-white shadow-[0_10px_30px_rgba(255,59,79,0.28)]">
-            CR
+            {t('siigo', language).slice(0, 2)}
           </div>
           <ChevronDown className="hidden h-5 w-5 text-slate-600 md:block" />
         </div>

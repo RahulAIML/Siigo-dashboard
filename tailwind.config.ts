@@ -26,11 +26,24 @@ export default {
         violet: '#8B5CF6',
         indigo: '#6366F1',
         cyan: '#06B6D4',
-        surface: 'var(--color-surface)',
-        card: 'var(--color-card)',
-        line: 'var(--color-line)',
-        muted: 'var(--color-muted)',
-        bg: 'var(--color-bg)',
+        // Semantic tokens — powered by CSS variables in index.css
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        border:     'hsl(var(--border))',
+        input:      'hsl(var(--input))',
+        ring:       'hsl(var(--ring))',
+        card: {
+          DEFAULT:    'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        muted: {
+          DEFAULT:    'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        // Legacy aliases (keep for backwards compat)
+        surface:  'var(--color-surface)',
+        line:     'var(--color-line)',
+        bg:       'var(--color-bg)',
         'bg-alt': 'var(--color-bg-alt)',
       },
       fontFamily: {

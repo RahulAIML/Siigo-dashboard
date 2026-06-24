@@ -593,8 +593,9 @@ function useCoachingData(
     }
 
     // ── At-risk advisors ──────────────────────────────────────────────────────
+    // Exclude users with avgScore === 0: those are unscored, not at-risk.
     const atRisk: AtRiskAdvisor[] = userStats
-      .filter((u) => u.avgScore < PASS_THRESHOLD)
+      .filter((u) => u.avgScore > 0 && u.avgScore < PASS_THRESHOLD)
       .sort((a, b) => a.avgScore - b.avgScore)
       .map((u) => ({
         name: u.name,

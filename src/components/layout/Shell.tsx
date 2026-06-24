@@ -16,7 +16,7 @@ export default function Shell() {
   }, [theme])
 
   return (
-    <div className="flex min-h-screen bg-[#f4f7fb] text-slate-900">
+    <div className="flex min-h-screen bg-[#f4f7fb] dark:bg-[#0b1121] text-slate-900 dark:text-slate-100">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
