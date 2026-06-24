@@ -272,7 +272,11 @@ export default function AIAssistant() {
     const noData   = language === 'es'
       ? 'No tengo datos suficientes para responder eso en este momento.'
       : 'I don\'t have enough data to answer that right now.'
+    const now      = new Date()
+    const todayStr = now.toISOString().slice(0, 10)
+    const monthStr = now.toLocaleString(language === 'es' ? 'es-CO' : 'en-US', { month: 'long', year: 'numeric' })
     return `You are the SIIGO Sales Training Analytics AI Assistant.
+TODAY'S DATE: ${todayStr} (${monthStr}). Use this as reference for any time-relative question ("this month", "este mes", "yesterday", "ayer", etc.).
 
 ⚠️ LANGUAGE RULE — HIGHEST PRIORITY:
 You MUST respond EXCLUSIVELY in ${lang}. This is non-negotiable.
@@ -314,8 +318,10 @@ JOIN PATTERN (always use this):
 SQL ALLOWED ONLY FOR: session counts, user lists, date ranges, interaction text, recent activity.
 SQL FORBIDDEN FOR: pass rate, approval rate, scores, rankings, coaching risk — use DASHBOARD DATA instead.
 
-LIVE DASHBOARD DATA (the ONLY source of truth for scores and pass rates):
-${aiContext || '(No hay datos disponibles en este momento)'}
+=== LIVE DASHBOARD DATA — READ THIS BEFORE ANSWERING ===
+This is pre-computed from the real database. Use these numbers directly — do NOT query SQL for anything listed here.
+${aiContext || language === 'es' ? '(Sin datos cargados aún — los KPIs se muestran en pantalla)' : '(No data loaded yet — KPIs are visible on screen)'}
+=== END DASHBOARD DATA ===
 
 TWO-PASS RESPONSE PROTOCOL:
 Only generate SQL when the question requires data NOT in the dashboard above (e.g. raw interaction text, specific date ranges, user details).
@@ -768,26 +774,6 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
                 </div>
               </div>
             ))}
-
-            {/* Typing indicator — only show when no streaming placeholder exists yet */}
-            {thinking && messages[messages.length - 1]?.role !== 'model' && (
-              <div className="flex gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Bot size={13} className="text-slate-300" />
-                </div>
-                <div className="bg-white/5 rounded-xl rounded-tl-none px-3 py-2">
-                  <span className="flex gap-1 items-center">
-                    {[0, 1, 2].map((d) => (
-                      <span
-                        key={d}
-                        className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce"
-                        style={{ animationDelay: `${d * 150}ms` }}
-                      />
-                    ))}
-                  </span>
-                </div>
-              </div>
-            )}
 
             <div ref={bottomRef} />
           </div>
