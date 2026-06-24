@@ -212,8 +212,8 @@ export function computeTrend(
 // ---------------------------------------------------------------------------
 
 export function computeRoundStats(sims: Simulation[]): RoundStat[] {
-  const rounds = [1, 2, 3, 4, 5] as const
-  const roundLabels = ['Round 1', 'Round 2', 'Round 3', 'Round 4', 'Round 5']
+  const rounds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+  const roundLabels = rounds.map(n => `Round ${n}`)
 
   return rounds.map((n, idx) => {
     // Use presence of a response in round N + overall session score as proxy

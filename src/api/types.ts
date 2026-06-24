@@ -18,7 +18,7 @@ export interface Simulation {
   Fecha_y_Hora:      string          // datetime
   Puntos_Totales:    number | null
   closing_analysis:  string | null
-  // Interaction rounds 1–5
+  // Interaction rounds 1–20
   Pregunta_1: string | null;   Respuesta_1: string | null
   Retroalimentacion_1: string | null; Puntos_1: number | null
   Pregunta_2: string | null;   Respuesta_2: string | null
@@ -29,6 +29,36 @@ export interface Simulation {
   Retroalimentacion_4: string | null; Puntos_4: number | null
   Pregunta_5: string | null;   Respuesta_5: string | null
   Retroalimentacion_5: string | null; Puntos_5: number | null
+  Pregunta_6: string | null;   Respuesta_6: string | null
+  Retroalimentacion_6: string | null; Puntos_6: number | null
+  Pregunta_7: string | null;   Respuesta_7: string | null
+  Retroalimentacion_7: string | null; Puntos_7: number | null
+  Pregunta_8: string | null;   Respuesta_8: string | null
+  Retroalimentacion_8: string | null; Puntos_8: number | null
+  Pregunta_9: string | null;   Respuesta_9: string | null
+  Retroalimentacion_9: string | null; Puntos_9: number | null
+  Pregunta_10: string | null;  Respuesta_10: string | null
+  Retroalimentacion_10: string | null; Puntos_10: number | null
+  Pregunta_11: string | null;  Respuesta_11: string | null
+  Retroalimentacion_11: string | null; Puntos_11: number | null
+  Pregunta_12: string | null;  Respuesta_12: string | null
+  Retroalimentacion_12: string | null; Puntos_12: number | null
+  Pregunta_13: string | null;  Respuesta_13: string | null
+  Retroalimentacion_13: string | null; Puntos_13: number | null
+  Pregunta_14: string | null;  Respuesta_14: string | null
+  Retroalimentacion_14: string | null; Puntos_14: number | null
+  Pregunta_15: string | null;  Respuesta_15: string | null
+  Retroalimentacion_15: string | null; Puntos_15: number | null
+  Pregunta_16: string | null;  Respuesta_16: string | null
+  Retroalimentacion_16: string | null; Puntos_16: number | null
+  Pregunta_17: string | null;  Respuesta_17: string | null
+  Retroalimentacion_17: string | null; Puntos_17: number | null
+  Pregunta_18: string | null;  Respuesta_18: string | null
+  Retroalimentacion_18: string | null; Puntos_18: number | null
+  Pregunta_19: string | null;  Respuesta_19: string | null
+  Retroalimentacion_19: string | null; Puntos_19: number | null
+  Pregunta_20: string | null;  Respuesta_20: string | null
+  Retroalimentacion_20: string | null; Puntos_20: number | null
 }
 
 // ─── Activity / Simulator ─────────────────────────────────────────────────────

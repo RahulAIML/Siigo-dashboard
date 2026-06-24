@@ -9,7 +9,6 @@ import { downloadSimReport } from '../lib/reportPdf'
 import { cn } from '../lib/cn'
 import { useAppStore } from '../store'
 import { t } from '../lib/i18n'
-import { t } from '../lib/i18n'
 import type { Simulation } from '../api/types'
 
 // ---------------------------------------------------------------------------
@@ -68,7 +67,7 @@ function stripHtml(html: string): string {
 
 function buildSimDetails(sim: Simulation) {
   const details: { sequence: number; ai_question: string; user_response: string; feedback: string | null }[] = []
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 20; i++) {
     const q = sim[`Pregunta_${i}` as keyof Simulation] as string | null
     const r = sim[`Respuesta_${i}` as keyof Simulation] as string | null
     const f = sim[`Retroalimentacion_${i}` as keyof Simulation] as string | null

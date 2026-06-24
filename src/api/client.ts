@@ -79,24 +79,49 @@ export async function fetchSimulations(
        us.date_created                    AS Fecha_y_Hora,
        us.score                           AS Puntos_Totales,
        us.closing_analysis,
-       d1.ai_text   AS Pregunta_1, d1.user_text AS Respuesta_1,
-       d1.retro_analysis AS Retroalimentacion_1, NULL AS Puntos_1,
-       d2.ai_text   AS Pregunta_2, d2.user_text AS Respuesta_2,
-       d2.retro_analysis AS Retroalimentacion_2, NULL AS Puntos_2,
-       d3.ai_text   AS Pregunta_3, d3.user_text AS Respuesta_3,
-       d3.retro_analysis AS Retroalimentacion_3, NULL AS Puntos_3,
-       d4.ai_text   AS Pregunta_4, d4.user_text AS Respuesta_4,
-       d4.retro_analysis AS Retroalimentacion_4, NULL AS Puntos_4,
-       d5.ai_text   AS Pregunta_5, d5.user_text AS Respuesta_5,
-       d5.retro_analysis AS Retroalimentacion_5, NULL AS Puntos_5
+       d1.ai_text  AS Pregunta_1,  d1.user_text  AS Respuesta_1,  d1.retro_analysis  AS Retroalimentacion_1,  NULL AS Puntos_1,
+       d2.ai_text  AS Pregunta_2,  d2.user_text  AS Respuesta_2,  d2.retro_analysis  AS Retroalimentacion_2,  NULL AS Puntos_2,
+       d3.ai_text  AS Pregunta_3,  d3.user_text  AS Respuesta_3,  d3.retro_analysis  AS Retroalimentacion_3,  NULL AS Puntos_3,
+       d4.ai_text  AS Pregunta_4,  d4.user_text  AS Respuesta_4,  d4.retro_analysis  AS Retroalimentacion_4,  NULL AS Puntos_4,
+       d5.ai_text  AS Pregunta_5,  d5.user_text  AS Respuesta_5,  d5.retro_analysis  AS Retroalimentacion_5,  NULL AS Puntos_5,
+       d6.ai_text  AS Pregunta_6,  d6.user_text  AS Respuesta_6,  d6.retro_analysis  AS Retroalimentacion_6,  NULL AS Puntos_6,
+       d7.ai_text  AS Pregunta_7,  d7.user_text  AS Respuesta_7,  d7.retro_analysis  AS Retroalimentacion_7,  NULL AS Puntos_7,
+       d8.ai_text  AS Pregunta_8,  d8.user_text  AS Respuesta_8,  d8.retro_analysis  AS Retroalimentacion_8,  NULL AS Puntos_8,
+       d9.ai_text  AS Pregunta_9,  d9.user_text  AS Respuesta_9,  d9.retro_analysis  AS Retroalimentacion_9,  NULL AS Puntos_9,
+       d10.ai_text AS Pregunta_10, d10.user_text AS Respuesta_10, d10.retro_analysis AS Retroalimentacion_10, NULL AS Puntos_10,
+       d11.ai_text AS Pregunta_11, d11.user_text AS Respuesta_11, d11.retro_analysis AS Retroalimentacion_11, NULL AS Puntos_11,
+       d12.ai_text AS Pregunta_12, d12.user_text AS Respuesta_12, d12.retro_analysis AS Retroalimentacion_12, NULL AS Puntos_12,
+       d13.ai_text AS Pregunta_13, d13.user_text AS Respuesta_13, d13.retro_analysis AS Retroalimentacion_13, NULL AS Puntos_13,
+       d14.ai_text AS Pregunta_14, d14.user_text AS Respuesta_14, d14.retro_analysis AS Retroalimentacion_14, NULL AS Puntos_14,
+       d15.ai_text AS Pregunta_15, d15.user_text AS Respuesta_15, d15.retro_analysis AS Retroalimentacion_15, NULL AS Puntos_15,
+       d16.ai_text AS Pregunta_16, d16.user_text AS Respuesta_16, d16.retro_analysis AS Retroalimentacion_16, NULL AS Puntos_16,
+       d17.ai_text AS Pregunta_17, d17.user_text AS Respuesta_17, d17.retro_analysis AS Retroalimentacion_17, NULL AS Puntos_17,
+       d18.ai_text AS Pregunta_18, d18.user_text AS Respuesta_18, d18.retro_analysis AS Retroalimentacion_18, NULL AS Puntos_18,
+       d19.ai_text AS Pregunta_19, d19.user_text AS Respuesta_19, d19.retro_analysis AS Retroalimentacion_19, NULL AS Puntos_19,
+       d20.ai_text AS Pregunta_20, d20.user_text AS Respuesta_20, d20.retro_analysis AS Retroalimentacion_20, NULL AS Puntos_20
      FROM r_user_session us
      JOIN r_user      u  ON u.ID  = us.user_id
      JOIN r_simulator rs ON rs.ID = us.simulator_id
-     LEFT JOIN r_user_session_details d1 ON d1.session_id = us.ID AND d1.sequence = 1
-     LEFT JOIN r_user_session_details d2 ON d2.session_id = us.ID AND d2.sequence = 2
-     LEFT JOIN r_user_session_details d3 ON d3.session_id = us.ID AND d3.sequence = 3
-     LEFT JOIN r_user_session_details d4 ON d4.session_id = us.ID AND d4.sequence = 4
-     LEFT JOIN r_user_session_details d5 ON d5.session_id = us.ID AND d5.sequence = 5
+     LEFT JOIN r_user_session_details d1  ON d1.session_id  = us.ID AND d1.sequence  = 1
+     LEFT JOIN r_user_session_details d2  ON d2.session_id  = us.ID AND d2.sequence  = 2
+     LEFT JOIN r_user_session_details d3  ON d3.session_id  = us.ID AND d3.sequence  = 3
+     LEFT JOIN r_user_session_details d4  ON d4.session_id  = us.ID AND d4.sequence  = 4
+     LEFT JOIN r_user_session_details d5  ON d5.session_id  = us.ID AND d5.sequence  = 5
+     LEFT JOIN r_user_session_details d6  ON d6.session_id  = us.ID AND d6.sequence  = 6
+     LEFT JOIN r_user_session_details d7  ON d7.session_id  = us.ID AND d7.sequence  = 7
+     LEFT JOIN r_user_session_details d8  ON d8.session_id  = us.ID AND d8.sequence  = 8
+     LEFT JOIN r_user_session_details d9  ON d9.session_id  = us.ID AND d9.sequence  = 9
+     LEFT JOIN r_user_session_details d10 ON d10.session_id = us.ID AND d10.sequence = 10
+     LEFT JOIN r_user_session_details d11 ON d11.session_id = us.ID AND d11.sequence = 11
+     LEFT JOIN r_user_session_details d12 ON d12.session_id = us.ID AND d12.sequence = 12
+     LEFT JOIN r_user_session_details d13 ON d13.session_id = us.ID AND d13.sequence = 13
+     LEFT JOIN r_user_session_details d14 ON d14.session_id = us.ID AND d14.sequence = 14
+     LEFT JOIN r_user_session_details d15 ON d15.session_id = us.ID AND d15.sequence = 15
+     LEFT JOIN r_user_session_details d16 ON d16.session_id = us.ID AND d16.sequence = 16
+     LEFT JOIN r_user_session_details d17 ON d17.session_id = us.ID AND d17.sequence = 17
+     LEFT JOIN r_user_session_details d18 ON d18.session_id = us.ID AND d18.sequence = 18
+     LEFT JOIN r_user_session_details d19 ON d19.session_id = us.ID AND d19.sequence = 19
+     LEFT JOIN r_user_session_details d20 ON d20.session_id = us.ID AND d20.sequence = 20
      WHERE us.simulator_id IN (${SIIGO_IDS_SQL})
        AND u.client_id = ${SIIGO_CLIENT_ID}
        AND us.date_created >= '${effFrom}'

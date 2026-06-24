@@ -33,7 +33,12 @@ const SIIGO_BLUE  = '#0061ff'
 const GREEN       = '#22c55e'
 const AMBER       = '#f59e0b'
 const RED         = '#ef4444'
-const ROUND_COLORS = [SIIGO_BLUE, '#6366f1', '#8b5cf6', '#06b6d4', GREEN]
+const ROUND_COLORS = [
+  SIIGO_BLUE, '#6366f1', '#8b5cf6', '#06b6d4', GREEN,
+  '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#84cc16',
+  '#3b82f6', '#a855f7', '#f97316', '#10b981', '#e11d48',
+  '#0ea5e9', '#d946ef', '#fb923c', '#4ade80', '#facc15',
+]
 
 // ─── Tier helpers ─────────────────────────────────────────────────────────────
 
@@ -111,7 +116,7 @@ function RoundCard({ stat, index, language }: { stat: RoundStat; index: number; 
         <div className="flex items-center gap-2">
           <div
             className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-            style={{ backgroundColor: `${ROUND_COLORS[index]}20`, color: ROUND_COLORS[index] }}
+            style={{ backgroundColor: `${ROUND_COLORS[index % ROUND_COLORS.length]}20`, color: ROUND_COLORS[index % ROUND_COLORS.length] }}
           >
             {stat.round}
           </div>
@@ -390,8 +395,8 @@ export default function ConversationalPage() {
     return (
       <div className="flex flex-col gap-6 animate-pulse">
         <div className="h-10 w-64 rounded-lg bg-muted" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-5 gap-3">
+          {Array.from({ length: 20 }).map((_, i) => (
             <div key={i} className="h-36 rounded-xl bg-muted" />
           ))}
         </div>
@@ -461,7 +466,7 @@ export default function ConversationalPage() {
       </motion.div>
 
       {/* ── 2. Round performance stats ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-5 gap-3">
         {roundStats.map((stat, i) => (
           <RoundCard key={stat.round} stat={stat} index={i} language={language} />
         ))}
@@ -473,7 +478,7 @@ export default function ConversationalPage() {
         {/* Radar */}
         <SectionCard
           title="Round Comparison Radar"
-          subtitle="Avg score vs pass rate across all 5 rounds"
+          subtitle={`Avg score vs pass rate across all ${roundStats.length} rounds`}
         >
           <RoundRadar data={roundStats} loading={isLoading} />
         </SectionCard>
