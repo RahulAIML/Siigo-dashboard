@@ -336,9 +336,21 @@ export async function downloadSimReport(
   // Section 3 — Closing Analysis (if available)
   // -------------------------------------------------------------------------
   if (sim.closing_analysis && sim.closing_analysis.trim().length > 0) {
-    drawSectionHeader(state, t('closingTitle', lang))
-    drawWrappedText(state, sim.closing_analysis.trim(), 2)
-    state.y += 4
+    const closingText = sim.closing_analysis
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+    if (closingText.length > 0) {
+      drawSectionHeader(state, t('closingTitle', lang))
+      drawWrappedText(state, closingText, 2)
+      state.y += 4
+    }
   }
 
   // -------------------------------------------------------------------------

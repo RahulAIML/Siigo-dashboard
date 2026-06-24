@@ -111,8 +111,8 @@ function OrgTreeNode({ node, depth = 0, statsMap, language }: OrgTreeNodeProps) 
         </span>
 
         {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-medium text-indigo-300">
+        <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+          <span className="text-xs font-medium text-white">
             {node.name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -128,7 +128,7 @@ function OrgTreeNode({ node, depth = 0, statsMap, language }: OrgTreeNodeProps) 
         </div>
 
         {/* Type badge */}
-        <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 hidden sm:inline-flex">
+        <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 hidden sm:inline-flex">
           {node.type}
         </span>
 

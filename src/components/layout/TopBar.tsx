@@ -6,7 +6,7 @@ import { t } from '../../lib/i18n'
 // ─── Page metadata ────────────────────────────────────────────────────────────
 
 const PAGE_META: Record<string, { es: string; en: string; subEs: string; subEn: string }> = {
-  '/':              { es: 'Overview',       en: 'Overview',         subEs: 'Resumen del dashboard',       subEn: 'Dashboard summary' },
+  '/':              { es: 'Vista General',  en: 'Overview',         subEs: 'Resumen del dashboard',       subEn: 'Dashboard summary' },
   '/simulations':   { es: 'Simulaciones',   en: 'Simulations',      subEs: 'Historial de sesiones',       subEn: 'Session history' },
   '/conversational':{ es: 'Conversacional', en: 'Conversational AI',subEs: 'Sesiones de chat con IA',     subEn: 'AI chat sessions' },
   '/leaderboard':   { es: 'Ranking',        en: 'Leaderboard',      subEs: 'Mejores desempeños del equipo',subEn: 'Top team performers' },
