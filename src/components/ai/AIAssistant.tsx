@@ -872,8 +872,8 @@ If dashboard data is already sufficient, respond ONLY with: "NO_SQL_NEEDED".`
 
             <p className="text-[10px] text-slate-600 mt-1.5 text-center">
               {language === 'es'
-                ? 'Powered by Gemini 2.5 Flash • Solo datos SIIGO verificados'
-                : 'Powered by Gemini 2.5 Flash • SIIGO verified data only'}
+                ? 'Powered by RolPlay • Solo datos SIIGO verificados'
+                : 'Powered by RolPlay • SIIGO verified data only'}
             </p>
           </div>
         </motion.div>
