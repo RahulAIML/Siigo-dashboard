@@ -1,9 +1,11 @@
 import React, { Component, Suspense, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Shell from './components/layout/Shell'
+import { AuthProvider, useAuthContext } from './components/AuthProvider'
 import { prefetchAll } from './api/queries'
 import { DATA_EPOCH, MAX_PERSISTED_ENTRY_BYTES } from './config/constants'
+import LoginPage from './pages/LoginPage'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -226,6 +228,39 @@ function PrefetchOnMount() {
   return null
 }
 
+// ─── App Routes ───────────────────────────────────────────────────────────────
+
+function AppRoutes() {
+  const { isAuthenticated } = useAuthContext()
+
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    )
+  }
+
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        <Route path="/" element={<Shell />}>
+          <Route index element={<OverviewPage />} />
+          <Route path="simulations" element={<SimulationsPage />} />
+          <Route path="conversational" element={<ConversationalPage />} />
+          <Route path="leaderboard" element={<LeaderboardPage />} />
+          <Route path="activities" element={<ActivitiesPage />} />
+          <Route path="organization" element={<OrganizationPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
+  )
+}
+
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -234,21 +269,9 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <PrefetchOnMount />
         <BrowserRouter>
-          <Suspense fallback={<PageSkeleton />}>
-            <Routes>
-              <Route path="/" element={<Shell />}>
-                <Route index element={<OverviewPage />} />
-                <Route path="simulations"    element={<SimulationsPage />} />
-                <Route path="conversational" element={<ConversationalPage />} />
-                <Route path="leaderboard"  element={<LeaderboardPage />} />
-                <Route path="activities"   element={<ActivitiesPage />} />
-                <Route path="organization" element={<OrganizationPage />} />
-                <Route path="reports"      element={<ReportsPage />} />
-                <Route path="settings"     element={<SettingsPage />} />
-              </Route>
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>
