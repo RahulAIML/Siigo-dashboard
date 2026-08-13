@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Menu, Moon, Sun } from 'lucide-react'
 import { useAppStore } from '../../store/index'
-import { t } from '../../lib/i18n'
+import { UserMenu } from './UserMenu'
 
 // ─── Page metadata ────────────────────────────────────────────────────────────
 
@@ -88,16 +88,7 @@ export default function TopBar() {
           {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
         </button>
 
-        {/* User badge */}
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-alt)] px-2.5 py-1">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0066FF] text-[10px] font-bold text-white">
-            SG
-          </div>
-          <div className="hidden text-right md:block">
-            <div className="text-[12px] font-semibold text-[var(--color-fg)] leading-none">SIIGO</div>
-            <div className="text-[10px] text-[var(--color-muted)] leading-tight">{t('admin', language)}</div>
-          </div>
-        </div>
+        <UserMenu />
       </div>
     </header>
   )
