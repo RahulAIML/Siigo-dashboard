@@ -21,6 +21,7 @@ const DIST = join(__dirname, 'dist')
 const PORT = parseInt(process.env.PORT ?? '4174')
 const CACHE_TTL = 5 * 60 * 1000
 const DASHBOARD_NAME = process.env.DASHBOARD_NAME ?? 'Siigo'
+const SQL_TOKEN = process.env.SQL_TOKEN || 'ROLPLAY-TEAM2026'
 
 const app = express()
 const apiCache = new Map()
@@ -90,9 +91,6 @@ app.post('/api/auth/logout', logoutHandler)
 app.get('/api/auth/me', meHandler)
 
 // ─── Upstream API proxy ───────────────────────────────────────────────────
-// Mirrors the proxy table in vite.config.ts. Vite's proxy only applies to the
-// dev server, so without this the built server has no route for these paths
-// and every data request falls through to the SPA fallback below.
 const PROXIES = [
   {
     prefix: '/siigo/bridge',
@@ -111,8 +109,6 @@ async function proxyRequest(req, res, route) {
   const search = req.originalUrl.slice(req.path.length)
   const target = `${route.target}${route.rewrite(req.path)}${search}`
   const isGet = req.method === 'GET'
-  // These endpoints carry their query in the POST body, so the body is part
-  // of the cache identity — keying on the URL alone would collide.
   const payload = isGet ? '' : JSON.stringify(req.body ?? {})
   const key = `${req.method} ${target} ${payload}`
 
@@ -128,8 +124,8 @@ async function proxyRequest(req, res, route) {
     const upstream = await fetch(target, {
       method: req.method,
       headers: isGet
-        ? { Accept: 'application/json' }
-        : { Accept: 'application/json', 'Content-Type': 'application/json' },
+        ? { Accept: 'application/json', Authorization: SQL_TOKEN }
+        : { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: SQL_TOKEN },
       body: isGet ? undefined : payload,
     })
     const body = await upstream.text()
@@ -149,8 +145,6 @@ async function proxyRequest(req, res, route) {
   }
 }
 
-// Dashboard data requires a token issued by this dashboard, so the numbers
-// are not readable by skipping the login screen.
 app.use((req, res, next) => {
   const route = matchProxy(req.path)
   if (!route) return next()
@@ -177,10 +171,6 @@ app.get('*', async (req, res) => {
     if ((ext === '.js' || ext === '.css') && req.path.startsWith('/assets/')) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
     } else if (mime.startsWith('text/html')) {
-      // index.html names the hashed bundles, so a cached copy pins the browser
-      // to the previous deployment's assets — a shipped change the user never
-      // sees. The assets above are immutable and content-hashed, so only this
-      // document has to be revalidated.
       res.setHeader('Cache-Control', 'no-store, must-revalidate')
     }
     send(req, res, entry.data, entry.gz)
